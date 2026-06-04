@@ -1,0 +1,11 @@
+/goal Outcome: Execute the FireRed/LeafGreen runtime roadmap in `.vault/plans/001` through `.vault/plans/005`: bootstrap from `pret/pokefirered`, prove a dedicated mGBA FireRed Rev 1 runtime, expand telemetry, build the web control deck, add a bounded Codex agent loop, then add LeafGreen Rev 1 support and hardening.
+
+Context: Start from `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`, `task-graph.md`, `.vault/PLAN.md`, and the linked plans. The workspace currently has `.vault` only; plan 001 bootstraps source before runtime code.
+
+Boundaries: ROMs owned local under `C:\Emulation` stay outside git. Do not commit ROMs, saves, screenshots, local config, credentials, or emulator state. Do not attach to active Mesen2 sessions. Ask before destructive actions, system-wide installs, commits/pushes, credential setup, or scope expansion beyond FireRed/LeafGreen Rev 1.
+
+Constraints: Use FireRed Rev 1 first, LeafGreen Rev 1 later, a dedicated emulator instance, and mGBA first with BizHawk fallback only after captured evidence. Keep runtime core, emulator bridge, game telemetry, UI, and agent layers modular. Prefer TDD for config, adapters, telemetry, actions, policies, and storage.
+
+Verify: After each task run focused tests and relevant smoke checks. Final evidence must include changed files, tests, runtime smoke, UI/agent evidence where applicable, open risks, and updated `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`.
+
+Iterate/done/stop: Execute the task graph in order, update progress after meaningful actions, capture decisions/solutions/encounters when durable, and stop for approval boundaries or repeated blockers. Done only when linked plan success criteria pass or the user explicitly defers remaining plans.
