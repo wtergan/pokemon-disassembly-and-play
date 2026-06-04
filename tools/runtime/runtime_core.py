@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from .action_executor import ActionExecutor
 from .emulators.base import EmulatorBridge
+from .state_models import empty_telemetry_snapshot
+from .state_slots import StateSlotManager
 from .trace_recorder import TraceRecorder
 
 
@@ -16,17 +19,23 @@ TelemetryReader = Callable[[EmulatorBridge], dict[str, Any]]
 def empty_telemetry(emulator: EmulatorBridge) -> dict[str, Any]:
     """Return a minimal telemetry payload when no game adapter is configured."""
 
-    return {"frame": emulator.frame_count, "status": "unavailable"}
+    return empty_telemetry_snapshot(emulator.frame_count)
 
 
 class RuntimeCore:
     """Coordinates bridge primitives, traces, actions, and telemetry snapshots."""
 
-    def __init__(self, emulator: EmulatorBridge, telemetry_reader: TelemetryReader = empty_telemetry) -> None:
+    def __init__(
+        self,
+        emulator: EmulatorBridge,
+        telemetry_reader: TelemetryReader = empty_telemetry,
+        state_dir: Path | None = None,
+    ) -> None:
         self.emulator = emulator
         self.traces = TraceRecorder()
         self.actions = ActionExecutor(emulator, self.traces)
         self._telemetry_reader = telemetry_reader
+        self.states = StateSlotManager(emulator, self.traces, state_dir or Path(".runtime-state"))
 
     def health(self) -> dict[str, Any]:
         health = self.emulator.health()
@@ -54,3 +63,18 @@ class RuntimeCore:
     def recent_traces(self) -> list[dict[str, Any]]:
         return self.traces.recent()
 
+    def list_states(self) -> dict[str, Any]:
+        return self.states.list_slots()
+
+    def save_state(self, slot: str) -> dict[str, Any]:
+        return self.states.save(slot)
+
+    def load_state(self, slot: str) -> dict[str, Any]:
+        return self.states.load(slot)
+
+    def close(self) -> None:
+        """Release emulator resources owned by this runtime."""
+
+        close = getattr(self.emulator, "close", None)
+        if callable(close):
+            close()

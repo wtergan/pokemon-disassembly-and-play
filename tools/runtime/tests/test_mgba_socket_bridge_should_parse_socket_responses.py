@@ -5,6 +5,8 @@ import threading
 import time
 from pathlib import Path
 
+import pytest
+
 from tools.runtime.emulators.mgba_bridge import MgbaLaunchConfig, MgbaSocketBridge
 
 
@@ -15,7 +17,16 @@ PNG_BYTES = bytes.fromhex(
 )
 
 
+def require_local_socket() -> None:
+    try:
+        probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except PermissionError:
+        pytest.skip("local socket creation is unavailable in this execution sandbox")
+    probe.close()
+
+
 def test_mgba_socket_bridge_should_parse_socket_responses(tmp_path: Path) -> None:
+    require_local_socket()
     host = "127.0.0.1"
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, 0))
@@ -75,6 +86,7 @@ def test_mgba_socket_bridge_should_parse_socket_responses(tmp_path: Path) -> Non
 
 
 def test_mgba_socket_bridge_should_accept_lua_client_connection(tmp_path: Path) -> None:
+    require_local_socket()
     host = "127.0.0.1"
     probe_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     probe_socket.bind((host, 0))
@@ -119,6 +131,7 @@ def test_mgba_socket_bridge_should_accept_lua_client_connection(tmp_path: Path) 
 
 
 def test_mgba_realtime_wait_should_not_send_lua_run_command(tmp_path: Path, monkeypatch) -> None:
+    require_local_socket()
     host = "127.0.0.1"
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, 0))
@@ -200,6 +213,59 @@ def test_mgba_socket_bridge_should_serialize_line_protocol_requests(tmp_path: Pa
         thread.join(timeout=1)
 
     assert bridge._file.max_active == 1
+
+
+def test_mgba_memory_reads_should_update_frame_count(tmp_path: Path) -> None:
+    class ReadFile:
+        def write(self, _raw: bytes) -> None:
+            pass
+
+        def readline(self) -> bytes:
+            return b"ok\tvalue=42\tframe=77\n"
+
+    bridge = MgbaSocketBridge(
+        MgbaLaunchConfig(
+            executable=Path("mgba-qt"),
+            rom_path=Path("firered.gba"),
+            lua_bridge=Path("tools/runtime/emulators/mgba_bridge.lua"),
+        ),
+        screenshot_dir=tmp_path,
+    )
+    bridge._file = ReadFile()
+
+    assert bridge.read8(0x02000000) == 42
+    assert bridge.frame_count == 77
+
+
+def test_mgba_snapshots_should_use_unique_files(tmp_path: Path) -> None:
+    class ScreenshotFile:
+        def __init__(self) -> None:
+            self.paths: list[Path] = []
+
+        def write(self, raw: bytes) -> None:
+            _command, path = raw.decode("utf-8").strip().split("\t")
+            screenshot_path = Path(path)
+            self.paths.append(screenshot_path)
+            screenshot_path.write_bytes(PNG_BYTES)
+
+        def readline(self) -> bytes:
+            return b"ok\tframe=21\n"
+
+    bridge = MgbaSocketBridge(
+        MgbaLaunchConfig(
+            executable=Path("mgba-qt"),
+            rom_path=Path("firered.gba"),
+            lua_bridge=Path("tools/runtime/emulators/mgba_bridge.lua"),
+        ),
+        screenshot_dir=tmp_path,
+    )
+    bridge._file = ScreenshotFile()
+
+    first = bridge.snapshot()
+    second = bridge.snapshot()
+
+    assert first.image_base64 == second.image_base64
+    assert len(set(bridge._file.paths)) == 2
 
 
 def assert_read8(bridge: MgbaSocketBridge) -> None:

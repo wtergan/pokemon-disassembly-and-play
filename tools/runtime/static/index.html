@@ -26,17 +26,18 @@
           <h2 id="controls-title">Controls</h2>
           <button class="icon-button" id="refresh" type="button" title="Refresh snapshot">R</button>
         </div>
+        <div class="input-state" id="input-state" aria-live="polite">held: none</div>
         <div class="controls-grid" aria-label="Game Boy Advance controls">
-          <button class="control-button dpad up" data-button="up" type="button" title="Up">&uarr;</button>
-          <button class="control-button dpad left" data-button="left" type="button" title="Left">&larr;</button>
-          <button class="control-button dpad right" data-button="right" type="button" title="Right">&rarr;</button>
-          <button class="control-button dpad down" data-button="down" type="button" title="Down">&darr;</button>
-          <button class="control-button face b" data-button="b" type="button" title="B">B</button>
-          <button class="control-button face a" data-button="a" type="button" title="A">A</button>
-          <button class="control-button menu select" data-button="select" type="button" title="Select">SEL</button>
-          <button class="control-button menu start" data-button="start" type="button" title="Start">START</button>
-          <button class="control-button shoulder l" data-button="l" type="button" title="L">L</button>
-          <button class="control-button shoulder r" data-button="r" type="button" title="R">R</button>
+          <button class="control-button dpad up" data-button="up" type="button" title="Hold Up" aria-label="Hold Up" aria-pressed="false">&uarr;</button>
+          <button class="control-button dpad left" data-button="left" type="button" title="Hold Left" aria-label="Hold Left" aria-pressed="false">&larr;</button>
+          <button class="control-button dpad right" data-button="right" type="button" title="Hold Right" aria-label="Hold Right" aria-pressed="false">&rarr;</button>
+          <button class="control-button dpad down" data-button="down" type="button" title="Hold Down" aria-label="Hold Down" aria-pressed="false">&darr;</button>
+          <button class="control-button face b" data-button="b" type="button" title="Hold B" aria-label="Hold B" aria-pressed="false">B</button>
+          <button class="control-button face a" data-button="a" type="button" title="Hold A" aria-label="Hold A" aria-pressed="false">A</button>
+          <button class="control-button menu select" data-button="select" type="button" title="Hold Select" aria-label="Hold Select" aria-pressed="false">SEL</button>
+          <button class="control-button menu start" data-button="start" type="button" title="Hold Start" aria-label="Hold Start" aria-pressed="false">START</button>
+          <button class="control-button shoulder l" data-button="l" type="button" title="Hold L" aria-label="Hold L" aria-pressed="false">L</button>
+          <button class="control-button shoulder r" data-button="r" type="button" title="Hold R" aria-label="Hold R" aria-pressed="false">R</button>
         </div>
       </section>
 
@@ -46,11 +47,19 @@
           <span id="rom-match">rom: --</span>
         </div>
         <dl class="metrics">
+          <div><dt>Mode</dt><dd id="mode">--</dd></div>
           <div><dt>Map</dt><dd id="map">--</dd></div>
           <div><dt>Player</dt><dd id="player">--</dd></div>
           <div><dt>Camera</dt><dd id="camera">--</dd></div>
+          <div><dt>Party</dt><dd id="party">--</dd></div>
+          <div><dt>Bag</dt><dd id="bag">--</dd></div>
+          <div><dt>Flags / Vars</dt><dd id="events">--</dd></div>
           <div><dt>Symbols</dt><dd id="symbols">--</dd></div>
         </dl>
+        <details class="raw-panel">
+          <summary>Raw telemetry</summary>
+          <pre id="raw-telemetry">{}</pre>
+        </details>
       </section>
 
       <section class="trace-panel" aria-labelledby="trace-title">
@@ -60,7 +69,21 @@
         </div>
         <ol id="traces" class="trace-list"></ol>
       </section>
+
+      <section class="state-panel" aria-labelledby="state-title">
+        <div class="panel-header">
+          <h2 id="state-title">States</h2>
+          <span id="state-status">states: --</span>
+        </div>
+        <div class="state-controls">
+          <label for="state-slot">Slot</label>
+          <input id="state-slot" name="state-slot" type="text" value="quick" maxlength="32" pattern="[A-Za-z0-9_-]{1,32}" />
+          <button id="save-state" type="button">Save</button>
+          <button id="load-state" type="button">Load</button>
+        </div>
+        <ol id="states" class="state-list"></ol>
+      </section>
     </main>
-    <script src="/app.js"></script>
+    <script type="module" src="/app.js"></script>
   </body>
 </html>

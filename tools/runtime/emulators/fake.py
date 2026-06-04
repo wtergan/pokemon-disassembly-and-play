@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from pathlib import Path
 
 from .base import EmulatorHealth, Snapshot
 
@@ -56,3 +57,9 @@ class FakeEmulatorBridge:
     def read32(self, address: int) -> int:
         return int.from_bytes(self._memory[address : address + 4], "little")
 
+    def save_state(self, path: Path) -> None:
+        path.write_bytes(self._frame_count.to_bytes(8, "little") + ",".join(sorted(self._buttons)).encode("ascii"))
+
+    def load_state(self, path: Path) -> None:
+        data = path.read_bytes()
+        self._frame_count = int.from_bytes(data[:8], "little")

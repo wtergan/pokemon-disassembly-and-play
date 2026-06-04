@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M2.T1
+- Current milestone/task: M4.T1
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -36,29 +36,49 @@
 - FireRed telemetry must avoid overclaiming uncertain pointer, encrypted, or mode state.
 - `pret/pokefirered` build toolchain may need setup before symbol generation works.
 - mGBA's live GUI bridge cannot call `emu:runFrame()` from the socket callback; Windows/WSL runtime config must use `frame_advance_mode = "realtime_wait"`.
-- No generated `pokefirered_rev1.sym` exists yet, so real runtime telemetry reports ROM identity plus missing-symbol state until the toolchain can generate symbols.
+- No generated `pokefirered_rev1.sym` exists yet, so real runtime telemetry reports ROM identity plus missing-symbol state until the toolchain can generate symbols. The runtime now auto-discovers the file when it appears at the repo root or `build/firered_rev1/`.
 - Plan 001 browser verification found and fixed mGBA socket concurrency by serializing bridge requests.
+- Plan 001 post-review fixes also added runtime close support, unique snapshot filenames, memory-read frame updates, malformed action validation, and basename-only symbol source telemetry.
+- M2.T2 is complete: `telemetry.save` now includes player identity bytes, play time, encrypted money, coins, bag pocket counts, compact flag/var summaries, and checksum-validated party member summaries.
+- M2.T3 is complete: `telemetry.location.map` now includes map metadata, layout dimensions/paths, connections, warps, and coordinate context when map assets are available.
+- M2.T4 is complete: `telemetry.save.player.name` and party member `nickname` values decode through `charmap.txt`, and `telemetry.mode` classifies field, battle, menu, dialogue_textbox, transition_loading, and unknown with confidence plus `gMain`/`gPaletteFade`/`gTasks` evidence.
+- M2.T5 and plan 002 are complete at fixture/API level: `/telemetry` now normalizes through schema v1 with `target`, `runtime`, explicit unavailable sections, and `capabilities` flags. Live decoded-state smoke still needs `pokefirered_rev1.sym` to be generated.
+- M3.T1 is complete: static UI now imports `api-client.js`, runtime API requests have timeouts and JSON error detail handling, and periodic refreshes are single-flight.
+- M3.T2 is complete: controls now send press/release for pointer and keyboard holds, show held-button state, maintain `aria-pressed`, and serialize action requests.
+- M3.T3 is complete: telemetry panel formatting lives in `telemetry-format.js`; the deck renders mode, map, player, camera, party, bag, flags/vars, symbols, raw JSON, and formatted trace labels.
+- M3.T4 is complete: runtime state slots are contained under `state_dir`, exposed through `/states` endpoints, and rendered by the state panel.
+- M3.T5 and plan 003 are complete: desktop/mobile screenshots and Playwright interaction smoke passed against the fake runtime. `.git` is writable again as of the full-access permission change, so commits can proceed.
+- Current local venv has stale `starlette 1.2.1`; repo requirements now pin `starlette<1.0`, but DNS prevented re-sync. Endpoint tests skip in this stale env rather than hanging.
 
 ## Next Action
 
-Execute M2.T1 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: stabilize generated symbol resolution and decide how the runtime should obtain `pokefirered_rev1.sym` in this environment.
+Execute M4.T1 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: define the compact agent context schema for planner-safe Codex integration.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot
 
-- Updated: 2026-06-04T03:31:02-04:00
+- Updated: 2026-06-04T10:43:49-04:00
 - Event: `precompact`
 - Repo: `/home/gilgames/Code/pokemon-disassembly-and-play`
 - Branch: `main`
 - Active goal: `.vault/goals/goal-firered-runtime-2026-06-04/`
 - Active plan: `.vault/plans/001-firered-runtime-spike-2026-06-04.md`
-- Changed files: 4
-  - `tools/runtime/emulators/mgba_bridge.lua`
+- Changed files: 26
+  - `.vault/encounters/runtime-fastapi-starlette-compatibility-2026-06-04.md`
+  - `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
+  - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
+  - `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`
+  - `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md`
+  - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`
+  - `tools/runtime/action_executor.py`
   - `tools/runtime/emulators/mgba_bridge.py`
-  - `tools/runtime/tests/test_mgba_launch_command_should_include_script_and_rom.py`
-  - `tools/runtime/tests/test_mgba_socket_bridge_should_parse_socket_responses.py`
-- Last progress: - Encounters: none yet.
+  - `tools/runtime/games/firered/map_data.py`
+  - `tools/runtime/games/firered/save_blocks.py`
+  - `tools/runtime/games/firered/symbols.py`
+  - `tools/runtime/games/firered/telemetry.py`
+  - ... 14 more
+- Last progress: - `.vault/encounters/runtime-fastapi-starlette-compatibility-2026-06-04.md`
 
 ### Capture Queue
-- Solution candidate: progress suggests a fix/resolution with production changes, but no `.vault/solutions/` file changed.
+- No decision, encounter, or solution capture candidates detected.
 <!-- codex-vault-memory-advisor:end -->

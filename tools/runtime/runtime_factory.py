@@ -13,25 +13,27 @@ from typing import cast
 
 from .config import RuntimeConfig, load_runtime_config
 from .emulators.mgba_bridge import ConnectionMode, FrameAdvanceMode, MgbaLaunchConfig, MgbaSocketBridge
-from .games.firered.symbols import SymbolTable, load_symbol_table
+from .games.firered.map_data import try_load_map_registry
+from .games.firered.symbols import discover_symbol_table
 from .games.firered.telemetry import FireRedTelemetryReader
+from .games.firered.text import try_load_charmap
 from .runtime_core import RuntimeCore
 
 
 def create_runtime_from_config_path(config_path: Path, launch: bool = True) -> RuntimeCore:
     """Load `config_path` and build the configured runtime core."""
 
-    return create_runtime_from_config(load_runtime_config(config_path), launch=launch)
+    return create_runtime_from_config(load_runtime_config(config_path), launch=launch, repo_root=Path.cwd())
 
 
-def create_runtime_from_config(config: RuntimeConfig, launch: bool = True) -> RuntimeCore:
+def create_runtime_from_config(config: RuntimeConfig, launch: bool = True, repo_root: Path | None = None) -> RuntimeCore:
     """Build a runtime core for the configured target and emulator."""
 
     emulator = _create_mgba_bridge(config)
     if launch:
         emulator.launch()
-    telemetry_reader = _create_telemetry_reader(config)
-    return RuntimeCore(emulator, telemetry_reader=telemetry_reader)
+    telemetry_reader = _create_telemetry_reader(config, repo_root=repo_root or Path.cwd())
+    return RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=config.runtime.state_dir)
 
 
 def _create_mgba_bridge(config: RuntimeConfig) -> MgbaSocketBridge:
@@ -53,8 +55,13 @@ def _create_mgba_bridge(config: RuntimeConfig) -> MgbaSocketBridge:
     )
 
 
-def _create_telemetry_reader(config: RuntimeConfig) -> FireRedTelemetryReader:
+def _create_telemetry_reader(config: RuntimeConfig, repo_root: Path) -> FireRedTelemetryReader:
     if config.target.game != "firered" or config.target.revision != "rev1":
         raise ValueError(f"unsupported target: {config.target.game} {config.target.revision}")
-    symbols = load_symbol_table(config.target.symbol_path) if config.target.symbol_path else SymbolTable.empty()
-    return FireRedTelemetryReader(symbols=symbols, rom_path=config.target.rom_path)
+    symbols = discover_symbol_table(repo_root, explicit_path=config.target.symbol_path)
+    return FireRedTelemetryReader(
+        symbols=symbols,
+        rom_path=config.target.rom_path,
+        map_registry=try_load_map_registry(repo_root),
+        text_decoder=try_load_charmap(repo_root),
+    )

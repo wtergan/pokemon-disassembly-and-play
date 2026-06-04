@@ -35,7 +35,10 @@ class ActionRequest:
         action = str(payload.get("action", "")).lower()
         button_value = payload.get("button")
         button = str(button_value).lower() if button_value is not None else None
-        frames = int(payload.get("frames", 1))
+        try:
+            frames = int(payload.get("frames", 1))
+        except (TypeError, ValueError) as exc:
+            raise ActionValidationError("frames must be an integer") from exc
         request = cls(action=action, button=button, frames=frames)  # type: ignore[arg-type]
         request.validate()
         return request
@@ -86,4 +89,3 @@ class ActionExecutor:
             {"action": request.action, "button": request.button, "frames": request.frames},
         )
         return {"ok": True, "trace_id": trace["id"], "frame": self._emulator.frame_count}
-

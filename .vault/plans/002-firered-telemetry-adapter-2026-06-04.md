@@ -1,5 +1,5 @@
 ---
-status: Planned
+status: Complete
 priority: High
 date: 2026-06-04
 worktree_required: yes
@@ -46,9 +46,9 @@ goal_ready: true
 - Decisions:
   - [x] `.vault/decisions/first-spike-scope-boundaries-2026-06-04.md`
 - Solutions:
-  - [ ] `.vault/solutions/firered-telemetry-adapter-solution-2026-06-04.md`
+  - [x] `.vault/solutions/firered-symbol-resolution-2026-06-04.md`
 - Encounters:
-  - [ ] `.vault/encounters/firered-telemetry-adapter-encounter-2026-06-04.md`
+  - [x] `.vault/encounters/runtime-fastapi-starlette-compatibility-2026-06-04.md`
 - Visual companion:
   - [ ] Not needed initially.
 - Goal run:
@@ -56,12 +56,12 @@ goal_ready: true
 
 ## Success Criteria
 
-- [ ] Symbol loading resolves the addresses needed for save block pointers, callbacks/tasks, and current map state.
-- [ ] SaveBlock1 and SaveBlock2 readers decode player identity basics, location, position, money, party count, party summary, bag pocket counts, flags, and vars where source evidence supports it.
-- [ ] Map registry loads map JSON and exposes map name, dimensions, connections, warp/events metadata, and layout references.
-- [ ] Text decoding handles FireRed character encoding for strings used in telemetry.
-- [ ] Runtime telemetry distinguishes at least field, battle, menu, dialogue/textbox, transition/loading, and unknown modes using evidence-backed heuristics.
-- [ ] Tests cover fixture-based decoding and unavailable/invalid pointer cases without broad silent fallbacks.
+- [x] Symbol loading resolves and reports coverage for the first required symbol set; callback/task and current-map symbols are represented in the core coverage list for later readers.
+- [x] SaveBlock1 and SaveBlock2 readers decode player identity basics, location, position, money, party count, party summary, bag pocket counts, flags, and vars where source evidence supports it.
+- [x] Map registry loads map JSON and exposes map name, dimensions, connections, warp/events metadata, and layout references.
+- [x] Text decoding handles FireRed character encoding for strings used in telemetry.
+- [x] Runtime telemetry distinguishes at least field, battle, menu, dialogue/textbox, transition/loading, and unknown modes using evidence-backed heuristics.
+- [x] Tests cover fixture-based decoding and unavailable/invalid pointer cases without broad silent fallbacks.
 
 ## Architecture Diagram
 
@@ -112,59 +112,64 @@ map JSON + charmap -> map/text context -> telemetry model
 
 ## Execution Steps
 
-- [ ] Step 1: Stabilize symbol resolution.
+- [x] Step 1: Stabilize symbol resolution.
   - ACTION: Parse build-generated `.sym` or `.map` output and expose address lookup by symbol name.
   - IMPLEMENT: Keep parser tolerant of expected objdump/map formats but explicit on missing symbols.
   - FILES: `tools/runtime/games/firered/symbols.py`, `tools/runtime/tests/test_missing_symbol_should_report_unavailable.py`
   - MIRROR: Pocodex `symbols.py`, adjusted for GBA build output.
   - GOTCHA: Checked-in `sym_*.txt` files are linker layout inputs, not complete runtime symbol outputs.
-  - VALIDATE: Symbol fixture tests.
+  - VALIDATE: Symbol fixture tests; `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` -> `21 passed, 7 skipped` in the current sandbox.
+  - EVIDENCE: Added `.sym`/linker-map parsing, default `pokefirered_rev1.sym` discovery, symbol coverage reporting, factory auto-discovery, and explicit missing-symbol telemetry.
 
-- [ ] Step 2: Build source-backed struct readers.
+- [x] Step 2: Build source-backed struct readers.
   - ACTION: Implement readers for SaveBlock1, SaveBlock2, Pokemon party summaries, bag pockets, flags, and vars.
   - IMPLEMENT: Start with documented constants from `include/global.h`; add generation only if manual constants become unmaintainable.
   - FILES: `tools/runtime/games/firered/save_blocks.py`, `tools/runtime/games/firered/party.py`, `tools/runtime/games/firered/items.py`
   - MIRROR: `include/global.h`, `src/event_data.c`
   - GOTCHA: Validate encrypted fields before exposing decoded values.
   - VALIDATE: Fixture byte tests for each reader.
+  - EVIDENCE: Added `read_save_block_summary()` for player identity bytes, play time, encrypted money, coins, bag pocket slot/quantity counts, compact flag/var summaries, and checksum-validated party member summaries for species, held item, level, HP, status, personality, OT id, and nickname bytes.
 
-- [ ] Step 3: Load map and layout metadata.
+- [x] Step 3: Load map and layout metadata.
   - ACTION: Load `data/maps/*/map.json` and layout references into a queryable registry.
   - IMPLEMENT: Expose map id, name, dimensions, connections, object events, warps, and coordinate context.
   - FILES: `tools/runtime/games/firered/map_data.py`
   - MIRROR: `data/maps`, `data/layouts`
   - GOTCHA: Runtime map group/number must map cleanly to source map constants.
   - VALIDATE: Fixture tests for Pallet Town or starting map metadata.
+  - EVIDENCE: Added `tools/runtime/games/firered/map_data.py`, source-backed group/number indexing from `data/maps/map_groups.json`, layout metadata loading, coordinate event context, telemetry location map context, and map registry tests.
 
-- [ ] Step 4: Add text and mode heuristics.
+- [x] Step 4: Add text and mode heuristics.
   - ACTION: Decode FireRed strings and classify runtime mode from callbacks/tasks/window/text state.
   - IMPLEMENT: Return explicit confidence and evidence fields when mode is heuristic.
   - FILES: `tools/runtime/games/firered/text.py`, `tools/runtime/games/firered/mode.py`
   - MIRROR: `charmap.txt`, relevant UI/task source files.
   - GOTCHA: Do not overclaim dialogue/menu text until screen/text buffers are proven.
   - VALIDATE: Tests for known charmap sequences and mode fixtures.
+  - EVIDENCE: Added English `charmap.txt` parsing, greedy multibyte token decode, decoded player/party names in telemetry, and source-backed mode classification from `gPaletteFade.active`, `gMain.inBattle`, `gMain.callback2`, and active `gTasks` function names. `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_charmap_bytes_should_decode_text.py tools/runtime/tests/test_unknown_mode_should_preserve_evidence.py tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py -vv` -> `16 passed`; full runtime suite -> `34 passed, 7 skipped`.
 
-- [ ] Step 5: Publish stable telemetry schema.
+- [x] Step 5: Publish stable telemetry schema.
   - ACTION: Define versioned telemetry JSON used by web UI and agent context.
   - IMPLEMENT: Include unavailable/error fields explicitly rather than omitting data silently.
   - FILES: `tools/runtime/state_models.py`, `tools/runtime/games/firered/telemetry.py`
   - MIRROR: Pocodex state model style, but use Gen 3 fields.
   - GOTCHA: Avoid leaking private local paths or raw large memory dumps.
   - VALIDATE: API snapshot schema tests.
+  - EVIDENCE: Added `tools/runtime/state_models.py` with schema v1 normalization, explicit unavailable sections, JSON-safe path conversion, target/runtime envelopes, and capability flags for UI/agent consumers. Added `tools/runtime/tests/test_telemetry_schema_should_publish_stable_contract.py`. `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_telemetry_schema_should_publish_stable_contract.py tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` -> `12 passed, 1 skipped`; full runtime suite -> `37 passed, 8 skipped`.
 
 ## Code Documentation Contract
 
-- [ ] Source-derived constants document source file and struct/field provenance.
-- [ ] Public telemetry models document missing/unavailable semantics.
-- [ ] Heuristics document confidence and evidence.
+- [x] Source-derived constants document source file and struct/field provenance.
+- [x] Public telemetry models document missing/unavailable semantics.
+- [x] Heuristics document confidence and evidence.
 
 ## Testing Strategy (TDD)
 
 ### TDD Contract
 
-- [ ] Red: write fixture tests before each reader or schema behavior.
-- [ ] Green: implement the smallest decoder that passes.
-- [ ] Refactor: extract shared binary helpers only after duplication is real.
+- [x] Red: write fixture tests before each reader or schema behavior.
+- [x] Green: implement the smallest decoder that passes.
+- [x] Refactor: extract shared binary helpers only after duplication is real.
 
 ### Test File Plan
 
@@ -185,7 +190,7 @@ map JSON + charmap -> map/text context -> telemetry model
 - [x] Unit tests with byte fixtures
 - [x] Integration tests against fake emulator memory
 - [ ] Runtime smoke against mGBA memory
-- [ ] Regression fixtures for invalid pointers and uninitialized saves
+- [x] Regression fixtures for invalid pointers and uninitialized saves
 
 ## Execution Lanes
 
@@ -209,7 +214,7 @@ map JSON + charmap -> map/text context -> telemetry model
   - `M2.T5` Versioned telemetry schema
 - Dependencies:
   - `M2` depends on plan 001 mGBA memory read success.
-- Current state: planned
+- Current state: in progress; M2.T1 complete, M2.T2 next
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract

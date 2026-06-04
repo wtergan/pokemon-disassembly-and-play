@@ -1,5 +1,5 @@
 ---
-status: Planned
+status: Complete
 priority: Medium
 date: 2026-06-04
 worktree_required: yes
@@ -41,9 +41,9 @@ goal_ready: true
 - Decisions:
   - [x] `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
 - Solutions:
-  - [ ] `.vault/solutions/runtime-web-control-deck-solution-2026-06-04.md`
+  - [x] `.vault/solutions/runtime-web-control-deck-solution-2026-06-04.md`
 - Encounters:
-  - [ ] `.vault/encounters/runtime-web-control-deck-encounter-2026-06-04.md`
+  - [x] `.vault/encounters/runtime-browser-tooling-2026-06-04.md`
 - Visual companion:
   - [ ] Optional only if layout becomes complex.
 - Goal run:
@@ -51,13 +51,13 @@ goal_ready: true
 
 ## Success Criteria
 
-- [ ] Browser shows a live or refreshable game frame without layout shifts.
-- [ ] Manual controls support directional buttons, A/B, Start/Select, hold/tap behavior, and keyboard shortcuts.
-- [ ] Telemetry panels show current mode, map, coordinates, party summary, bag summary, flags/vars summary, and raw debug details.
-- [ ] Savestate controls are runtime-owned and clearly separated from normal emulator saves.
-- [ ] Trace panel records actions, telemetry changes, runtime errors, and save/load events.
-- [ ] UI works at desktop and narrow/mobile-like widths with no overlapping text or controls.
-- [ ] Browser verification captures screenshots or documented observations for layout and interaction.
+- [x] Browser shows a live or refreshable game frame without layout shifts.
+- [x] Manual controls support directional buttons, A/B, Start/Select, hold/tap behavior, and keyboard shortcuts.
+- [x] Telemetry panels show current mode, map, coordinates, party summary, bag summary, flags/vars summary, and raw debug details.
+- [x] Savestate controls are runtime-owned and clearly separated from normal emulator saves.
+- [x] Trace panel records actions, telemetry changes, runtime errors, and save/load events.
+- [x] UI works at desktop and narrow/mobile-like widths with no overlapping text or controls.
+- [x] Browser verification captures screenshots or documented observations for layout and interaction.
 
 ## Architecture Diagram
 
@@ -106,51 +106,56 @@ static UI -> runtime API -> frame / telemetry / action / states / traces
 
 ## Execution Steps
 
-- [ ] Step 1: Stabilize runtime API client.
+- [x] Step 1: Stabilize runtime API client.
   - ACTION: Create a small browser API client with explicit error states and polling cadence.
   - IMPLEMENT: Use typed JSDoc or structured modules if staying vanilla JS.
   - FILES: `tools/runtime/static/app.js`
   - MIRROR: Pocodex static app patterns.
   - GOTCHA: Avoid overlapping polling requests that flood the runtime.
   - VALIDATE: Browser smoke and JS unit tests if test runner exists.
+  - EVIDENCE: Added `tools/runtime/static/api-client.js` as a small ES module for `/health`, `/snapshot`, `/telemetry`, `/traces`, and `/action`; app polling is single-flight and requests time out with explicit errors. `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py tools/runtime/tests/test_static_deck_should_serve_index.py -vv` -> `3 passed, 1 skipped`; full runtime suite -> `40 passed, 8 skipped`.
 
-- [ ] Step 2: Build the screen and control surfaces.
+- [x] Step 2: Build the screen and control surfaces.
   - ACTION: Render frame viewport, button controls, keyboard input, and current input state.
   - IMPLEMENT: Stable dimensions, accessible labels/tooltips, no layout shifts.
   - FILES: `tools/runtime/static/index.html`, `tools/runtime/static/styles.css`, `tools/runtime/static/app.js`
   - MIRROR: Pocodex web deck screenshot and local screenshot reference.
   - GOTCHA: Prevent repeated keydown from sending uncontrolled input storms.
   - VALIDATE: Manual keyboard and click smoke.
+  - EVIDENCE: Added visible held-input state, accessible `aria-pressed` controls, pointer press/release handling for mouse/touch holds, keyboard keydown/keyup holds with repeat suppression, and serialized action requests. `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_control_surface_should_support_hold_inputs.py tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py -vv` -> `5 passed`; full runtime suite -> `42 passed, 8 skipped`.
 
-- [ ] Step 3: Build telemetry and trace panels.
+- [x] Step 3: Build telemetry and trace panels.
   - ACTION: Render high-signal telemetry first, debug JSON second, and action/runtime traces.
   - IMPLEMENT: Keep raw values inspectable without drowning the operator.
   - FILES: `tools/runtime/static/app.js`, `tools/runtime/static/styles.css`
   - MIRROR: Pocodex telemetry panels.
   - GOTCHA: Show unknown/unavailable states honestly.
   - VALIDATE: Fixture API responses render stable states.
+  - EVIDENCE: Added `tools/runtime/static/telemetry-format.js`, high-signal mode/map/player/camera/party/bag/flags-vars/symbol summaries, raw telemetry details, and clearer trace labels. `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_telemetry_panel_should_format_runtime_state.py tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py -vv` -> `5 passed`; full runtime suite -> `44 passed, 8 skipped`.
 
-- [ ] Step 4: Add savestate workflow.
+- [x] Step 4: Add savestate workflow.
   - ACTION: Expose runtime-owned state slots and save/load controls.
   - IMPLEMENT: Require explicit slot names or IDs; display timestamp and source ROM identity.
   - FILES: `tools/runtime/static/app.js`, runtime state endpoints as needed.
   - MIRROR: Pocodex `/states`, `/save_state`, `/load_state` concepts.
   - GOTCHA: Do not write to emulator default save locations if avoidable.
   - VALIDATE: Save/load smoke with dedicated runtime state directory.
+  - EVIDENCE: Added `tools/runtime/state_slots.py`, contained slot validation, `/states`, `/states/{slot}/save`, `/states/{slot}/load`, fake and mGBA bridge save/load methods, and a UI state panel. `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_state_slot_should_stay_in_runtime_directory.py tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py tools/runtime/tests/test_telemetry_panel_should_format_runtime_state.py -vv` -> `8 passed`; full runtime suite -> `47 passed, 8 skipped`.
 
-- [ ] Step 5: Browser verification and accessibility pass.
+- [x] Step 5: Browser verification and accessibility pass.
   - ACTION: Verify desktop and narrow viewport layout, keyboard access, focus states, and text fit.
   - IMPLEMENT: Use Playwright or local browser tooling when available.
   - FILES: `tools/runtime/static/*`, `.vault/encounters/` if layout tooling fails in a reusable way.
   - MIRROR: project frontend instructions.
   - GOTCHA: Do not leave temporary screenshots or generated assets in tracked paths unless intentional.
   - VALIDATE: Browser screenshots or documented smoke results.
+  - EVIDENCE: Served fake runtime at `http://127.0.0.1:18765/`; captured desktop screenshot `/tmp/pokemon-runtime-m3-desktop-fixed.png` and mobile screenshot `/tmp/pokemon-runtime-m3-mobile-fixed.png`; Playwright interaction smoke verified held A button state, save/load slot feedback, and action/state trace rendering. Final automated checks: `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` -> `50 passed, 5 skipped`; compile and `git diff --check` clean.
 
 ## Code Documentation Contract
 
-- [ ] Public API client functions document endpoint expectations.
-- [ ] Non-obvious polling, input cooldown, or state-slot rules are documented.
-- [ ] No comments that merely restate DOM updates.
+- [x] Public API client functions document endpoint expectations.
+- [x] Non-obvious polling, input cooldown, or state-slot rules are documented.
+- [x] No comments that merely restate DOM updates.
 
 ## Testing Strategy (TDD)
 
@@ -174,9 +179,9 @@ static UI -> runtime API -> frame / telemetry / action / states / traces
 ### Coverage Layers
 
 - [x] API endpoint tests
-- [ ] Browser interaction smoke
-- [ ] Responsive layout verification
-- [ ] Accessibility check for controls and focus order
+- [x] Browser interaction smoke
+- [x] Responsive layout verification
+- [x] Accessibility check for controls and focus order
 
 ## Execution Lanes
 
@@ -200,7 +205,7 @@ static UI -> runtime API -> frame / telemetry / action / states / traces
   - `M3.T5` Browser and accessibility verification
 - Dependencies:
   - `M3` depends on plans 001 and 002.
-- Current state: planned
+- Current state: complete
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -272,8 +277,9 @@ Final evidence:
 
 ## Open Questions
 
-- [ ] Should savestate slots be named manually, numbered, or both?
+- [x] Should savestate slots be named manually, numbered, or both? Answer: manually named slots first, validated as 1-32 letters, numbers, underscores, or dashes.
 
 ## Progress Log
 
 - 2026-06-04: Plan created as web/UI follow-up to runtime and telemetry plans.
+- 2026-06-04: Plan completed with static ES module UI, runtime-owned state slots, desktop/mobile screenshots, Playwright interaction smoke, and `50 passed, 5 skipped` runtime tests.

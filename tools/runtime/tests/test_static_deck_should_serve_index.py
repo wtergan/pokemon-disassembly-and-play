@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
-
 from tools.runtime.runtime_app import create_app
+from tools.runtime.tests.http_client import request
 
 
 def test_static_deck_should_serve_index() -> None:
-    client = TestClient(create_app())
-
-    response = client.get("/")
+    response = request(create_app(), "GET", "/")
 
     assert response.status_code == 200
     assert "FireRed Runtime" in response.text

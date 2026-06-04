@@ -3,10 +3,10 @@
 ## Current Status
 
 - Phase: implementation
-- Current milestone: M2
-- Current task: M2.T1
-- Last action: 2026-06-04 - Completed M1.T6 and plan 001 with config-driven real runtime launch, basic browser deck, serialized mGBA socket requests, endpoint smoke, and desktop/mobile screenshot verification.
-- Next action: Start plan 002 M2.T1 by stabilizing symbol resolution for generated `pokefirered_rev1.sym` and fallback evidence.
+- Current milestone: M4
+- Current task: M4.T1
+- Last action: 2026-06-04 - Completed M3.T5 and plan 003 with browser/responsive verification.
+- Next action: Execute M4.T1 by defining the compact agent context schema for planner-safe Codex integration.
 
 ## Execution Ledger
 
@@ -17,6 +17,16 @@
 - 2026-06-04 - M1.T4 complete: official stable mGBA `0.10.5` Windows frontend rejected `--script`; installed official dev build `mGBA-build-2026-06-02-win64-9072-92621ea01d7a809b0cd3b1a687f30f0ea8db7c7a`; added `MgbaSocketBridge` plus Lua bridge; switched Windows/WSL operation to Lua-client reverse socket mode because WSL cannot connect to the Windows listener while Windows can connect back to WSL localhost; used real-time frame waits because `emu:runFrame()` blocks from the live GUI socket callback.
 - 2026-06-04 - M1.T5 complete: added `tools/runtime/games/firered/` with symbol parsing, SaveBlock offsets, ROM SHA-1 identity, and telemetry decoding for SaveBlock pointers, map group/number, player coordinates, camera coordinates, and SaveBlock2 encryption key when generated symbols are available. Added optional `target.symbol_path`; documented that no generated `poke*.sym` exists yet.
 - 2026-06-04 - M1.T6 complete: added `runtime_factory`, config-driven `server.py --config`, static deck assets, static route tests, runtime factory tests, and mGBA request serialization after browser verification exposed concurrent socket protocol corruption. Plan 001 is complete.
+- 2026-06-04 - M2.T1 complete: added generated symbol parsing for objdump/simple/linker-map formats, default FireRed Rev 1 symbol discovery, core symbol coverage, factory auto-discovery, missing-symbol telemetry, basename-only symbol source reporting, invalid SaveBlock2 guard, mGBA read frame-count updates, unique snapshot filenames, runtime close support, CLI shutdown cleanup, malformed action validation, and a Starlette compatibility pin.
+- 2026-06-04 - M2.T2 complete: added `read_save_block_summary()` in `tools/runtime/games/firered/save_blocks.py` and surfaced it as `telemetry.save`. It decodes player identity bytes, play time, encrypted money, coins, bag pocket counts, compact flag/var summaries, and checksum-validated party member summaries from Gen 3 encrypted Pokemon substructs.
+- 2026-06-04 - M2.T3 complete: added `tools/runtime/games/firered/map_data.py`, loading `data/maps/*/map.json`, `data/maps/map_groups.json`, and `data/layouts/layouts.json`; telemetry location now includes map metadata, layout dimensions/paths, connections, warps, and coordinate context when a registry is available.
+- 2026-06-04 - M2.T4 complete: added `tools/runtime/games/firered/text.py` and `tools/runtime/games/firered/mode.py`; telemetry now decodes FireRed player/party strings through `charmap.txt` and classifies broad mode as field, battle, menu, dialogue_textbox, transition_loading, or unknown with confidence and memory evidence.
+- 2026-06-04 - M2.T5 complete: added `tools/runtime/state_models.py` and schema tests; telemetry now publishes a stable v1 envelope with target/runtime fields, explicit unavailable sections, JSON-safe path conversion, and derived capability flags. Plan 002 is complete at fixture/API level; live decoded runtime smoke still depends on generating `pokefirered_rev1.sym`.
+- 2026-06-04 - M3.T1 complete: extracted `tools/runtime/static/api-client.js`, converted `app.js` to a module, added request timeouts and explicit JSON error extraction, and made refresh polling single-flight to avoid overlapping runtime calls.
+- 2026-06-04 - M3.T2 complete: added pointer and keyboard press/release control handling, held-button state display, `aria-pressed` updates, and action serialization so repeated keydown events do not send input storms.
+- 2026-06-04 - M3.T3 complete: added `telemetry-format.js`, high-signal telemetry summary fields for mode/map/player/camera/party/bag/flags-vars/symbols, raw JSON details, and trace formatting.
+- 2026-06-04 - M3.T4 complete: added contained runtime state slots, mGBA/fake bridge save/load methods, `/states` endpoints, a state panel, and path-containment tests. Git was blocked at the time because `.git` was mounted read-only.
+- 2026-06-04 - M3.T5 complete: browser verification passed against fake runtime at `http://127.0.0.1:18765/`; desktop/mobile screenshots were captured under `/tmp`, and a Playwright interaction smoke verified held input state, save/load state feedback, and trace rendering. Plan 003 is complete.
 
 ## Validation Evidence
 
@@ -34,12 +44,33 @@
 | 2026-06-04 | M1.T6 real endpoint smoke | Configured server at `http://127.0.0.1:8765` | pass | `/health`, `/telemetry`, `/snapshot`, `/action`, `/traces`, `/`, `/app.js`, and `/styles.css` returned expected responses. |
 | 2026-06-04 | M1.T6 concurrent endpoint smoke | Parallel `/health`, `/snapshot`, `/telemetry`, `/traces` x4 | pass | All responses 200 after mGBA socket request serialization. |
 | 2026-06-04 | M1.T6 browser screenshots | `npx --yes playwright screenshot --browser chromium --viewport-size=1280,900/390,844 --wait-for-timeout=5000` | pass | Screenshots saved to `/tmp/pokemon-runtime-desktop-playwright-settled.png` and `/tmp/pokemon-runtime-mobile-playwright-settled.png`; no clipping or endpoint errors. |
+| 2026-06-04 | M2.T1 tests | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` | pass with skips | `21 passed, 7 skipped`; skips are local socket denial and stale `starlette 1.2.1` endpoint checks. Repo now pins `starlette<1.0`; DNS prevented local venv re-sync. |
+| 2026-06-04 | M2.T2 save summary tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py -vv` | pass | `7 passed`; covers player bytes, money, coins, bag counts, flags, vars, invalid SaveBlock2 unavailable states, party summaries, and checksum mismatch handling. |
+| 2026-06-04 | M2.T2 runtime tests | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` | pass with skips | `22 passed, 7 skipped`; same local socket/ASGI dependency skips as M2.T1. |
+| 2026-06-04 | M2.T3 map tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_map_json_should_resolve_map_metadata.py tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py -vv` | pass | `10 passed`; covers Pallet Town metadata, group/number lookup, coordinate warp context, unknown map handling, and telemetry location map context. |
+| 2026-06-04 | M2.T3 runtime tests | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` | pass with skips | `25 passed, 7 skipped`; same local socket/ASGI dependency skips. |
+| 2026-06-04 | M2.T4 text/mode tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_charmap_bytes_should_decode_text.py tools/runtime/tests/test_unknown_mode_should_preserve_evidence.py tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py -vv` | pass | `16 passed`; covers player-name decoding, greedy multibyte tokens, unknown bytes, unknown/battle/transition/menu/dialogue modes, and telemetry integration. |
+| 2026-06-04 | M2.T4 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `34 passed, 7 skipped`; compile and whitespace checks clean. Skips remain local socket/ASGI dependency limited. |
+| 2026-06-04 | M2.T5 schema tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_telemetry_schema_should_publish_stable_contract.py tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass with skip | `12 passed, 1 skipped`; endpoint schema test skipped in stale Starlette env. |
+| 2026-06-04 | M2.T5 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `37 passed, 8 skipped`; compile and whitespace checks clean. Skips remain local socket/ASGI dependency limited. |
+| 2026-06-04 | M3.T1 API client tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py tools/runtime/tests/test_static_deck_should_serve_index.py -vv` | pass with skip | `3 passed, 1 skipped`; Node-backed tests cover endpoint methods, action body, JSON error detail, and timeout errors. |
+| 2026-06-04 | M3.T1 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `40 passed, 8 skipped`; compile and whitespace checks clean. Skips remain local socket/ASGI dependency limited. |
+| 2026-06-04 | M3.T2 control tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_control_surface_should_support_hold_inputs.py tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py -vv` | pass | `5 passed`; covers backend press/release held state, accessible control markup, and API client behavior. |
+| 2026-06-04 | M3.T2 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `42 passed, 8 skipped`; compile and whitespace checks clean. Skips remain local socket/ASGI dependency limited. |
+| 2026-06-04 | M3.T3 telemetry panel tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_telemetry_panel_should_format_runtime_state.py tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py -vv` | pass | `5 passed`; covers decoded and unavailable telemetry summaries plus trace formatting. |
+| 2026-06-04 | M3.T3 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `44 passed, 8 skipped`; compile and whitespace checks clean. Skips remain local socket/ASGI dependency limited. |
+| 2026-06-04 | M3.T4 state slot tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_state_slot_should_stay_in_runtime_directory.py tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py tools/runtime/tests/test_telemetry_panel_should_format_runtime_state.py -vv` | pass | `8 passed`; covers save/load, path containment, missing slots, API client state calls, and trace formatting. |
+| 2026-06-04 | M3.T4 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check`; `test -w .git` | pass with skips / git blocked | `47 passed, 8 skipped`; compile and whitespace checks clean. `.git` reported `git-not-writable`, so commits remain blocked by the sandbox mount. |
+| 2026-06-04 | M3.T5 browser screenshots | `npx --yes playwright screenshot --browser chromium --viewport-size=1280,900/390,844 --wait-for-timeout=3000 http://127.0.0.1:18765/ ...` | pass | Screenshots saved to `/tmp/pokemon-runtime-m3-desktop-fixed.png` and `/tmp/pokemon-runtime-m3-mobile-fixed.png`; visual inspection found no obvious overlap/clipping after fixing native `fetch` binding. |
+| 2026-06-04 | M3.T5 browser interaction | `NODE_PATH=/tmp/pokemon-runtime-pw/node_modules node --input-type=module <Playwright smoke>` | pass | Verified held A state, release state, save/load slot feedback, and action/state traces. |
+| 2026-06-04 | M3.T5 final checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `50 passed, 5 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 
 | Date | Scope | Reviewer | Verdict | Follow-up |
 |---|---|---|---|---|
 | 2026-06-04 | Planning | coordinator | ready | Generated plans are ready for user review before native `/goal` execution. |
+| 2026-06-04 | Plan 001 post-implementation | validator/reviewer/security/pattern-detector | request fixes / approve mix | Runtime lifecycle, snapshot race, stale read frames, malformed action validation, symbol path exposure, dependency and docs examples were triaged; code fixes landed for lifecycle, snapshot race, read frames, malformed actions, symbol path exposure, and dependency pin. |
 
 ## Durable Captures
 
@@ -49,6 +80,11 @@
   - `.vault/decisions/first-spike-scope-boundaries-2026-06-04.md`
 - Solutions:
   - `.vault/solutions/mgba-wsl-reverse-socket-2026-06-04.md`
+  - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`
+  - `.vault/solutions/telemetry-schema-normalization-2026-06-04.md`
+  - `.vault/solutions/runtime-web-control-deck-solution-2026-06-04.md`
 - Encounters:
   - `.vault/encounters/mgba-wsl-bridge-2026-06-04.md`
   - `.vault/encounters/mgba-socket-concurrency-2026-06-04.md`
+  - `.vault/encounters/runtime-fastapi-starlette-compatibility-2026-06-04.md`
+  - `.vault/encounters/runtime-browser-tooling-2026-06-04.md`

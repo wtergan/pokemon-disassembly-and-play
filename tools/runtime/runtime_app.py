@@ -11,13 +11,26 @@ from fastapi.staticfiles import StaticFiles
 from .action_executor import ActionValidationError
 from .emulators.fake import FakeEmulatorBridge
 from .runtime_core import RuntimeCore
+from .state_slots import StateSlotError
 
 
-def create_app(runtime: RuntimeCore | None = None, static_dir: Path | None = None) -> FastAPI:
+def create_app(
+    runtime: RuntimeCore | None = None,
+    static_dir: Path | None = None,
+    expose_docs: bool | None = None,
+) -> FastAPI:
     """Create the runtime HTTP app with an injectable runtime core for tests."""
 
-    app = FastAPI(title="Pokemon FireRed Runtime", version="0.1.0")
     runtime_core = runtime or RuntimeCore(FakeEmulatorBridge())
+    docs_enabled = expose_docs if expose_docs is not None else runtime is None
+
+    app = FastAPI(
+        title="Pokemon FireRed Runtime",
+        version="0.1.0",
+        docs_url="/docs" if docs_enabled else None,
+        redoc_url="/redoc" if docs_enabled else None,
+        openapi_url="/openapi.json" if docs_enabled else None,
+    )
 
     @app.get("/health")
     def health() -> dict[str, Any]:
@@ -35,6 +48,24 @@ def create_app(runtime: RuntimeCore | None = None, static_dir: Path | None = Non
     def traces() -> dict[str, Any]:
         return {"traces": runtime_core.recent_traces()}
 
+    @app.get("/states")
+    def states() -> dict[str, Any]:
+        return runtime_core.list_states()
+
+    @app.post("/states/{slot}/save")
+    def save_state(slot: str) -> dict[str, Any]:
+        try:
+            return runtime_core.save_state(slot)
+        except StateSlotError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/states/{slot}/load")
+    def load_state(slot: str) -> dict[str, Any]:
+        try:
+            return runtime_core.load_state(slot)
+        except StateSlotError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     @app.post("/action")
     def action(payload: dict[str, Any]) -> dict[str, Any]:
         try:
@@ -47,4 +78,3 @@ def create_app(runtime: RuntimeCore | None = None, static_dir: Path | None = Non
         app.mount("/", StaticFiles(directory=resolved_static_dir, html=True), name="static")
 
     return app
-

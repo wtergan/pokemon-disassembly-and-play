@@ -27,11 +27,11 @@
 
 | Task ID | Plan | Task | State | Depends On | Owner/Lane | Validation |
 |---|---|---|---|---|---|---|
-| M2.T1 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Stabilize symbol resolution. | ready | M1 | implementer | Symbol fixture tests |
-| M2.T2 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Add source-backed save-block readers. | planned | M2.T1 | implementer | Save-block fixture tests |
-| M2.T3 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Load map/layout metadata. | planned | M2.T2 | implementer | Map fixture tests |
-| M2.T4 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Add text decoding and mode heuristics. | planned | M2.T2 | implementer/reviewer | Text and mode tests |
-| M2.T5 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Publish versioned telemetry schema. | planned | M2.T3 M2.T4 | implementer/validator | Schema/API tests |
+| M2.T1 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Stabilize symbol resolution. | complete | M1 | implementer | Symbol fixture tests |
+| M2.T2 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Add source-backed save-block readers. | complete | M2.T1 | implementer | Save-block fixture tests |
+| M2.T3 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Load map/layout metadata. | complete | M2.T2 | implementer | Map fixture tests |
+| M2.T4 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Add text decoding and mode heuristics. | complete | M2.T2 | implementer/reviewer | Text and mode tests |
+| M2.T5 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Publish versioned telemetry schema. | complete | M2.T3 M2.T4 | implementer/validator | Schema/API tests |
 
 ### M3: Runtime Web Control Deck
 
@@ -42,11 +42,11 @@
 
 | Task ID | Plan | Task | State | Depends On | Owner/Lane | Validation |
 |---|---|---|---|---|---|---|
-| M3.T1 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Stabilize browser API client. | planned | M1.T6 | implementer | API client/browser smoke |
-| M3.T2 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Build frame and manual controls. | planned | M3.T1 | implementer/accessibility-auditor | Keyboard/click smoke |
-| M3.T3 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Render telemetry and trace panels. | planned | M2.T5 M3.T1 | implementer | Browser smoke |
-| M3.T4 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Add runtime-owned savestate controls. | planned | M3.T2 | implementer/security | State directory tests |
-| M3.T5 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Run browser and accessibility verification. | planned | M3.T4 | validator/accessibility-auditor | Screenshot/check summary |
+| M3.T1 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Stabilize browser API client. | complete | M1.T6 | implementer | API client/browser smoke |
+| M3.T2 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Build frame and manual controls. | complete | M3.T1 | implementer/accessibility-auditor | Keyboard/click smoke |
+| M3.T3 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Render telemetry and trace panels. | complete | M2.T5 M3.T1 | implementer | Browser smoke |
+| M3.T4 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Add runtime-owned savestate controls. | complete | M3.T2 | implementer/security | State directory tests |
+| M3.T5 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Run browser and accessibility verification. | complete | M3.T4 | validator/accessibility-auditor | Screenshot/check summary |
 
 ### M4: Codex Agent Loop
 
@@ -57,7 +57,7 @@
 
 | Task ID | Plan | Task | State | Depends On | Owner/Lane | Validation |
 |---|---|---|---|---|---|---|
-| M4.T1 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Define compact agent context schema. | planned | M2.T5 | implementer/security | Privacy/context tests |
+| M4.T1 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Define compact agent context schema. | ready | M2.T5 | implementer/security | Privacy/context tests |
 | M4.T2 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Implement action policy and blocked-action traces. | planned | M1.T6 | implementer/security | Policy tests |
 | M4.T3 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add Codex client/app-server integration. | planned | M4.T1 M4.T2 | implementer | Fake client tests |
 | M4.T4 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add bounded objective runner. | planned | M4.T3 | implementer/reviewer | Runner stop-condition tests |

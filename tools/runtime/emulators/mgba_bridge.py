@@ -13,6 +13,7 @@ import socket
 import subprocess
 import threading
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -162,9 +163,10 @@ class MgbaSocketBridge:
 
     def snapshot(self) -> Snapshot:
         screenshot_path = self._next_screenshot_path()
-        fields = self._request("screenshot", self._path_for_emulator(screenshot_path))
-        self._update_frame_count(fields)
-        image_bytes = screenshot_path.read_bytes()
+        with self._request_lock:
+            fields = self._request_unlocked("screenshot", self._path_for_emulator(screenshot_path))
+            self._update_frame_count(fields)
+            image_bytes = screenshot_path.read_bytes()
         return Snapshot(frame=self._frame_count, image_base64=base64.b64encode(image_bytes).decode("ascii"))
 
     def press_button(self, button: str) -> None:
@@ -185,24 +187,49 @@ class MgbaSocketBridge:
         self._update_frame_count(fields)
 
     def read8(self, address: int) -> int:
-        return int(self._request("read8", str(address))["value"])
+        fields = self._request("read8", str(address))
+        self._update_frame_count(fields)
+        return int(fields["value"])
 
     def read16(self, address: int) -> int:
-        return int(self._request("read16", str(address))["value"])
+        fields = self._request("read16", str(address))
+        self._update_frame_count(fields)
+        return int(fields["value"])
 
     def read32(self, address: int) -> int:
-        return int(self._request("read32", str(address))["value"])
+        fields = self._request("read32", str(address))
+        self._update_frame_count(fields)
+        return int(fields["value"])
+
+    def save_state(self, path: Path) -> None:
+        """Save mGBA state to `path` through the Lua bridge."""
+
+        fields = self._request("save_state", self._path_for_emulator(path))
+        self._update_frame_count(fields)
+        if fields.get("saved") != "true":
+            raise MgbaBridgeError("mGBA did not save state")
+
+    def load_state(self, path: Path) -> None:
+        """Load mGBA state from `path` through the Lua bridge."""
+
+        fields = self._request("load_state", self._path_for_emulator(path))
+        self._update_frame_count(fields)
+        if fields.get("loaded") != "true":
+            raise MgbaBridgeError("mGBA did not load state")
 
     def _request(self, command: str, *parts: str) -> dict[str, str]:
+        with self._request_lock:
+            return self._request_unlocked(command, *parts)
+
+    def _request_unlocked(self, command: str, *parts: str) -> dict[str, str]:
         if self._file is None:
             raise MgbaBridgeError("mGBA bridge is not connected")
         line = "\t".join((command, *parts)) + "\n"
-        with self._request_lock:
-            try:
-                self._file.write(line.encode("utf-8"))
-                raw = self._file.readline()
-            except OSError as exc:
-                raise MgbaBridgeError(f"mGBA bridge request timed out or failed for {command}: {exc}") from exc
+        try:
+            self._file.write(line.encode("utf-8"))
+            raw = self._file.readline()
+        except OSError as exc:
+            raise MgbaBridgeError(f"mGBA bridge request timed out or failed for {command}: {exc}") from exc
         if not raw:
             raise MgbaBridgeError("mGBA bridge closed the connection")
         response = raw.decode("utf-8").strip()
@@ -269,7 +296,7 @@ class MgbaSocketBridge:
         else:
             screenshot_dir = self._screenshot_dir
         screenshot_dir.mkdir(parents=True, exist_ok=True)
-        return screenshot_dir / f"snapshot-{int(time.time() * 1000)}.png"
+        return screenshot_dir / f"snapshot-{uuid.uuid4().hex}.png"
 
     def _windows_cache_dir(self) -> Path:
         if self._config.script_cache_dir is not None:

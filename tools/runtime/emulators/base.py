@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol
 
 
@@ -56,3 +57,8 @@ class EmulatorBridge(Protocol):
     def read32(self, address: int) -> int:
         """Read a little-endian unsigned word from emulator memory."""
 
+    def save_state(self, path: Path) -> None:
+        """Save emulator state to a runtime-owned path."""
+
+    def load_state(self, path: Path) -> None:
+        """Load emulator state from a runtime-owned path."""

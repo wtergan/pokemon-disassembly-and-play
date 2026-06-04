@@ -22,8 +22,13 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8765, type=int)
     args = parser.parse_args()
-    runtime_app = create_app(create_runtime_from_config_path(args.config)) if args.config else app
-    uvicorn.run(runtime_app, host=args.host, port=args.port, reload=False)
+    runtime = create_runtime_from_config_path(args.config) if args.config else None
+    runtime_app = create_app(runtime) if runtime else app
+    try:
+        uvicorn.run(runtime_app, host=args.host, port=args.port, reload=False)
+    finally:
+        if runtime is not None:
+            runtime.close()
 
 
 if __name__ == "__main__":

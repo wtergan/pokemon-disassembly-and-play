@@ -13,6 +13,9 @@ from pathlib import Path
 from typing import Any
 
 from ...emulators.base import EmulatorBridge
+from ...state_models import TELEMETRY_SCHEMA_VERSION, normalize_telemetry_snapshot
+from .map_data import FireRedMapRegistry
+from .mode import classify_runtime_mode
 from .save_blocks import (
     SAVE_BLOCK_1_LOCATION_MAP_GROUP,
     SAVE_BLOCK_1_LOCATION_MAP_NUM,
@@ -21,12 +24,14 @@ from .save_blocks import (
     SAVE_BLOCK_1_POS_Y,
     SAVE_BLOCK_2_ENCRYPTION_KEY,
     is_gba_address,
+    read_save_block_summary,
 )
 from .symbols import SymbolTable
+from .text import FireRedCharmap
 
 
 FIRERED_REV1_SHA1 = "dd5945db9b930750cb39d00c84da8571feebf417"
-_SAVE_BLOCK_POINTER_SYMBOLS = ("gSaveBlock1Ptr", "gSaveBlock2Ptr")
+_TELEMETRY_SYMBOLS = ("gSaveBlock1Ptr", "gSaveBlock2Ptr", "gCamera")
 _CAMERA_SYMBOL = "gCamera"
 
 
@@ -36,6 +41,8 @@ class FireRedTelemetryReader:
 
     symbols: SymbolTable
     rom_path: Path | None = None
+    map_registry: FireRedMapRegistry | None = None
+    text_decoder: FireRedCharmap | None = None
     expected_sha1: str = FIRERED_REV1_SHA1
 
     def __call__(self, emulator: EmulatorBridge) -> dict[str, Any]:
@@ -43,31 +50,39 @@ class FireRedTelemetryReader:
 
         save_block_1 = self._read_pointer(emulator, "gSaveBlock1Ptr")
         save_block_2 = self._read_pointer(emulator, "gSaveBlock2Ptr")
-        missing_symbols = self._missing_symbols(_SAVE_BLOCK_POINTER_SYMBOLS)
+        symbol_coverage = self.symbols.coverage(_TELEMETRY_SYMBOLS)
 
+        location = self._read_location(emulator, save_block_1["value"])
         payload: dict[str, Any] = {
-            "schema_version": 1,
+            "schema_version": TELEMETRY_SCHEMA_VERSION,
             "game": "firered",
             "revision": "rev1",
             "frame": emulator.frame_count,
             "rom": self._rom_identity(),
             "symbols": {
-                "available": not missing_symbols,
-                "source": str(self.symbols.source) if self.symbols.source else None,
-                "missing": missing_symbols,
+                "available": symbol_coverage.available,
+                "source": self.symbols.source.name if self.symbols.source else None,
+                "missing": symbol_coverage.missing,
             },
             "save_blocks": {
                 "gSaveBlock1Ptr": save_block_1,
                 "gSaveBlock2Ptr": save_block_2,
             },
-            "location": self._read_location(emulator, save_block_1["value"]),
+            "location": location,
+            "mode": classify_runtime_mode(emulator, self.symbols, location_available=location["available"]),
             "camera": self._read_camera(emulator),
+            "save": read_save_block_summary(
+                emulator,
+                save_block_1["value"],
+                save_block_2["value"],
+                text_decoder=self.text_decoder,
+            ),
         }
-        if save_block_2["value"] is not None:
+        if _is_valid_pointer(save_block_2["value"]):
             payload["save_blocks"]["gSaveBlock2Ptr"]["encryption_key"] = emulator.read32(
                 save_block_2["value"] + SAVE_BLOCK_2_ENCRYPTION_KEY
             )
-        return payload
+        return normalize_telemetry_snapshot(payload)
 
     def _read_pointer(self, emulator: EmulatorBridge, symbol_name: str) -> dict[str, Any]:
         symbol_address = self.symbols.get(symbol_name)
@@ -85,13 +100,23 @@ class FireRedTelemetryReader:
     def _read_location(self, emulator: EmulatorBridge, save_block_1: int | None) -> dict[str, Any]:
         if not _is_valid_pointer(save_block_1):
             return {"available": False, "reason": "missing_save_block_1"}
+        map_group = _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_GROUP)
+        map_num = _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_NUM)
+        player_x = _read_s16(emulator, save_block_1 + SAVE_BLOCK_1_POS_X)
+        player_y = _read_s16(emulator, save_block_1 + SAVE_BLOCK_1_POS_Y)
+        map_context = (
+            self.map_registry.describe_location(map_group, map_num, player_x, player_y)
+            if self.map_registry is not None
+            else {"available": False, "reason": "map_registry_unavailable"}
+        )
         return {
             "available": True,
-            "map_group": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_GROUP),
-            "map_num": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_NUM),
+            "map_group": map_group,
+            "map_num": map_num,
             "warp_id": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_WARP_ID),
-            "player_x": _read_s16(emulator, save_block_1 + SAVE_BLOCK_1_POS_X),
-            "player_y": _read_s16(emulator, save_block_1 + SAVE_BLOCK_1_POS_Y),
+            "player_x": player_x,
+            "player_y": player_y,
+            "map": map_context,
         }
 
     def _read_camera(self, emulator: EmulatorBridge) -> dict[str, Any]:
@@ -117,10 +142,6 @@ class FireRedTelemetryReader:
             "expected_sha1": self.expected_sha1,
             "matches_expected": sha1 == self.expected_sha1,
         }
-
-    def _missing_symbols(self, names: tuple[str, ...]) -> list[str]:
-        return [name for name in names if self.symbols.get(name) is None]
-
 
 def _is_valid_pointer(pointer: int | None) -> bool:
     return pointer is not None and pointer != 0 and is_gba_address(pointer)
