@@ -75,8 +75,8 @@
 | M5.T1 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add target profiles and hash checks. | complete | M1.T6 | implementer/security | Profile/hash tests |
 | M5.T2 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add LeafGreen adapter path. | complete | M5.T1 M2.T5 | implementer | LeafGreen fixture/smoke tests |
 | M5.T3 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Harden runtime storage by target. | complete | M5.T1 M3.T4 | implementer/security | Path containment tests |
-| M5.T4 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Evaluate BizHawk fallback only if evidence requires it. | ready | M1.T4 | reviewer/implementer | Adapter contract tests if implemented |
-| M5.T5 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Write setup and operating docs. | planned | M5.T3 | implementer/reviewer | Fresh-read docs review |
+| M5.T4 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Evaluate BizHawk fallback only if evidence requires it. | complete | M1.T4 | reviewer/implementer | Focused mGBA bridge tests and decision capture |
+| M5.T5 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Write setup and operating docs. | ready | M5.T3 M5.T4 | implementer/reviewer | Fresh-read docs review |
 
 ## State Values
 

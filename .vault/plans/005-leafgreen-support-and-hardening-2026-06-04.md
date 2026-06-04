@@ -45,6 +45,7 @@ goal_ready: true
 - Decisions:
   - [x] `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
   - [x] `.vault/decisions/target-profile-hash-verification-2026-06-04.md`
+  - [x] `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`
 - Solutions:
   - [x] `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`
 - Encounters:
@@ -62,7 +63,7 @@ goal_ready: true
 - [ ] Smoke tests launch both configured targets and verify health/snapshot/action/basic telemetry.
 - [x] Runtime directories for states, traces, logs, and screenshots are isolated by target profile.
 - [ ] Setup docs explain Windows/WSL, mGBA path config, ROM path config, build/symbol expectations, and safety boundaries.
-- [ ] If BizHawk fallback was needed, the fallback decision and adapter notes are captured durably.
+- [x] BizHawk fallback evaluation is captured durably; no fallback adapter is needed yet.
 
 ## Architecture Diagram
 
@@ -134,13 +135,13 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - GOTCHA: Path traversal and accidental writes outside runtime dirs.
   - VALIDATE: `11 passed` focused storage/factory/state-slot tests; `77 passed, 10 skipped` full runtime tests.
 
-- [ ] Step 4: Add fallback bridge evaluation.
+- [x] Step 4: Add fallback bridge evaluation.
   - ACTION: Evaluate whether mGBA remains sufficient; only implement BizHawk if plan 001 or later encounters justify it.
-  - IMPLEMENT: Keep bridge interface unchanged.
-  - FILES: `tools/runtime/emulators/base.py`, optional `tools/runtime/emulators/bizhawk_bridge.py`
+  - IMPLEMENT: Kept bridge interface unchanged; current evidence does not justify a BizHawk adapter.
+  - FILES: `tools/runtime/emulators/base.py`, `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`
   - MIRROR: mGBA adapter contract.
   - GOTCHA: Do not add BizHawk complexity without evidence.
-  - VALIDATE: Adapter contract tests.
+  - VALIDATE: `9 passed` focused mGBA bridge contract tests; `77 passed, 10 skipped` full runtime tests.
 
 - [ ] Step 5: Write setup and operating docs.
   - ACTION: Document Windows/WSL setup, mGBA config, ROM config, safety, tests, and troubleshooting.
@@ -205,7 +206,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - `M5.T5` Setup docs
 - Dependencies:
   - `M5` depends on plans 001 through 004.
-- Current state: M5.T3 complete; M5.T4 ready
+- Current state: M5.T4 complete; M5.T5 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract

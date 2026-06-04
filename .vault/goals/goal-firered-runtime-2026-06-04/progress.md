@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M5
-- Current task: M5.T4
-- Last action: 2026-06-04 - Completed M5.T3 by adding target-scoped runtime storage.
-- Next action: Execute M5.T4 by evaluating whether BizHawk fallback is justified by current mGBA evidence.
+- Current task: M5.T5
+- Last action: 2026-06-04 - Completed M5.T4 by recording that BizHawk fallback is not justified by current mGBA evidence.
+- Next action: Execute M5.T5 by writing setup and operating docs.
 
 ## Execution Ledger
 
@@ -35,6 +35,7 @@
 - 2026-06-04 - M5.T1 complete: added `tools/runtime/target_profiles.py` with FireRed Rev 1 and LeafGreen Rev 1 metadata, default SHA-1 verification in config loading, explicit `verify_hash = false` fixture escape hatch that preserves mismatch metadata, and target-profile/hash tests.
 - 2026-06-04 - M5.T2 complete: added `tools/runtime/games/leafgreen/` with a LeafGreen telemetry reader path, made the shared FireRed reader publish configurable target identity, generalized symbol discovery to profile basenames/build directories, and updated runtime factory to select FireRed or LeafGreen readers from target profile metadata.
 - 2026-06-04 - M5.T3 complete: added `tools/runtime/storage.py` to map runtime-owned roots to target-scoped directories, wired factory state slots and screenshots through scoped paths, and verified FireRed/LeafGreen state directories cannot collide.
+- 2026-06-04 - M5.T4 complete: reviewed the mGBA WSL/socket encounters and validation evidence; mGBA remains sufficient, so no BizHawk adapter was added. Durable decision: `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`.
 
 ## Validation Evidence
 
@@ -92,6 +93,7 @@
 | 2026-06-04 | M5.T2 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `74 passed, 10 skipped`; compile and whitespace checks clean. |
 | 2026-06-04 | M5.T3 storage tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_runtime_storage_should_stay_under_target_directory.py tools/runtime/tests/test_state_slot_should_stay_in_runtime_directory.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass | `11 passed`; covers target-scoped storage roots, unsafe profile-key rejection, state-slot containment, and FireRed/LeafGreen state-dir isolation. |
 | 2026-06-04 | M5.T3 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `77 passed, 10 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M5.T4 bridge fallback checks | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_mgba_launch_command_should_include_script_and_rom.py tools/runtime/tests/test_mgba_socket_bridge_should_parse_socket_responses.py -vv`; `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `git diff --check` | pass with skips | `9 passed` focused mGBA bridge tests; full suite `77 passed, 10 skipped`; no BizHawk adapter required. |
 
 ## Review Ledger
 
@@ -109,6 +111,7 @@
   - `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`
   - `.vault/decisions/agent-client-disabled-default-2026-06-04.md`
   - `.vault/decisions/target-profile-hash-verification-2026-06-04.md`
+  - `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`
 - Solutions:
   - `.vault/solutions/mgba-wsl-reverse-socket-2026-06-04.md`
   - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`

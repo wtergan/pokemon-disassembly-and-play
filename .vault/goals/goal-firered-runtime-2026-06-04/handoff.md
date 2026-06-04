@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M5.T4
+- Current milestone/task: M5.T5
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -56,29 +56,31 @@
 - M5.T1 is complete: target profiles now cover FireRed Rev 1 and LeafGreen Rev 1, config verifies ROM SHA-1 by default, fixture configs can opt out with `verify_hash = false`, and wrong-hash/LeafGreen profile tests pass. Durable decision: `.vault/decisions/target-profile-hash-verification-2026-06-04.md`.
 - M5.T2 is complete: runtime factory selects FireRed or LeafGreen telemetry readers from target profiles, LeafGreen publishes `target.game = leafgreen`, and profile-based symbol discovery finds `pokeleafgreen_rev1.sym`.
 - M5.T3 is complete: runtime-owned storage roots are scoped by target profile key for states, traces, logs, screenshots, and cache paths; factory uses scoped state and screenshot paths. Durable pattern: `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`.
+- M5.T4 is complete: current mGBA evidence remains sufficient, so no BizHawk adapter was added. Durable decision: `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`.
 - Current local venv has stale `starlette 1.2.1`; repo requirements now pin `starlette<1.0`, but DNS prevented re-sync. Endpoint tests skip in this stale env rather than hanging.
 
 ## Next Action
 
-Execute M5.T4 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: evaluate whether BizHawk fallback is justified by current mGBA evidence; do not implement BizHawk without documented need.
+Execute M5.T5 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: write setup and operating docs for Windows/WSL, mGBA config, ROM config, symbols, safety, tests, and troubleshooting.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot
 
-- Updated: 2026-06-04T11:23:04-04:00
-- Event: `precompact`
+- Updated: 2026-06-04T12:05:28-04:00
+- Event: `M5.T4 complete`
 - Repo: `/home/gilgames/Code/pokemon-disassembly-and-play`
 - Branch: `main`
 - Active goal: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Active plan: `.vault/plans/004-codex-agent-loop-2026-06-04.md`
-- Changed files: 4
-  - `tools/runtime/runtime_app.py`
-  - `tools/runtime/agent_context.py`
-  - `tools/runtime/runtime_core.py`
-  - `tools/runtime/tests/test_agent_context_should_omit_private_paths.py`
-- Last progress: - `.vault/encounters/runtime-browser-tooling-2026-06-04.md`
+- Active plan: `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md`
+- Changed files: 6
+  - `.vault/PLAN.md`
+  - `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`
+  - `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
+  - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
+  - `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`
+  - `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md`
+- Last progress: M5.T4 complete; continue with M5.T5 docs.
 
 ### Capture Queue
-- Encounter candidate: goal progress mentions a blocker/error/failure/root cause, but no `.vault/encounters/` file changed.
-- Solution candidate: progress suggests a fix/resolution with production changes, but no `.vault/solutions/` file changed.
+- None.
 <!-- codex-vault-memory-advisor:end -->
