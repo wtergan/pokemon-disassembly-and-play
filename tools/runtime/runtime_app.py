@@ -44,6 +44,10 @@ def create_app(
     def telemetry() -> dict[str, Any]:
         return runtime_core.telemetry()
 
+    @app.get("/agent_context")
+    def agent_context() -> dict[str, Any]:
+        return runtime_core.agent_context()
+
     @app.get("/traces")
     def traces() -> dict[str, Any]:
         return {"traces": runtime_core.recent_traces()}

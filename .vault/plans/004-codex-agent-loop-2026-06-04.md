@@ -1,5 +1,5 @@
 ---
-status: Planned
+status: In Progress
 priority: High
 date: 2026-06-04
 worktree_required: yes
@@ -56,7 +56,7 @@ goal_ready: true
 
 ## Success Criteria
 
-- [ ] `/agent_context` returns compact, high-signal state for model use without large raw dumps or private paths.
+- [x] `/agent_context` returns compact, high-signal state for model use without large raw dumps or private paths.
 - [ ] Action policy exposes a small validated tool set such as tap, hold, wait, save_state, load_state, inspect, and stop.
 - [ ] Agent loop records every proposed action, validation decision, execution result, and post-action telemetry delta.
 - [ ] Objective runner can execute short bounded goals such as "open menu", "walk one tile", or "wait until field mode" using savestate-backed recovery.
@@ -110,13 +110,13 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
 
 ## Execution Steps
 
-- [ ] Step 1: Define agent context schema.
+- [x] Step 1: Define agent context schema.
   - ACTION: Build a compact model-facing context from telemetry, traces, action affordances, and objective state.
   - IMPLEMENT: Include unknown/unavailable fields explicitly; cap sizes.
-  - FILES: `tools/runtime/agent_context.py`, `tools/runtime/state_models.py`
+  - FILES: `tools/runtime/agent_context.py`, `tools/runtime/runtime_core.py`, `tools/runtime/runtime_app.py`
   - MIRROR: Pocodex `agent_context.py`
   - GOTCHA: Do not include local ROM paths, secrets, or large raw memory dumps.
-  - VALIDATE: Context size and content tests.
+  - VALIDATE: `6 passed, 2 skipped` focused context/schema tests; `53 passed, 6 skipped` full runtime tests; `/agent_context` fake-server smoke.
 
 - [ ] Step 2: Implement action policy.
   - ACTION: Define allowed actions, cooldowns, preconditions, and stop controls.
@@ -152,7 +152,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
 
 ## Code Documentation Contract
 
-- [ ] Agent context schema documents size limits and privacy boundaries.
+- [x] Agent context schema documents size limits and privacy boundaries.
 - [ ] Action policy documents safety invariants and cooldowns.
 - [ ] Objective runner documents stop conditions and verification expectations.
 
@@ -206,7 +206,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - `M4.T5` Agent endpoints/UI
 - Dependencies:
   - `M4` depends on plans 001 through 003.
-- Current state: planned
+- Current state: M4.T1 complete; M4.T2 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -283,3 +283,4 @@ Final evidence:
 ## Progress Log
 
 - 2026-06-04: Plan created as agent-loop follow-up after manual runtime stabilization.
+- 2026-06-04: M4.T1 complete. Added privacy-safe `tools/runtime/agent_context.py`, exposed `RuntimeCore.agent_context()` and `/agent_context`, added context privacy/size/action tests, verified POSIX and Windows path omission, and smoked the endpoint against the fake runtime.

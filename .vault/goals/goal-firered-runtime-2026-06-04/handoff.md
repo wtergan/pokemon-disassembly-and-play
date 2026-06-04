@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M4.T1
+- Current milestone/task: M4.T2
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -48,37 +48,30 @@
 - M3.T3 is complete: telemetry panel formatting lives in `telemetry-format.js`; the deck renders mode, map, player, camera, party, bag, flags/vars, symbols, raw JSON, and formatted trace labels.
 - M3.T4 is complete: runtime state slots are contained under `state_dir`, exposed through `/states` endpoints, and rendered by the state panel.
 - M3.T5 and plan 003 are complete: desktop/mobile screenshots and Playwright interaction smoke passed against the fake runtime. `.git` is writable again as of the full-access permission change, so commits can proceed.
+- M4.T1 is complete: `/agent_context` now returns a compact privacy-safe planner context with target/runtime/state summaries, objective placeholder, quick slot metadata, allowed action affordances, capped traces, rules, and output contract. Tests cover POSIX/Windows path omission, hash omission, trace caps, and safe action affordances.
 - Current local venv has stale `starlette 1.2.1`; repo requirements now pin `starlette<1.0`, but DNS prevented re-sync. Endpoint tests skip in this stale env rather than hanging.
 
 ## Next Action
 
-Execute M4.T1 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: define the compact agent context schema for planner-safe Codex integration.
+Execute M4.T2 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: implement action policy validation and blocked-action traces.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot
 
-- Updated: 2026-06-04T10:43:49-04:00
+- Updated: 2026-06-04T11:23:04-04:00
 - Event: `precompact`
 - Repo: `/home/gilgames/Code/pokemon-disassembly-and-play`
 - Branch: `main`
 - Active goal: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Active plan: `.vault/plans/001-firered-runtime-spike-2026-06-04.md`
-- Changed files: 26
-  - `.vault/encounters/runtime-fastapi-starlette-compatibility-2026-06-04.md`
-  - `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
-  - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
-  - `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`
-  - `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md`
-  - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`
-  - `tools/runtime/action_executor.py`
-  - `tools/runtime/emulators/mgba_bridge.py`
-  - `tools/runtime/games/firered/map_data.py`
-  - `tools/runtime/games/firered/save_blocks.py`
-  - `tools/runtime/games/firered/symbols.py`
-  - `tools/runtime/games/firered/telemetry.py`
-  - ... 14 more
-- Last progress: - `.vault/encounters/runtime-fastapi-starlette-compatibility-2026-06-04.md`
+- Active plan: `.vault/plans/004-codex-agent-loop-2026-06-04.md`
+- Changed files: 4
+  - `tools/runtime/runtime_app.py`
+  - `tools/runtime/agent_context.py`
+  - `tools/runtime/runtime_core.py`
+  - `tools/runtime/tests/test_agent_context_should_omit_private_paths.py`
+- Last progress: - `.vault/encounters/runtime-browser-tooling-2026-06-04.md`
 
 ### Capture Queue
-- No decision, encounter, or solution capture candidates detected.
+- Encounter candidate: goal progress mentions a blocker/error/failure/root cause, but no `.vault/encounters/` file changed.
+- Solution candidate: progress suggests a fix/resolution with production changes, but no `.vault/solutions/` file changed.
 <!-- codex-vault-memory-advisor:end -->

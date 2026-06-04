@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M4
-- Current task: M4.T1
-- Last action: 2026-06-04 - Completed M3.T5 and plan 003 with browser/responsive verification.
-- Next action: Execute M4.T1 by defining the compact agent context schema for planner-safe Codex integration.
+- Current task: M4.T2
+- Last action: 2026-06-04 - Completed M4.T1 by adding compact privacy-safe agent context and `/agent_context`.
+- Next action: Execute M4.T2 by implementing action policy validation and blocked-action traces.
 
 ## Execution Ledger
 
@@ -27,6 +27,7 @@
 - 2026-06-04 - M3.T3 complete: added `telemetry-format.js`, high-signal telemetry summary fields for mode/map/player/camera/party/bag/flags-vars/symbols, raw JSON details, and trace formatting.
 - 2026-06-04 - M3.T4 complete: added contained runtime state slots, mGBA/fake bridge save/load methods, `/states` endpoints, a state panel, and path-containment tests. Git was blocked at the time because `.git` was mounted read-only.
 - 2026-06-04 - M3.T5 complete: browser verification passed against fake runtime at `http://127.0.0.1:18765/`; desktop/mobile screenshots were captured under `/tmp`, and a Playwright interaction smoke verified held input state, save/load state feedback, and trace rendering. Plan 003 is complete.
+- 2026-06-04 - M4.T1 complete: added `tools/runtime/agent_context.py`, `RuntimeCore.agent_context()`, and `/agent_context`; the context includes compact target/runtime/state summaries, objective placeholder, available state slots, allowed action affordances, capped recent traces, planner rules, and output contract while omitting private paths, hashes, and raw image payloads.
 
 ## Validation Evidence
 
@@ -64,6 +65,9 @@
 | 2026-06-04 | M3.T5 browser screenshots | `npx --yes playwright screenshot --browser chromium --viewport-size=1280,900/390,844 --wait-for-timeout=3000 http://127.0.0.1:18765/ ...` | pass | Screenshots saved to `/tmp/pokemon-runtime-m3-desktop-fixed.png` and `/tmp/pokemon-runtime-m3-mobile-fixed.png`; visual inspection found no obvious overlap/clipping after fixing native `fetch` binding. |
 | 2026-06-04 | M3.T5 browser interaction | `NODE_PATH=/tmp/pokemon-runtime-pw/node_modules node --input-type=module <Playwright smoke>` | pass | Verified held A state, release state, save/load slot feedback, and action/state traces. |
 | 2026-06-04 | M3.T5 final checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `50 passed, 5 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M4.T1 context/schema tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_agent_context_should_omit_private_paths.py tools/runtime/tests/test_telemetry_schema_should_publish_stable_contract.py -vv` | pass with skips | `6 passed, 2 skipped`; covers compact context shape, POSIX/Windows path omission, hash omission, capped traces, and action affordances. |
+| 2026-06-04 | M4.T1 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `53 passed, 6 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M4.T1 endpoint smoke | Fake runtime server at `http://127.0.0.1:18766/agent_context` | pass | Returned schema version 1 with explicit unavailable state, quick slot metadata, and allowed actions. |
 
 ## Review Ledger
 

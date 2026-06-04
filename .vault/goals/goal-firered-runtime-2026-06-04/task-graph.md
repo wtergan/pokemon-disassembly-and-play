@@ -57,8 +57,8 @@
 
 | Task ID | Plan | Task | State | Depends On | Owner/Lane | Validation |
 |---|---|---|---|---|---|---|
-| M4.T1 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Define compact agent context schema. | ready | M2.T5 | implementer/security | Privacy/context tests |
-| M4.T2 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Implement action policy and blocked-action traces. | planned | M1.T6 | implementer/security | Policy tests |
+| M4.T1 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Define compact agent context schema. | complete | M2.T5 | implementer/security | Privacy/context tests |
+| M4.T2 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Implement action policy and blocked-action traces. | ready | M1.T6 | implementer/security | Policy tests |
 | M4.T3 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add Codex client/app-server integration. | planned | M4.T1 M4.T2 | implementer | Fake client tests |
 | M4.T4 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add bounded objective runner. | planned | M4.T3 | implementer/reviewer | Runner stop-condition tests |
 | M4.T5 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Expose agent endpoints and UI state. | planned | M4.T4 M3.T5 | implementer/validator | Short objective smoke |
