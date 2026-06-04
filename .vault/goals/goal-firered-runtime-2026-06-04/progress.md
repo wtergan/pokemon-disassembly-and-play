@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M5
-- Current task: M5.T2
-- Last action: 2026-06-04 - Completed M5.T1 by adding explicit target profiles and default ROM SHA-1 verification.
-- Next action: Execute M5.T2 by adding a LeafGreen adapter path while reusing shared FireRed-compatible behavior only where evidence supports it.
+- Current task: M5.T3
+- Last action: 2026-06-04 - Completed M5.T2 by adding a LeafGreen adapter path and profile-based symbol discovery.
+- Next action: Execute M5.T3 by hardening runtime storage so states, traces, logs, screenshots, and cache paths stay target-scoped.
 
 ## Execution Ledger
 
@@ -33,6 +33,7 @@
 - 2026-06-04 - M4.T4 complete: added `tools/runtime/objective_runner.py`, `objective_memory.py`, and `objective_scoring.py`; `RuntimeCore.run_objective()` now runs short capped objectives with quick checkpoint/recovery hooks, explicit stop handling, context deltas, and success criteria that must match observed context.
 - 2026-06-04 - M4.T5 and plan 004 complete: added `/agent/status`, `/agent/step`, `/agent/objective`, and `/agent/stop`; added browser API methods and an Agent panel with step/run/stop controls, objective JSON, status metrics, and logs; validated with focused API/static tests, live fake-runtime endpoint smoke, and desktop/mobile browser smoke.
 - 2026-06-04 - M5.T1 complete: added `tools/runtime/target_profiles.py` with FireRed Rev 1 and LeafGreen Rev 1 metadata, default SHA-1 verification in config loading, explicit `verify_hash = false` fixture escape hatch that preserves mismatch metadata, and target-profile/hash tests.
+- 2026-06-04 - M5.T2 complete: added `tools/runtime/games/leafgreen/` with a LeafGreen telemetry reader path, made the shared FireRed reader publish configurable target identity, generalized symbol discovery to profile basenames/build directories, and updated runtime factory to select FireRed or LeafGreen readers from target profile metadata.
 
 ## Validation Evidence
 
@@ -86,6 +87,8 @@
 | 2026-06-04 | M4.T5 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `68 passed, 10 skipped`; compile and whitespace checks clean. |
 | 2026-06-04 | M5.T1 profile tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_wrong_rom_hash_should_fail_target_profile.py tools/runtime/tests/test_missing_rom_config_should_fail_fast.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass | `12 passed`; covers wrong-hash rejection, explicit hash bypass metadata, LeafGreen Rev 1 profile metadata, existing config defaults, and factory wiring. |
 | 2026-06-04 | M5.T1 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `71 passed, 10 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M5.T2 LeafGreen tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_leafgreen_profile_should_select_leafgreen_adapter.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py -vv` | pass | `13 passed`; covers LeafGreen adapter selection, LeafGreen runtime factory telemetry, LeafGreen symbol discovery, and FireRed regression fixtures. |
+| 2026-06-04 | M5.T2 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `74 passed, 10 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 

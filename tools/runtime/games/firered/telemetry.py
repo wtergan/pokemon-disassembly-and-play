@@ -44,6 +44,8 @@ class FireRedTelemetryReader:
     map_registry: FireRedMapRegistry | None = None
     text_decoder: FireRedCharmap | None = None
     expected_sha1: str = FIRERED_REV1_SHA1
+    game: str = "firered"
+    revision: str = "rev1"
 
     def __call__(self, emulator: EmulatorBridge) -> dict[str, Any]:
         """Read the smallest source-backed telemetry payload from `emulator`."""
@@ -55,8 +57,8 @@ class FireRedTelemetryReader:
         location = self._read_location(emulator, save_block_1["value"])
         payload: dict[str, Any] = {
             "schema_version": TELEMETRY_SCHEMA_VERSION,
-            "game": "firered",
-            "revision": "rev1",
+            "game": self.game,
+            "revision": self.revision,
             "frame": emulator.frame_count,
             "rom": self._rom_identity(),
             "symbols": {

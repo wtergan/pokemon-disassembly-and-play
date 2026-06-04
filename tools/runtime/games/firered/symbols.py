@@ -82,12 +82,18 @@ class SymbolTable:
         return cls(addresses={})
 
 
-def discover_symbol_table(repo_root: Path, explicit_path: Path | None = None) -> SymbolTable:
-    """Load an explicit symbol file or the default FireRed Rev 1 symbol file when present."""
+def discover_symbol_table(
+    repo_root: Path,
+    explicit_path: Path | None = None,
+    *,
+    symbol_basename: str = FIRERED_REV1_SYMBOL_BASENAME,
+    build_name: str = "firered_rev1",
+) -> SymbolTable:
+    """Load an explicit symbol file or a target-profile symbol file when present."""
 
     if explicit_path is not None:
         return load_symbol_table(explicit_path)
-    discovered_path = find_default_symbol_file(repo_root)
+    discovered_path = find_symbol_file(repo_root, symbol_basename=symbol_basename, build_name=build_name)
     if discovered_path is None:
         return SymbolTable.empty()
     return load_symbol_table(discovered_path)
@@ -96,9 +102,15 @@ def discover_symbol_table(repo_root: Path, explicit_path: Path | None = None) ->
 def find_default_symbol_file(repo_root: Path) -> Path | None:
     """Find the default generated FireRed Rev 1 symbol file under `repo_root`."""
 
+    return find_symbol_file(repo_root, symbol_basename=FIRERED_REV1_SYMBOL_BASENAME, build_name="firered_rev1")
+
+
+def find_symbol_file(repo_root: Path, *, symbol_basename: str, build_name: str) -> Path | None:
+    """Find a generated symbol file for a target profile under `repo_root`."""
+
     candidates = (
-        repo_root / FIRERED_REV1_SYMBOL_BASENAME,
-        repo_root / "build" / "firered_rev1" / FIRERED_REV1_SYMBOL_BASENAME,
+        repo_root / symbol_basename,
+        repo_root / "build" / build_name / symbol_basename,
     )
     return next((path for path in candidates if path.exists()), None)
 

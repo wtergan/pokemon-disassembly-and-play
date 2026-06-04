@@ -58,7 +58,7 @@ goal_ready: true
 
 - [x] Runtime config supports FireRed Rev 1 and LeafGreen Rev 1 target profiles.
 - [x] ROM identity checks reject mismatched files with explicit errors.
-- [ ] Symbol/telemetry adapter handles LeafGreen Rev 1 differences or clearly documents shared behavior.
+- [x] Symbol/telemetry adapter handles LeafGreen Rev 1 differences or clearly documents shared behavior.
 - [ ] Smoke tests launch both configured targets and verify health/snapshot/action/basic telemetry.
 - [ ] Runtime directories for states, traces, logs, and screenshots are isolated by target profile.
 - [ ] Setup docs explain Windows/WSL, mGBA path config, ROM path config, build/symbol expectations, and safety boundaries.
@@ -118,13 +118,13 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - GOTCHA: Reject mismatched ROMs explicitly.
   - VALIDATE: `12 passed` focused profile/config/factory tests; `71 passed, 10 skipped` full runtime tests.
 
-- [ ] Step 2: Add LeafGreen adapter path.
+- [x] Step 2: Add LeafGreen adapter path.
   - ACTION: Reuse FireRed adapter where source-compatible and isolate differences where needed.
   - IMPLEMENT: Avoid copy/paste until differences are proven; use shared Gen 3 helpers when legitimate.
-  - FILES: `tools/runtime/games/leafgreen/`, `tools/runtime/games/gen3/`
+  - FILES: `tools/runtime/games/leafgreen/`, `tools/runtime/games/firered/telemetry.py`, `tools/runtime/games/firered/symbols.py`, `tools/runtime/runtime_factory.py`
   - MIRROR: FireRed adapter from plan 002.
   - GOTCHA: Do not assume every symbol/address is identical without evidence.
-  - VALIDATE: LeafGreen fixture tests and runtime smoke.
+  - VALIDATE: `13 passed` focused LeafGreen/factory/FireRed regression tests; `74 passed, 10 skipped` full runtime tests.
 
 - [ ] Step 3: Harden runtime storage and safety.
   - ACTION: Separate state, trace, log, screenshot, and cache paths by target profile.
@@ -154,7 +154,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
 
 - [x] Target profile schema documents required fields and identity checks.
 - [ ] Storage helpers document path containment invariants.
-- [ ] LeafGreen differences document source evidence.
+- [x] LeafGreen differences document source evidence.
 
 ## Testing Strategy (TDD)
 
@@ -205,7 +205,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - `M5.T5` Setup docs
 - Dependencies:
   - `M5` depends on plans 001 through 004.
-- Current state: M5.T1 complete; M5.T2 ready
+- Current state: M5.T2 complete; M5.T3 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -285,3 +285,4 @@ Final evidence:
 
 - 2026-06-04: Plan created as post-FireRed hardening and LeafGreen support follow-up.
 - 2026-06-04: M5.T1 complete. Added explicit FireRed Rev 1 and LeafGreen Rev 1 target profiles, default SHA-1 verification, visible mismatch metadata under explicit `verify_hash = false`, and profile/config/factory tests.
+- 2026-06-04: M5.T2 complete. Added LeafGreen telemetry reader path that reuses documented FRLG-compatible telemetry fields, made target identity configurable in the shared reader, generalized symbol discovery to profile basenames/build names, and added LeafGreen factory/profile tests.

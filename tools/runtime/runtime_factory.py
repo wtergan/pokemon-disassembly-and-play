@@ -18,6 +18,7 @@ from .games.firered.map_data import try_load_map_registry
 from .games.firered.symbols import discover_symbol_table
 from .games.firered.telemetry import FireRedTelemetryReader
 from .games.firered.text import try_load_charmap
+from .games.leafgreen.telemetry import LeafGreenTelemetryReader
 from .runtime_core import RuntimeCore
 
 
@@ -59,10 +60,16 @@ def _create_mgba_bridge(config: RuntimeConfig) -> MgbaSocketBridge:
 
 
 def _create_telemetry_reader(config: RuntimeConfig, repo_root: Path) -> FireRedTelemetryReader:
-    if config.target.game != "firered" or config.target.revision != "rev1":
+    if config.target.revision != "rev1" or config.target.profile.adapter not in {"firered", "leafgreen"}:
         raise ValueError(f"unsupported target: {config.target.game} {config.target.revision}")
-    symbols = discover_symbol_table(repo_root, explicit_path=config.target.symbol_path)
-    return FireRedTelemetryReader(
+    symbols = discover_symbol_table(
+        repo_root,
+        explicit_path=config.target.symbol_path,
+        symbol_basename=config.target.profile.symbol_basename,
+        build_name=config.target.profile.build_name,
+    )
+    reader_class = FireRedTelemetryReader if config.target.profile.adapter == "firered" else LeafGreenTelemetryReader
+    return reader_class(
         symbols=symbols,
         rom_path=config.target.rom_path,
         map_registry=try_load_map_registry(repo_root),
