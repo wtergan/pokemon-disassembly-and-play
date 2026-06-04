@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pokemon Runtime</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="deck">
+      <section class="screen-panel" aria-labelledby="screen-title">
+        <div class="panel-header">
+          <h1 id="screen-title">FireRed Runtime</h1>
+          <div class="status-line">
+            <span id="bridge">bridge: --</span>
+            <span id="frame">frame: --</span>
+          </div>
+        </div>
+        <div class="screen-shell">
+          <img id="screen" alt="Current emulator frame" />
+        </div>
+      </section>
+
+      <section class="controls-panel" aria-labelledby="controls-title">
+        <div class="panel-header">
+          <h2 id="controls-title">Controls</h2>
+          <button class="icon-button" id="refresh" type="button" title="Refresh snapshot">R</button>
+        </div>
+        <div class="controls-grid" aria-label="Game Boy Advance controls">
+          <button class="control-button dpad up" data-button="up" type="button" title="Up">&uarr;</button>
+          <button class="control-button dpad left" data-button="left" type="button" title="Left">&larr;</button>
+          <button class="control-button dpad right" data-button="right" type="button" title="Right">&rarr;</button>
+          <button class="control-button dpad down" data-button="down" type="button" title="Down">&darr;</button>
+          <button class="control-button face b" data-button="b" type="button" title="B">B</button>
+          <button class="control-button face a" data-button="a" type="button" title="A">A</button>
+          <button class="control-button menu select" data-button="select" type="button" title="Select">SEL</button>
+          <button class="control-button menu start" data-button="start" type="button" title="Start">START</button>
+          <button class="control-button shoulder l" data-button="l" type="button" title="L">L</button>
+          <button class="control-button shoulder r" data-button="r" type="button" title="R">R</button>
+        </div>
+      </section>
+
+      <section class="telemetry-panel" aria-labelledby="telemetry-title">
+        <div class="panel-header">
+          <h2 id="telemetry-title">Telemetry</h2>
+          <span id="rom-match">rom: --</span>
+        </div>
+        <dl class="metrics">
+          <div><dt>Map</dt><dd id="map">--</dd></div>
+          <div><dt>Player</dt><dd id="player">--</dd></div>
+          <div><dt>Camera</dt><dd id="camera">--</dd></div>
+          <div><dt>Symbols</dt><dd id="symbols">--</dd></div>
+        </dl>
+      </section>
+
+      <section class="trace-panel" aria-labelledby="trace-title">
+        <div class="panel-header">
+          <h2 id="trace-title">Traces</h2>
+          <span id="action-status">ready</span>
+        </div>
+        <ol id="traces" class="trace-list"></ol>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

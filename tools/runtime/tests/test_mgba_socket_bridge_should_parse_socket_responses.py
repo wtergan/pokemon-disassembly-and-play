@@ -162,3 +162,45 @@ def test_mgba_realtime_wait_should_not_send_lua_run_command(tmp_path: Path, monk
     assert bridge.frame_count == 9
     bridge.close()
     thread.join(timeout=1)
+
+
+def test_mgba_socket_bridge_should_serialize_line_protocol_requests(tmp_path: Path) -> None:
+    class ContentionFile:
+        def __init__(self) -> None:
+            self.active = 0
+            self.max_active = 0
+            self.lock = threading.Lock()
+
+        def write(self, raw: bytes) -> None:
+            with self.lock:
+                self.active += 1
+                self.max_active = max(self.max_active, self.active)
+            time.sleep(0.02)
+
+        def readline(self) -> bytes:
+            time.sleep(0.02)
+            with self.lock:
+                self.active -= 1
+            return b"ok\tvalue=42\tframe=1\n"
+
+    bridge = MgbaSocketBridge(
+        MgbaLaunchConfig(
+            executable=Path("mgba-qt"),
+            rom_path=Path("firered.gba"),
+            lua_bridge=Path("tools/runtime/emulators/mgba_bridge.lua"),
+        ),
+        screenshot_dir=tmp_path,
+    )
+    bridge._file = ContentionFile()
+    threads = [threading.Thread(target=lambda: assert_read8(bridge), daemon=True) for _ in range(5)]
+
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=1)
+
+    assert bridge._file.max_active == 1
+
+
+def assert_read8(bridge: MgbaSocketBridge) -> None:
+    assert bridge.read8(0x02000000) == 42

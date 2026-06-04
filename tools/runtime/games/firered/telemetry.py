@@ -26,6 +26,8 @@ from .symbols import SymbolTable
 
 
 FIRERED_REV1_SHA1 = "dd5945db9b930750cb39d00c84da8571feebf417"
+_SAVE_BLOCK_POINTER_SYMBOLS = ("gSaveBlock1Ptr", "gSaveBlock2Ptr")
+_CAMERA_SYMBOL = "gCamera"
 
 
 @dataclass(frozen=True)
@@ -41,11 +43,7 @@ class FireRedTelemetryReader:
 
         save_block_1 = self._read_pointer(emulator, "gSaveBlock1Ptr")
         save_block_2 = self._read_pointer(emulator, "gSaveBlock2Ptr")
-        missing_symbols = [
-            name
-            for name in ("gSaveBlock1Ptr", "gSaveBlock2Ptr")
-            if self.symbols.get(name) is None
-        ]
+        missing_symbols = self._missing_symbols(_SAVE_BLOCK_POINTER_SYMBOLS)
 
         payload: dict[str, Any] = {
             "schema_version": 1,
@@ -76,15 +74,16 @@ class FireRedTelemetryReader:
         if symbol_address is None:
             return {"available": False, "symbol_address": None, "value": None, "reason": "missing_symbol"}
         pointer = emulator.read32(symbol_address)
+        pointer_is_valid = _is_valid_pointer(pointer)
         return {
-            "available": pointer != 0 and is_gba_address(pointer),
+            "available": pointer_is_valid,
             "symbol_address": symbol_address,
             "value": pointer,
-            "reason": None if pointer != 0 and is_gba_address(pointer) else "invalid_pointer",
+            "reason": None if pointer_is_valid else "invalid_pointer",
         }
 
     def _read_location(self, emulator: EmulatorBridge, save_block_1: int | None) -> dict[str, Any]:
-        if save_block_1 is None or not is_gba_address(save_block_1):
+        if not _is_valid_pointer(save_block_1):
             return {"available": False, "reason": "missing_save_block_1"}
         return {
             "available": True,
@@ -96,7 +95,7 @@ class FireRedTelemetryReader:
         }
 
     def _read_camera(self, emulator: EmulatorBridge) -> dict[str, Any]:
-        camera_address = self.symbols.get("gCamera")
+        camera_address = self.symbols.get(_CAMERA_SYMBOL)
         if camera_address is None:
             return {"available": False, "reason": "missing_symbol"}
         return {
@@ -118,6 +117,13 @@ class FireRedTelemetryReader:
             "expected_sha1": self.expected_sha1,
             "matches_expected": sha1 == self.expected_sha1,
         }
+
+    def _missing_symbols(self, names: tuple[str, ...]) -> list[str]:
+        return [name for name in names if self.symbols.get(name) is None]
+
+
+def _is_valid_pointer(pointer: int | None) -> bool:
+    return pointer is not None and pointer != 0 and is_gba_address(pointer)
 
 
 def _read_s8(emulator: EmulatorBridge, address: int) -> int:

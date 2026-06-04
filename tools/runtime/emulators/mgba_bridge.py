@@ -11,6 +11,7 @@ import base64
 import os
 import socket
 import subprocess
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -64,6 +65,7 @@ class MgbaSocketBridge:
         self._listen_socket: socket.socket | None = None
         self._file = None
         self._frame_count = 0
+        self._request_lock = threading.Lock()
 
     @property
     def frame_count(self) -> int:
@@ -123,10 +125,8 @@ class MgbaSocketBridge:
         last_error: OSError | None = None
         while time.monotonic() < deadline:
             try:
-                self._socket = socket.create_connection((self._config.host, self._config.port), timeout=1.0)
-                self._socket.settimeout(self._request_timeout)
-                self._file = self._socket.makefile("rwb", buffering=0)
-                self.health()
+                bridge_socket = socket.create_connection((self._config.host, self._config.port), timeout=1.0)
+                self._attach_socket(bridge_socket)
                 return
             except OSError as exc:
                 last_error = exc
@@ -157,23 +157,23 @@ class MgbaSocketBridge:
 
     def health(self) -> EmulatorHealth:
         fields = self._request("ping")
-        self._frame_count = int(fields.get("frame", self._frame_count))
+        self._update_frame_count(fields)
         return EmulatorHealth(running=True, frame=self._frame_count, bridge=fields.get("bridge", "mgba"))
 
     def snapshot(self) -> Snapshot:
         screenshot_path = self._next_screenshot_path()
         fields = self._request("screenshot", self._path_for_emulator(screenshot_path))
-        self._frame_count = int(fields.get("frame", self._frame_count))
+        self._update_frame_count(fields)
         image_bytes = screenshot_path.read_bytes()
         return Snapshot(frame=self._frame_count, image_base64=base64.b64encode(image_bytes).decode("ascii"))
 
     def press_button(self, button: str) -> None:
         fields = self._request("press", button)
-        self._frame_count = int(fields.get("frame", self._frame_count))
+        self._update_frame_count(fields)
 
     def release_button(self, button: str) -> None:
         fields = self._request("release", button)
-        self._frame_count = int(fields.get("frame", self._frame_count))
+        self._update_frame_count(fields)
 
     def run_frames(self, frames: int) -> None:
         if self._config.frame_advance_mode == "realtime_wait":
@@ -182,7 +182,7 @@ class MgbaSocketBridge:
             self.health()
             return
         fields = self._request("run", str(frames))
-        self._frame_count = int(fields.get("frame", self._frame_count))
+        self._update_frame_count(fields)
 
     def read8(self, address: int) -> int:
         return int(self._request("read8", str(address))["value"])
@@ -197,11 +197,12 @@ class MgbaSocketBridge:
         if self._file is None:
             raise MgbaBridgeError("mGBA bridge is not connected")
         line = "\t".join((command, *parts)) + "\n"
-        try:
-            self._file.write(line.encode("utf-8"))
-            raw = self._file.readline()
-        except OSError as exc:
-            raise MgbaBridgeError(f"mGBA bridge request timed out or failed for {command}: {exc}") from exc
+        with self._request_lock:
+            try:
+                self._file.write(line.encode("utf-8"))
+                raw = self._file.readline()
+            except OSError as exc:
+                raise MgbaBridgeError(f"mGBA bridge request timed out or failed for {command}: {exc}") from exc
         if not raw:
             raise MgbaBridgeError("mGBA bridge closed the connection")
         response = raw.decode("utf-8").strip()
@@ -211,6 +212,16 @@ class MgbaSocketBridge:
         if status != "ok":
             raise MgbaBridgeError(fields.get("error", response))
         return fields
+
+    def _attach_socket(self, bridge_socket: socket.socket) -> None:
+        self._socket = bridge_socket
+        self._socket.settimeout(self._request_timeout)
+        self._file = self._socket.makefile("rwb", buffering=0)
+        self.health()
+
+    def _update_frame_count(self, fields: dict[str, str]) -> None:
+        if "frame" in fields:
+            self._frame_count = int(fields["frame"])
 
     def _start_listener(self) -> None:
         if self._listen_socket is not None:
@@ -228,10 +239,8 @@ class MgbaSocketBridge:
         self._listen_socket.settimeout(0.2)
         while time.monotonic() < deadline:
             try:
-                self._socket, _ = self._listen_socket.accept()
-                self._socket.settimeout(self._request_timeout)
-                self._file = self._socket.makefile("rwb", buffering=0)
-                self.health()
+                bridge_socket, _ = self._listen_socket.accept()
+                self._attach_socket(bridge_socket)
                 return
             except OSError as exc:
                 last_error = exc

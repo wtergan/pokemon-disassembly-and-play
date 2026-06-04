@@ -1,5 +1,5 @@
 ---
-status: In Progress
+status: Complete
 priority: High
 date: 2026-06-04
 worktree_required: no
@@ -55,9 +55,10 @@ goal_ready: true
   - [x] `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
   - [x] `.vault/decisions/first-spike-scope-boundaries-2026-06-04.md`
 - Solutions:
-  - [ ] `.vault/solutions/firered-runtime-spike-solution-2026-06-04.md`
+  - [x] `.vault/solutions/mgba-wsl-reverse-socket-2026-06-04.md`
 - Encounters:
-  - [ ] `.vault/encounters/firered-runtime-spike-encounter-2026-06-04.md`
+  - [x] `.vault/encounters/mgba-wsl-bridge-2026-06-04.md`
+  - [x] `.vault/encounters/mgba-socket-concurrency-2026-06-04.md`
 - Visual companion:
   - [ ] Not needed for this plan; Mermaid diagrams are sufficient.
 - Goal run:
@@ -70,9 +71,9 @@ goal_ready: true
 - [x] A dedicated visible mGBA instance can launch FireRed Rev 1 from the runtime.
 - [x] Runtime can capture a frame or screenshot for `/snapshot`.
 - [x] Runtime can press and release at least one button through `/action` and observe frame/state progression.
-- [ ] Runtime can read enough memory to expose frame count, ROM identity/hash, `gSaveBlock1Ptr`, `gSaveBlock2Ptr`, map group/number, and player/camera coordinates when available.
-- [ ] `/health`, `/snapshot`, `/telemetry`, `/action`, and basic static UI routes exist.
-- [ ] Focused tests cover config validation, action validation, emulator interface behavior through a fake bridge, and FireRed minimal telemetry decoding from fixture bytes.
+- [x] Runtime can read enough memory to expose frame count, ROM identity/hash, `gSaveBlock1Ptr`, `gSaveBlock2Ptr`, map group/number, and player/camera coordinates when available.
+- [x] `/health`, `/snapshot`, `/telemetry`, `/action`, and basic static UI routes exist.
+- [x] Focused tests cover config validation, action validation, emulator interface behavior through a fake bridge, and FireRed minimal telemetry decoding from fixture bytes.
 
 ## Architecture Diagram
 
@@ -166,19 +167,20 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
   - VALIDATE: Fixture tests decode expected little-endian pointer and position values.
   - RESULT: Added generated-symbol parsing and source-backed SaveBlock/fieldmap telemetry. Fixture tests decode ROM identity, SaveBlock pointers, map group/number, player position, camera position, and SaveBlock2 encryption key. Real mGBA smoke without `pokefirered_rev1.sym` reports ROM SHA-1 match and explicit missing-symbol telemetry instead of guessed state.
 
-- [ ] Step 6: Expose minimal API and browser deck.
+- [x] Step 6: Expose minimal API and browser deck.
   - ACTION: Serve `/health`, `/snapshot`, `/telemetry`, `/action`, and a basic static control page.
   - IMPLEMENT: Use predictable JSON models; button actions must be whitelisted and traced.
   - FILES: `tools/runtime/server.py`, `tools/runtime/static/index.html`, `tools/runtime/static/styles.css`, `tools/runtime/static/app.js`
   - MIRROR: Pocodex static runtime deck.
   - GOTCHA: Keep UI plain and functional; plan 003 owns polish and richer panels.
   - VALIDATE: API smoke tests pass and manual browser check shows a frame/telemetry update after input.
+  - RESULT: Added config-driven runtime factory, `server.py --config`, and static deck assets. Real configured server returned health, snapshot, telemetry, traces, and action responses from mGBA; Playwright viewport screenshots passed at 1280x900 and 390x844.
 
 ## Code Documentation Contract
 
-- [ ] New nontrivial source files include top-level language-native documentation.
-- [ ] Public functions, classes, commands, and modules have concise doc comments where signatures are not self-explanatory.
-- [ ] Comments explain intent, invariants, tradeoffs, or edge cases rather than restating code.
+- [x] New nontrivial source files include top-level language-native documentation.
+- [x] Public functions, classes, commands, and modules have concise doc comments where signatures are not self-explanatory.
+- [x] Comments explain intent, invariants, tradeoffs, or edge cases rather than restating code.
 
 ## Testing Strategy (TDD)
 
@@ -207,7 +209,7 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
 - [x] Unit tests for config/action/telemetry decoding
 - [x] Integration tests with fake emulator adapter
 - [x] Manual workflow smoke with real mGBA
-- [ ] Browser smoke once static deck exists
+- [x] Browser smoke once static deck exists
 
 ## Execution Lanes
 
@@ -329,3 +331,4 @@ Final evidence:
 - 2026-06-04: Plan created from prior brainstorm, research note, and accepted ADRs.
 - 2026-06-04: Completed M1.T1 by bootstrapping the workspace from the local `pret/pokefirered` reference clone, preserving `.vault`, initializing git on `main`, and committing the source baseline.
 - 2026-06-04: Completed M1.T2 and M1.T3 with ignored runtime-local config, a FastAPI runtime skeleton, emulator bridge contract, fake emulator, action validation, trace recording, and five passing runtime tests.
+- 2026-06-04: Completed M1.T6 with config-driven runtime launch, basic static browser deck, serialized mGBA socket requests, 19 passing runtime tests, real endpoint smoke, and Playwright desktop/mobile screenshots.
