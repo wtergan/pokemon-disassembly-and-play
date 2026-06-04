@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M5.T5
+- Current milestone/task: complete
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -57,29 +57,32 @@
 - M5.T2 is complete: runtime factory selects FireRed or LeafGreen telemetry readers from target profiles, LeafGreen publishes `target.game = leafgreen`, and profile-based symbol discovery finds `pokeleafgreen_rev1.sym`.
 - M5.T3 is complete: runtime-owned storage roots are scoped by target profile key for states, traces, logs, screenshots, and cache paths; factory uses scoped state and screenshot paths. Durable pattern: `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`.
 - M5.T4 is complete: current mGBA evidence remains sufficient, so no BizHawk adapter was added. Durable decision: `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`.
+- M5.T5 and plan 005 are complete: top-level and runtime docs cover Windows/WSL, mGBA config, ROM config, symbols, runtime artifacts, safety, verification, and troubleshooting. FireRed and LeafGreen real-runtime smokes passed for health, snapshot, action, and basic telemetry.
 - Current local venv has stale `starlette 1.2.1`; repo requirements now pin `starlette<1.0`, but DNS prevented re-sync. Endpoint tests skip in this stale env rather than hanging.
 
 ## Next Action
 
-Execute M5.T5 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: write setup and operating docs for Windows/WSL, mGBA config, ROM config, symbols, safety, tests, and troubleshooting.
+Start a new feature plan for any follow-up work. Good candidates are symbol-generation automation, real mGBA objective smoke with the agent loop, or support for additional target revisions.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot
 
-- Updated: 2026-06-04T12:05:28-04:00
-- Event: `M5.T4 complete`
+- Updated: 2026-06-04T12:10:55-04:00
+- Event: `goal complete`
 - Repo: `/home/gilgames/Code/pokemon-disassembly-and-play`
 - Branch: `main`
 - Active goal: `.vault/goals/goal-firered-runtime-2026-06-04/`
 - Active plan: `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md`
-- Changed files: 6
+- Changed files: 8
   - `.vault/PLAN.md`
   - `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`
   - `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
   - `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`
   - `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md`
-- Last progress: M5.T4 complete; continue with M5.T5 docs.
+  - `README.md`
+  - `tools/runtime/README.md`
+- Last progress: Plans 001 through 005 complete.
 
 ### Capture Queue
 - None.

@@ -1,5 +1,5 @@
 ---
-status: In Progress
+status: Complete
 priority: Medium
 date: 2026-06-04
 worktree_required: yes
@@ -60,9 +60,9 @@ goal_ready: true
 - [x] Runtime config supports FireRed Rev 1 and LeafGreen Rev 1 target profiles.
 - [x] ROM identity checks reject mismatched files with explicit errors.
 - [x] Symbol/telemetry adapter handles LeafGreen Rev 1 differences or clearly documents shared behavior.
-- [ ] Smoke tests launch both configured targets and verify health/snapshot/action/basic telemetry.
+- [x] Smoke tests launch both configured targets and verify health/snapshot/action/basic telemetry.
 - [x] Runtime directories for states, traces, logs, and screenshots are isolated by target profile.
-- [ ] Setup docs explain Windows/WSL, mGBA path config, ROM path config, build/symbol expectations, and safety boundaries.
+- [x] Setup docs explain Windows/WSL, mGBA path config, ROM path config, build/symbol expectations, and safety boundaries.
 - [x] BizHawk fallback evaluation is captured durably; no fallback adapter is needed yet.
 
 ## Architecture Diagram
@@ -143,13 +143,13 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - GOTCHA: Do not add BizHawk complexity without evidence.
   - VALIDATE: `9 passed` focused mGBA bridge contract tests; `77 passed, 10 skipped` full runtime tests.
 
-- [ ] Step 5: Write setup and operating docs.
+- [x] Step 5: Write setup and operating docs.
   - ACTION: Document Windows/WSL setup, mGBA config, ROM config, safety, tests, and troubleshooting.
   - IMPLEMENT: Include no ROM download instructions.
   - FILES: `tools/runtime/README.md`, top-level `README.md` additions
   - MIRROR: Pocodex runtime docs and `pret/pokefirered` install docs.
   - GOTCHA: Keep legal/ownership boundaries clear.
-  - VALIDATE: Fresh-read doc review.
+  - VALIDATE: Fresh-read doc review, no ROM-download language scan, FireRed/LeafGreen real-runtime health/snapshot/action/basic telemetry smokes, and `77 passed, 10 skipped` full runtime tests.
 
 ## Code Documentation Contract
 
@@ -182,7 +182,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
 - [x] Unit tests for config/profile/storage
 - [x] Integration smoke for both target profiles
 - [ ] Optional fallback bridge contract tests if BizHawk is implemented
-- [ ] Documentation review
+- [x] Documentation review
 
 ## Execution Lanes
 
@@ -206,7 +206,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - `M5.T5` Setup docs
 - Dependencies:
   - `M5` depends on plans 001 through 004.
-- Current state: M5.T4 complete; M5.T5 ready
+- Current state: M5 complete; all planned milestones complete
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract

@@ -2,11 +2,11 @@
 
 ## Current Status
 
-- Phase: implementation
+- Phase: complete
 - Current milestone: M5
-- Current task: M5.T5
-- Last action: 2026-06-04 - Completed M5.T4 by recording that BizHawk fallback is not justified by current mGBA evidence.
-- Next action: Execute M5.T5 by writing setup and operating docs.
+- Current task: none
+- Last action: 2026-06-04 - Completed M5.T5 by writing runtime setup/operating docs and smoke-testing FireRed/LeafGreen runtime targets.
+- Next action: Start a new feature plan for any follow-up target revisions, symbol-generation automation, or real-agent play objectives.
 
 ## Execution Ledger
 
@@ -36,6 +36,7 @@
 - 2026-06-04 - M5.T2 complete: added `tools/runtime/games/leafgreen/` with a LeafGreen telemetry reader path, made the shared FireRed reader publish configurable target identity, generalized symbol discovery to profile basenames/build directories, and updated runtime factory to select FireRed or LeafGreen readers from target profile metadata.
 - 2026-06-04 - M5.T3 complete: added `tools/runtime/storage.py` to map runtime-owned roots to target-scoped directories, wired factory state slots and screenshots through scoped paths, and verified FireRed/LeafGreen state directories cannot collide.
 - 2026-06-04 - M5.T4 complete: reviewed the mGBA WSL/socket encounters and validation evidence; mGBA remains sufficient, so no BizHawk adapter was added. Durable decision: `.vault/decisions/bizhawk-fallback-not-needed-2026-06-04.md`.
+- 2026-06-04 - M5.T5 and plan 005 complete: expanded top-level and runtime setup docs with Windows/WSL, mGBA, ROM config, symbols, runtime artifacts, safety, verification, and troubleshooting guidance; FireRed and LeafGreen real-runtime smokes passed with health, snapshot, action, and basic telemetry.
 
 ## Validation Evidence
 
@@ -94,6 +95,9 @@
 | 2026-06-04 | M5.T3 storage tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_runtime_storage_should_stay_under_target_directory.py tools/runtime/tests/test_state_slot_should_stay_in_runtime_directory.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass | `11 passed`; covers target-scoped storage roots, unsafe profile-key rejection, state-slot containment, and FireRed/LeafGreen state-dir isolation. |
 | 2026-06-04 | M5.T3 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `77 passed, 10 skipped`; compile and whitespace checks clean. |
 | 2026-06-04 | M5.T4 bridge fallback checks | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_mgba_launch_command_should_include_script_and_rom.py tools/runtime/tests/test_mgba_socket_bridge_should_parse_socket_responses.py -vv`; `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `git diff --check` | pass with skips | `9 passed` focused mGBA bridge tests; full suite `77 passed, 10 skipped`; no BizHawk adapter required. |
+| 2026-06-04 | M5.T5 docs review | Fresh-read `README.md` and `tools/runtime/README.md`; `rg -n "download.*ROM|ROM download|obtain.*ROM|where to get|piracy|bios|BIOS" README.md tools/runtime/README.md`; `git diff --check` | pass | Runtime docs cover Windows/WSL, mGBA, ROM config, symbols, runtime artifacts, safety, verification, and troubleshooting; scan found no ROM acquisition guidance. |
+| 2026-06-04 | M5.T5 FireRed real smoke | Temporary Python smoke against ignored `tools/runtime/runtime.local.toml` | pass | Hash-verified FireRed Rev 1 config launched mGBA; health ok; snapshot PNG captured; tap action executed; telemetry target reported FireRed Rev 1. |
+| 2026-06-04 | M5.T5 LeafGreen real smoke | Temporary Python smoke using local LeafGreen Rev 1 ROM and existing mGBA settings | pass | Hash matched; mGBA health ok at frame 5; snapshot PNG frame 22 with base64 length 2276; tap action ok at frame 31; telemetry target reported LeafGreen Rev 1 with decoded location unavailable without symbols. |
 
 ## Review Ledger
 

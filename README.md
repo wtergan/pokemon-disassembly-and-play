@@ -13,4 +13,16 @@ It builds the following ROM images:
 
 To set up the repository, see [INSTALL.md](INSTALL.md).
 
+## Programmable Runtime
+
+This fork also contains a local programmable runtime under
+[`tools/runtime`](tools/runtime/). It is separate from the normal
+`pret/pokefirered` build flow: the runtime launches a dedicated mGBA instance,
+serves a browser control deck, exposes HTTP endpoints, records traces, and reads
+FireRed/LeafGreen Rev 1 telemetry from an owned local ROM.
+
+Runtime setup and operating notes live in
+[`tools/runtime/README.md`](tools/runtime/README.md). Keep ROMs, saves,
+`runtime.local.toml`, emulator binaries, and machine-specific paths out of git.
+
 For contacts and other pret projects, see [pret.github.io](https://pret.github.io/).
