@@ -2,6 +2,9 @@
 game = "firered"
 revision = "rev1"
 rom_path = "/mnt/c/Emulation/ROMs/Game Boy Advance/Pokemon - FireRed Version (USA, Europe) (Rev 1).gba"
+# Generate with `make syms GAME_VERSION=FIRERED GAME_REVISION=1` when the GBA
+# toolchain is available.
+# symbol_path = "pokefirered_rev1.sym"
 
 [mgba]
 executable = "mgba"

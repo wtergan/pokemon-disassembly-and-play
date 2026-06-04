@@ -49,6 +49,7 @@ def test_fixture_rom_config_should_load_runtime_paths(tmp_path: Path) -> None:
     assert config.target.game == "firered"
     assert config.target.revision == "rev1"
     assert config.target.rom_path == fixture_rom_path
+    assert config.target.symbol_path is None
     assert config.mgba.executable == "mgba"
     assert config.mgba.lua_bridge == Path("tools/runtime/emulators/mgba_bridge.lua")
     assert config.mgba.host == "127.0.0.1"
@@ -106,3 +107,37 @@ cache_dir = ".runtime-cache"
     assert config.mgba.frame_advance_mode == "realtime_wait"
     assert config.mgba.script_cache_dir == Path("/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache")
     assert config.mgba.log_file == Path("/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache/mgba_bridge.log")
+
+
+def test_runtime_config_should_load_optional_symbol_path(tmp_path: Path) -> None:
+    config_path = tmp_path / "runtime.local.toml"
+    fixture_rom_path = tmp_path / "fixtures" / "firered_rev1.gba"
+    symbol_path = tmp_path / "pokefirered_rev1.sym"
+    fixture_rom_path.parent.mkdir()
+    fixture_rom_path.write_bytes(b"fixture rom")
+    symbol_path.write_text("03005008 gSaveBlock1Ptr\n", encoding="utf-8")
+    config_path.write_text(
+        f"""
+[target]
+game = "firered"
+revision = "rev1"
+rom_path = "{fixture_rom_path}"
+symbol_path = "{symbol_path}"
+
+[mgba]
+executable = "mgba"
+lua_bridge = "tools/runtime/emulators/mgba_bridge.lua"
+
+[runtime]
+state_dir = ".runtime-state"
+trace_dir = ".runtime-traces"
+log_dir = ".runtime-logs"
+screenshot_dir = ".runtime-screenshots"
+cache_dir = ".runtime-cache"
+""",
+        encoding="utf-8",
+    )
+
+    config = load_runtime_config(config_path)
+
+    assert config.target.symbol_path == symbol_path

@@ -49,6 +49,7 @@ goal_ready: true
 
 - Research:
   - [x] `.vault/research/pocodex-pokefirered-runtime-2026-06-03.md`
+  - [x] `.vault/research/firered-minimal-telemetry-2026-06-04.md`
 - Decisions:
   - [x] `.vault/decisions/dedicated-runtime-emulator-instance-2026-06-03.md`
   - [x] `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
@@ -156,13 +157,14 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
   - VALIDATE: Fake bridge tests pass; manual smoke can launch a visible mGBA instance.
   - RESULT: Official stable mGBA `0.10.5` rejected `--script`; official dev build `mGBA-build-2026-06-02-win64-9072-92621ea01d7a809b0cd3b1a687f30f0ea8db7c7a` worked with `connection_mode=lua_client`, `frame_advance_mode=realtime_wait`, Windows-local Lua/screenshot staging, and WSLENV exports. Real smoke produced health, ROM read, input frame progression, and screenshot evidence.
 
-- [ ] Step 5: Add minimal FireRed Rev 1 telemetry.
+- [x] Step 5: Add minimal FireRed Rev 1 telemetry.
   - ACTION: Decode ROM identity, raw pointer symbols, map/location, and player/camera coordinates from mGBA memory reads.
   - IMPLEMENT: Use symbol output if available; otherwise document any fixed addresses/offsets used and validate against `include/global.h`.
   - FILES: `tools/runtime/games/firered/symbols.py`, `tools/runtime/games/firered/save_blocks.py`, `tools/runtime/games/firered/telemetry.py`
   - MIRROR: `include/global.h`, `src/main.c`, `src/fieldmap.c`
   - GOTCHA: Gen 3 save data has pointers and encrypted fields; keep this plan to unencrypted location/position basics.
   - VALIDATE: Fixture tests decode expected little-endian pointer and position values.
+  - RESULT: Added generated-symbol parsing and source-backed SaveBlock/fieldmap telemetry. Fixture tests decode ROM identity, SaveBlock pointers, map group/number, player position, camera position, and SaveBlock2 encryption key. Real mGBA smoke without `pokefirered_rev1.sym` reports ROM SHA-1 match and explicit missing-symbol telemetry instead of guessed state.
 
 - [ ] Step 6: Expose minimal API and browser deck.
   - ACTION: Serve `/health`, `/snapshot`, `/telemetry`, `/action`, and a basic static control page.
@@ -182,9 +184,9 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
 
 ### TDD Contract
 
-- [ ] Red: write a failing test first for config, action validation, adapter contract, and telemetry decoding behavior where practical.
-- [ ] Green: implement the smallest change that passes.
-- [ ] Refactor: improve structure while keeping tests green.
+- [x] Red: write a failing test first for config, action validation, adapter contract, and telemetry decoding behavior where practical.
+- [x] Green: implement the smallest change that passes.
+- [x] Refactor: improve structure while keeping tests green.
 
 ### Test File Plan
 

@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M1
-- Current task: M1.T5
-- Last action: 2026-06-04 - Completed M1.T4 with a real mGBA dev-build bridge smoke: launch, Lua/client socket IPC, health, ROM memory read, input press/wait/release, screenshot, Windows path staging, and WSLENV handling.
-- Next action: Execute M1.T5 by adding minimal FireRed Rev 1 telemetry from symbol-backed memory reads and fixture tests.
+- Current task: M1.T6
+- Last action: 2026-06-04 - Completed M1.T5 with source-backed FireRed telemetry modules, generated-symbol parsing, SaveBlock/fieldmap fixture tests, optional `target.symbol_path`, and a real mGBA no-symbol telemetry smoke.
+- Next action: Execute M1.T6 by wiring configured mGBA/FireRed telemetry into the API and adding the basic browser deck.
 
 ## Execution Ledger
 
@@ -15,6 +15,7 @@
 - 2026-06-04 - M1.T1 complete: copied `pret/pokefirered` source from `/home/gilgames/Code/github-clones/pret-pokefirered` into the workspace, preserving `.vault`; verified `Makefile` and `include/global.h`; initialized git; committed `CHORE: bootstrap pokefirered source` and `DOCS: add runtime execution plans`; created private GitHub repo `wtergan/pokemon-disassembly-and-play`.
 - 2026-06-04 - M1.T2/M1.T3 complete: added `tools/runtime/config.py`, runtime example config, local ignore rules, FastAPI app factory, emulator bridge contract, fake emulator, runtime core, action executor, trace recorder, and five behavior tests. Config implementer subagent produced the RED config test and confirmed static JS ignore behavior; main thread reconciled and completed the slice.
 - 2026-06-04 - M1.T4 complete: official stable mGBA `0.10.5` Windows frontend rejected `--script`; installed official dev build `mGBA-build-2026-06-02-win64-9072-92621ea01d7a809b0cd3b1a687f30f0ea8db7c7a`; added `MgbaSocketBridge` plus Lua bridge; switched Windows/WSL operation to Lua-client reverse socket mode because WSL cannot connect to the Windows listener while Windows can connect back to WSL localhost; used real-time frame waits because `emu:runFrame()` blocks from the live GUI socket callback.
+- 2026-06-04 - M1.T5 complete: added `tools/runtime/games/firered/` with symbol parsing, SaveBlock offsets, ROM SHA-1 identity, and telemetry decoding for SaveBlock pointers, map group/number, player coordinates, camera coordinates, and SaveBlock2 encryption key when generated symbols are available. Added optional `target.symbol_path`; documented that no generated `poke*.sym` exists yet.
 
 ## Validation Evidence
 
@@ -26,6 +27,8 @@
 | 2026-06-04 | M1.T2/M1.T3 | `/tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` | pass | 5 passed, 1 FastAPI TestClient deprecation warning. |
 | 2026-06-04 | M1.T4 tests | `/tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` | pass | 12 passed, 1 FastAPI TestClient deprecation warning. |
 | 2026-06-04 | M1.T4 real mGBA smoke | Dev mGBA launch through `MgbaSocketBridge` with `connection_mode=lua_client` and `frame_advance_mode=realtime_wait` | pass | Health frame 3, ROM byte at `0x08000000` = 127, input advanced to frame 21, screenshot frame 22, base64 length 2276. |
+| 2026-06-04 | M1.T5 tests | `/tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests` | pass | 16 passed, 1 FastAPI TestClient deprecation warning. |
+| 2026-06-04 | M1.T5 real mGBA smoke | `FireRedTelemetryReader(SymbolTable.empty(), rom_path=FireRed Rev 1 ROM)` over real bridge | pass | ROM SHA-1 matched; symbols unavailable; missing `gSaveBlock1Ptr`/`gSaveBlock2Ptr`; location unavailable with `missing_save_block_1`. |
 
 ## Review Ledger
 

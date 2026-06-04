@@ -15,8 +15,8 @@
 | M1.T2 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add ignored runtime config and local artifact boundaries. | complete | M1.T1 | implementer/security | Config tests and git status review |
 | M1.T3 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add Python runtime skeleton and fake emulator contract tests. | complete | M1.T2 | implementer | `python -m pytest -q tools/runtime/tests` |
 | M1.T4 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Prove mGBA launch, Lua/socket IPC, screenshot, input, and memory reads. | complete | M1.T3 | implementer/validator | mGBA manual smoke plus focused tests |
-| M1.T5 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add minimal FireRed telemetry. | ready | M1.T4 | implementer | Telemetry fixture tests |
-| M1.T6 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Expose minimal API and basic browser deck. | planned | M1.T5 | implementer/validator | API and browser smoke |
+| M1.T5 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add minimal FireRed telemetry. | complete | M1.T4 | implementer | Telemetry fixture tests |
+| M1.T6 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Expose minimal API and basic browser deck. | ready | M1.T5 | implementer/validator | API and browser smoke |
 
 ### M2: FireRed Telemetry Adapter
 

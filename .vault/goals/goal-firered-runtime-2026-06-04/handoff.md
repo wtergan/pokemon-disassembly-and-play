@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M1.T5
+- Current milestone/task: M1.T6
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -36,10 +36,11 @@
 - FireRed telemetry must avoid overclaiming uncertain pointer, encrypted, or mode state.
 - `pret/pokefirered` build toolchain may need setup before symbol generation works.
 - mGBA's live GUI bridge cannot call `emu:runFrame()` from the socket callback; Windows/WSL runtime config must use `frame_advance_mode = "realtime_wait"`.
+- No generated `pokefirered_rev1.sym` exists yet, so real runtime telemetry reports ROM identity plus missing-symbol state until the toolchain can generate symbols.
 
 ## Next Action
 
-Execute M1.T5 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: add minimal FireRed Rev 1 telemetry using source-backed symbols/offsets, fixture tests, and real mGBA memory reads.
+Execute M1.T6 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: wire configured mGBA/FireRed telemetry into the FastAPI app and add the basic browser deck.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot

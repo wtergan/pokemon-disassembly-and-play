@@ -1,0 +1,143 @@
+"""Minimal FireRed Rev 1 telemetry decoding.
+
+The first telemetry slice intentionally reads only source-backed, unencrypted
+fields: ROM identity, SaveBlock pointers, map location, player coordinates, and
+camera coordinates when the generated symbols are available.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from ...emulators.base import EmulatorBridge
+from .save_blocks import (
+    SAVE_BLOCK_1_LOCATION_MAP_GROUP,
+    SAVE_BLOCK_1_LOCATION_MAP_NUM,
+    SAVE_BLOCK_1_LOCATION_WARP_ID,
+    SAVE_BLOCK_1_POS_X,
+    SAVE_BLOCK_1_POS_Y,
+    SAVE_BLOCK_2_ENCRYPTION_KEY,
+    is_gba_address,
+)
+from .symbols import SymbolTable
+
+
+FIRERED_REV1_SHA1 = "dd5945db9b930750cb39d00c84da8571feebf417"
+
+
+@dataclass(frozen=True)
+class FireRedTelemetryReader:
+    """Callable telemetry reader for FireRed Rev 1 runtime state."""
+
+    symbols: SymbolTable
+    rom_path: Path | None = None
+    expected_sha1: str = FIRERED_REV1_SHA1
+
+    def __call__(self, emulator: EmulatorBridge) -> dict[str, Any]:
+        """Read the smallest source-backed telemetry payload from `emulator`."""
+
+        save_block_1 = self._read_pointer(emulator, "gSaveBlock1Ptr")
+        save_block_2 = self._read_pointer(emulator, "gSaveBlock2Ptr")
+        missing_symbols = [
+            name
+            for name in ("gSaveBlock1Ptr", "gSaveBlock2Ptr")
+            if self.symbols.get(name) is None
+        ]
+
+        payload: dict[str, Any] = {
+            "schema_version": 1,
+            "game": "firered",
+            "revision": "rev1",
+            "frame": emulator.frame_count,
+            "rom": self._rom_identity(),
+            "symbols": {
+                "available": not missing_symbols,
+                "source": str(self.symbols.source) if self.symbols.source else None,
+                "missing": missing_symbols,
+            },
+            "save_blocks": {
+                "gSaveBlock1Ptr": save_block_1,
+                "gSaveBlock2Ptr": save_block_2,
+            },
+            "location": self._read_location(emulator, save_block_1["value"]),
+            "camera": self._read_camera(emulator),
+        }
+        if save_block_2["value"] is not None:
+            payload["save_blocks"]["gSaveBlock2Ptr"]["encryption_key"] = emulator.read32(
+                save_block_2["value"] + SAVE_BLOCK_2_ENCRYPTION_KEY
+            )
+        return payload
+
+    def _read_pointer(self, emulator: EmulatorBridge, symbol_name: str) -> dict[str, Any]:
+        symbol_address = self.symbols.get(symbol_name)
+        if symbol_address is None:
+            return {"available": False, "symbol_address": None, "value": None, "reason": "missing_symbol"}
+        pointer = emulator.read32(symbol_address)
+        return {
+            "available": pointer != 0 and is_gba_address(pointer),
+            "symbol_address": symbol_address,
+            "value": pointer,
+            "reason": None if pointer != 0 and is_gba_address(pointer) else "invalid_pointer",
+        }
+
+    def _read_location(self, emulator: EmulatorBridge, save_block_1: int | None) -> dict[str, Any]:
+        if save_block_1 is None or not is_gba_address(save_block_1):
+            return {"available": False, "reason": "missing_save_block_1"}
+        return {
+            "available": True,
+            "map_group": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_GROUP),
+            "map_num": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_NUM),
+            "warp_id": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_WARP_ID),
+            "player_x": _read_s16(emulator, save_block_1 + SAVE_BLOCK_1_POS_X),
+            "player_y": _read_s16(emulator, save_block_1 + SAVE_BLOCK_1_POS_Y),
+        }
+
+    def _read_camera(self, emulator: EmulatorBridge) -> dict[str, Any]:
+        camera_address = self.symbols.get("gCamera")
+        if camera_address is None:
+            return {"available": False, "reason": "missing_symbol"}
+        return {
+            "available": True,
+            "symbol_address": camera_address,
+            "active": bool(emulator.read8(camera_address) & 0x01),
+            "x": _read_s32(emulator, camera_address + 0x04),
+            "y": _read_s32(emulator, camera_address + 0x08),
+        }
+
+    def _rom_identity(self) -> dict[str, Any]:
+        if self.rom_path is None:
+            return {"available": False, "sha1": None, "expected_sha1": self.expected_sha1, "matches_expected": None}
+        sha1 = _sha1_file(self.rom_path)
+        return {
+            "available": True,
+            "name": self.rom_path.name,
+            "sha1": sha1,
+            "expected_sha1": self.expected_sha1,
+            "matches_expected": sha1 == self.expected_sha1,
+        }
+
+
+def _read_s8(emulator: EmulatorBridge, address: int) -> int:
+    value = emulator.read8(address)
+    return value - 0x100 if value & 0x80 else value
+
+
+def _read_s16(emulator: EmulatorBridge, address: int) -> int:
+    value = emulator.read16(address)
+    return value - 0x10000 if value & 0x8000 else value
+
+
+def _read_s32(emulator: EmulatorBridge, address: int) -> int:
+    value = emulator.read32(address)
+    return value - 0x100000000 if value & 0x80000000 else value
+
+
+def _sha1_file(path: Path) -> str:
+    digest = hashlib.sha1()
+    with path.open("rb") as file:
+        while chunk := file.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()

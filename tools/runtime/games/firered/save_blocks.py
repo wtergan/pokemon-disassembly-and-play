@@ -1,0 +1,46 @@
+"""Source-backed FireRed SaveBlock offsets used by runtime telemetry.
+
+Offsets come from `include/global.h` in `pret/pokefirered`. SaveBlock1 begins
+with player position and `struct WarpData`; SaveBlock2 begins with player
+identity/options and stores the encryption key at `0xF20`.
+"""
+
+from __future__ import annotations
+
+SAVE_BLOCK_1_POS_X = 0x0000
+SAVE_BLOCK_1_POS_Y = 0x0002
+SAVE_BLOCK_1_LOCATION = 0x0004
+SAVE_BLOCK_1_LOCATION_MAP_GROUP = SAVE_BLOCK_1_LOCATION + 0x00
+SAVE_BLOCK_1_LOCATION_MAP_NUM = SAVE_BLOCK_1_LOCATION + 0x01
+SAVE_BLOCK_1_LOCATION_WARP_ID = SAVE_BLOCK_1_LOCATION + 0x02
+SAVE_BLOCK_1_LOCATION_X = SAVE_BLOCK_1_LOCATION + 0x04
+SAVE_BLOCK_1_LOCATION_Y = SAVE_BLOCK_1_LOCATION + 0x06
+SAVE_BLOCK_1_PLAYER_PARTY_COUNT = 0x0034
+SAVE_BLOCK_1_OBJECT_EVENTS = 0x06A0
+SAVE_BLOCK_1_FLAGS = 0x0EE0
+SAVE_BLOCK_1_VARS = 0x1000
+
+SAVE_BLOCK_2_PLAYER_NAME = 0x0000
+SAVE_BLOCK_2_PLAYER_GENDER = 0x0008
+SAVE_BLOCK_2_TRAINER_ID = 0x000A
+SAVE_BLOCK_2_PLAY_TIME_HOURS = 0x000E
+SAVE_BLOCK_2_PLAY_TIME_MINUTES = 0x0010
+SAVE_BLOCK_2_PLAY_TIME_SECONDS = 0x0011
+SAVE_BLOCK_2_ENCRYPTION_KEY = 0x0F20
+
+GBA_EWRAM_START = 0x02000000
+GBA_EWRAM_END = 0x02040000
+GBA_IWRAM_START = 0x03000000
+GBA_IWRAM_END = 0x03008000
+GBA_ROM_START = 0x08000000
+GBA_ROM_END = 0x0A000000
+
+
+def is_gba_address(address: int) -> bool:
+    """Return whether `address` is in a normal GBA ROM/RAM range."""
+
+    return (
+        GBA_EWRAM_START <= address < GBA_EWRAM_END
+        or GBA_IWRAM_START <= address < GBA_IWRAM_END
+        or GBA_ROM_START <= address < GBA_ROM_END
+    )

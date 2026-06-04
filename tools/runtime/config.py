@@ -29,6 +29,7 @@ class TargetConfig:
     game: str
     revision: str
     rom_path: Path
+    symbol_path: Path | None
 
 
 @dataclass(frozen=True)
@@ -81,12 +82,16 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
     rom_path = Path(_required_str(target, "rom_path")).expanduser()
     if not rom_path.exists():
         raise ConfigError(f"ROM path does not exist: {rom_path}")
+    symbol_path = _optional_path(target, "symbol_path")
+    if symbol_path is not None and not symbol_path.exists():
+        raise ConfigError(f"symbol path does not exist: {symbol_path}")
 
     return RuntimeConfig(
         target=TargetConfig(
             game=_required_str(target, "game").lower(),
             revision=_required_str(target, "revision").lower(),
             rom_path=rom_path,
+            symbol_path=symbol_path,
         ),
         mgba=MgbaConfig(
             executable=_required_str(mgba, "executable"),

@@ -2,7 +2,7 @@
 project: "Pokemon Disassembly And Play"
 date: "2026-06-04"
 status: "Active"
-progress: 32
+progress: 40
 ---
 
 # Project Roadmap
@@ -16,13 +16,14 @@ detail in `.vault/plans/`.
 - The project will build a Windows-friendly programmable runtime inspired by `Dimillian/Pocodex`, but based on `pret/pokefirered` and the user's owned FireRed/LeafGreen Rev 1 ROMs.
 - The committed first implementation path is FireRed Rev 1, a separate dedicated runtime emulator instance, mGBA as the first bridge target, and BizHawk as the fallback.
 - Real Windows mGBA bridge proof is complete using the official dev build, Lua-client reverse socket mode, WSLENV exports, Windows-local script/screenshot staging, and real-time frame waits.
+- Minimal FireRed telemetry modules now parse generated symbols and decode source-backed SaveBlock/fieldmap fields when symbols are available; real runtime currently reports missing symbols because `pokefirered_rev1.sym` has not been generated.
 - Active goal overlay: `.vault/goals/goal-firered-runtime-2026-06-04/`.
 
 ## Active Plans
 
 | Feature Plan | Feature | Status | Next Action |
 |---|---|---|---|
-| `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap the `pret/pokefirered` workspace and prove mGBA launch, screenshot, input, and minimal telemetry. | In Progress | Execute M1.T5: minimal FireRed telemetry. |
+| `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap the `pret/pokefirered` workspace and prove mGBA launch, screenshot, input, and minimal telemetry. | In Progress | Execute M1.T6: API and basic browser deck. |
 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Expand FireRed symbol, save block, map, text, mode, party, bag, and event telemetry. | Planned | Start after plan 001 proves mGBA memory reads. |
 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Build the Pocodex-style browser control deck, trace UX, manual controls, and save-state surfaces. | Planned | Start after stable `/snapshot`, `/telemetry`, and `/action` APIs exist. |
 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add planner-safe Codex agent integration, `agent_context`, action policy, and objective loop. | Planned | Start after manual runtime controls and traces are reliable. |
