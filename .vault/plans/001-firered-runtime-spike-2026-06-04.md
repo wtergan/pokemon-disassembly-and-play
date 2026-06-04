@@ -1,5 +1,5 @@
 ---
-status: Ready
+status: In Progress
 priority: High
 date: 2026-06-04
 worktree_required: no
@@ -123,7 +123,7 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
 
 ## Execution Steps
 
-- [ ] Step 1: Bootstrap the source tree.
+- [x] Step 1: Bootstrap the source tree.
   - ACTION: Populate the current workspace from `pret/pokefirered` while preserving `.vault`.
   - IMPLEMENT: Prefer upstream fetch/checkout if network is available; otherwise use the local reference clone as a fallback source. Preserve source layout and do not import ROMs.
   - FILES: root source files from `pret/pokefirered`, `.gitignore`
@@ -324,3 +324,4 @@ Final evidence:
 ## Progress Log
 
 - 2026-06-04: Plan created from prior brainstorm, research note, and accepted ADRs.
+- 2026-06-04: Completed M1.T1 by bootstrapping the workspace from the local `pret/pokefirered` reference clone, preserving `.vault`, initializing git on `main`, and committing the source baseline.

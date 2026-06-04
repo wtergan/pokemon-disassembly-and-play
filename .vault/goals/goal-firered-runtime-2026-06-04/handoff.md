@@ -3,8 +3,8 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M1.T1
-- Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` is not yet a git repository.
+- Current milestone/task: M1.T2
+- Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
   - `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`
@@ -17,8 +17,8 @@
 
 ## Latest Known State
 
-- The project is planning-complete enough to start execution.
-- The workspace contains `.vault` operational memory and no production runtime source yet.
+- The project has started execution.
+- The workspace now contains `pret/pokefirered` source plus `.vault` operational memory.
 - Reference clones exist under `/home/gilgames/Code/github-clones/`:
   - `Dimillian-Pocodex`
   - `pret-pokefirered`
@@ -40,4 +40,4 @@
 
 ## Next Action
 
-Execute M1.T1 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: bootstrap `pret/pokefirered` source into the current workspace while preserving `.vault`, then validate that `Makefile` and `include/global.h` exist and no ROM files were imported.
+Execute M1.T2 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: add runtime-local config and ignore rules for ROM paths, traces, states, logs, screenshots, and mGBA artifacts, then validate config loading and git status.

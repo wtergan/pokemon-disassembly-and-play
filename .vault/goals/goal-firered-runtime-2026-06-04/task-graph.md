@@ -11,8 +11,8 @@
 
 | Task ID | Plan | Task | State | Depends On | Owner/Lane | Validation |
 |---|---|---|---|---|---|---|
-| M1.T1 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap `pret/pokefirered` source tree while preserving `.vault`. | ready | None | implementer | `test -f Makefile` and no workspace ROMs |
-| M1.T2 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add ignored runtime config and local artifact boundaries. | planned | M1.T1 | implementer/security | Config tests and git status review |
+| M1.T1 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap `pret/pokefirered` source tree while preserving `.vault`. | complete | None | implementer | `test -f Makefile`; `test -f include/global.h`; no owned ROMs imported |
+| M1.T2 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add ignored runtime config and local artifact boundaries. | ready | M1.T1 | implementer/security | Config tests and git status review |
 | M1.T3 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add Python runtime skeleton and fake emulator contract tests. | planned | M1.T2 | implementer | `python -m pytest -q tools/runtime/tests` |
 | M1.T4 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Prove mGBA launch, Lua/socket IPC, screenshot, input, and memory reads. | planned | M1.T3 | implementer/validator | mGBA manual smoke plus focused tests |
 | M1.T5 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Add minimal FireRed telemetry. | planned | M1.T4 | implementer | Telemetry fixture tests |

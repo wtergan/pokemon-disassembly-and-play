@@ -4,14 +4,15 @@
 
 - Phase: planning
 - Current milestone: M1
-- Current task: M1.T1
-- Last action: 2026-06-04 - Created and validated the goal overlay, task graph, feature plans, planning ADRs, and native goal payload.
-- Next action: Start native `/goal` execution from `.vault/goals/goal-firered-runtime-2026-06-04/goal.md`, then execute M1.T1 from the task graph.
+- Current task: M1.T2
+- Last action: 2026-06-04 - Bootstrapped the workspace from `pret/pokefirered`, initialized git on `main`, created the GitHub repo under `wtergan`, and made atomic bootstrap/planning commits.
+- Next action: Execute M1.T2 by adding runtime-local config and ignore rules for ROM paths, traces, states, logs, screenshots, and mGBA artifacts.
 
 ## Execution Ledger
 
 - 2026-06-04 - Planning artifacts created for FireRed runtime spike, telemetry adapter, web control deck, Codex agent loop, LeafGreen support/hardening, and goal coordination.
 - 2026-06-04 - Readback checks found stale resolved questions in the research note and an overlong whole-file goal validation target; both were corrected by updating research and creating `native-goal.txt`.
+- 2026-06-04 - M1.T1 complete: copied `pret/pokefirered` source from `/home/gilgames/Code/github-clones/pret-pokefirered` into the workspace, preserving `.vault`; verified `Makefile` and `include/global.h`; initialized git; committed `CHORE: bootstrap pokefirered source` and `DOCS: add runtime execution plans`; created private GitHub repo `wtergan/pokemon-disassembly-and-play`.
 
 ## Validation Evidence
 
@@ -19,6 +20,7 @@
 |---|---|---|---|---|
 | 2026-06-04 | Planning | `.vault` artifact creation and readback | pass | Structure exists and stale research questions were resolved. |
 | 2026-06-04 | Goal payload | Goalcraft validator on `native-goal.txt` | pass | Objective is under 3,999 characters. |
+| 2026-06-04 | M1.T1 | `test -f Makefile`; `test -f include/global.h`; workspace ROM scan | pass | Source files exist; only upstream `data/*.gba` multiboot assets were present, not user FireRed/LeafGreen ROMs. |
 
 ## Review Ledger
 
