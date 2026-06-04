@@ -46,7 +46,7 @@ goal_ready: true
   - [x] `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
   - [x] `.vault/decisions/target-profile-hash-verification-2026-06-04.md`
 - Solutions:
-  - [ ] `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`
+  - [x] `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`
 - Encounters:
   - [ ] `.vault/encounters/leafgreen-support-and-hardening-encounter-2026-06-04.md`
 - Visual companion:
@@ -60,7 +60,7 @@ goal_ready: true
 - [x] ROM identity checks reject mismatched files with explicit errors.
 - [x] Symbol/telemetry adapter handles LeafGreen Rev 1 differences or clearly documents shared behavior.
 - [ ] Smoke tests launch both configured targets and verify health/snapshot/action/basic telemetry.
-- [ ] Runtime directories for states, traces, logs, and screenshots are isolated by target profile.
+- [x] Runtime directories for states, traces, logs, and screenshots are isolated by target profile.
 - [ ] Setup docs explain Windows/WSL, mGBA path config, ROM path config, build/symbol expectations, and safety boundaries.
 - [ ] If BizHawk fallback was needed, the fallback decision and adapter notes are captured durably.
 
@@ -126,13 +126,13 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - GOTCHA: Do not assume every symbol/address is identical without evidence.
   - VALIDATE: `13 passed` focused LeafGreen/factory/FireRed regression tests; `74 passed, 10 skipped` full runtime tests.
 
-- [ ] Step 3: Harden runtime storage and safety.
+- [x] Step 3: Harden runtime storage and safety.
   - ACTION: Separate state, trace, log, screenshot, and cache paths by target profile.
   - IMPLEMENT: Enforce path containment under runtime-owned ignored directories.
-  - FILES: `tools/runtime/storage.py`, `.gitignore`, docs
+  - FILES: `tools/runtime/storage.py`, `tools/runtime/runtime_factory.py`
   - MIRROR: plan 003 savestate behavior.
   - GOTCHA: Path traversal and accidental writes outside runtime dirs.
-  - VALIDATE: Path containment tests.
+  - VALIDATE: `11 passed` focused storage/factory/state-slot tests; `77 passed, 10 skipped` full runtime tests.
 
 - [ ] Step 4: Add fallback bridge evaluation.
   - ACTION: Evaluate whether mGBA remains sufficient; only implement BizHawk if plan 001 or later encounters justify it.
@@ -153,7 +153,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
 ## Code Documentation Contract
 
 - [x] Target profile schema documents required fields and identity checks.
-- [ ] Storage helpers document path containment invariants.
+- [x] Storage helpers document path containment invariants.
 - [x] LeafGreen differences document source evidence.
 
 ## Testing Strategy (TDD)
@@ -205,7 +205,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - `M5.T5` Setup docs
 - Dependencies:
   - `M5` depends on plans 001 through 004.
-- Current state: M5.T2 complete; M5.T3 ready
+- Current state: M5.T3 complete; M5.T4 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -286,3 +286,4 @@ Final evidence:
 - 2026-06-04: Plan created as post-FireRed hardening and LeafGreen support follow-up.
 - 2026-06-04: M5.T1 complete. Added explicit FireRed Rev 1 and LeafGreen Rev 1 target profiles, default SHA-1 verification, visible mismatch metadata under explicit `verify_hash = false`, and profile/config/factory tests.
 - 2026-06-04: M5.T2 complete. Added LeafGreen telemetry reader path that reuses documented FRLG-compatible telemetry fields, made target identity configurable in the shared reader, generalized symbol discovery to profile basenames/build names, and added LeafGreen factory/profile tests.
+- 2026-06-04: M5.T3 complete. Added target-scoped runtime storage helper, factory scoping for state slots and screenshots, unsafe profile-key rejection, and FireRed/LeafGreen state-directory tests.

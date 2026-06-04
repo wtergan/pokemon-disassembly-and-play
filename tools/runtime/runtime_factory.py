@@ -20,6 +20,7 @@ from .games.firered.telemetry import FireRedTelemetryReader
 from .games.firered.text import try_load_charmap
 from .games.leafgreen.telemetry import LeafGreenTelemetryReader
 from .runtime_core import RuntimeCore
+from .storage import target_scoped_runtime_paths
 
 
 def create_runtime_from_config_path(config_path: Path, launch: bool = True) -> RuntimeCore:
@@ -31,16 +32,17 @@ def create_runtime_from_config_path(config_path: Path, launch: bool = True) -> R
 def create_runtime_from_config(config: RuntimeConfig, launch: bool = True, repo_root: Path | None = None) -> RuntimeCore:
     """Build a runtime core for the configured target and emulator."""
 
-    emulator = _create_mgba_bridge(config)
+    storage = target_scoped_runtime_paths(config.runtime, config.target.profile.key)
+    emulator = _create_mgba_bridge(config, screenshot_dir=storage.screenshot_dir)
     if launch:
         emulator.launch()
     telemetry_reader = _create_telemetry_reader(config, repo_root=repo_root or Path.cwd())
-    runtime = RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=config.runtime.state_dir)
+    runtime = RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=storage.state_dir)
     _configure_agent(runtime, config, repo_root=repo_root or Path.cwd())
     return runtime
 
 
-def _create_mgba_bridge(config: RuntimeConfig) -> MgbaSocketBridge:
+def _create_mgba_bridge(config: RuntimeConfig, *, screenshot_dir: Path) -> MgbaSocketBridge:
     return MgbaSocketBridge(
         MgbaLaunchConfig(
             executable=Path(config.mgba.executable),
@@ -55,7 +57,7 @@ def _create_mgba_bridge(config: RuntimeConfig) -> MgbaSocketBridge:
             script_cache_dir=config.mgba.script_cache_dir,
             log_file=config.mgba.log_file,
         ),
-        screenshot_dir=config.runtime.screenshot_dir,
+        screenshot_dir=screenshot_dir,
     )
 
 

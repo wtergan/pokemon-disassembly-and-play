@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M5
-- Current task: M5.T3
-- Last action: 2026-06-04 - Completed M5.T2 by adding a LeafGreen adapter path and profile-based symbol discovery.
-- Next action: Execute M5.T3 by hardening runtime storage so states, traces, logs, screenshots, and cache paths stay target-scoped.
+- Current task: M5.T4
+- Last action: 2026-06-04 - Completed M5.T3 by adding target-scoped runtime storage.
+- Next action: Execute M5.T4 by evaluating whether BizHawk fallback is justified by current mGBA evidence.
 
 ## Execution Ledger
 
@@ -34,6 +34,7 @@
 - 2026-06-04 - M4.T5 and plan 004 complete: added `/agent/status`, `/agent/step`, `/agent/objective`, and `/agent/stop`; added browser API methods and an Agent panel with step/run/stop controls, objective JSON, status metrics, and logs; validated with focused API/static tests, live fake-runtime endpoint smoke, and desktop/mobile browser smoke.
 - 2026-06-04 - M5.T1 complete: added `tools/runtime/target_profiles.py` with FireRed Rev 1 and LeafGreen Rev 1 metadata, default SHA-1 verification in config loading, explicit `verify_hash = false` fixture escape hatch that preserves mismatch metadata, and target-profile/hash tests.
 - 2026-06-04 - M5.T2 complete: added `tools/runtime/games/leafgreen/` with a LeafGreen telemetry reader path, made the shared FireRed reader publish configurable target identity, generalized symbol discovery to profile basenames/build directories, and updated runtime factory to select FireRed or LeafGreen readers from target profile metadata.
+- 2026-06-04 - M5.T3 complete: added `tools/runtime/storage.py` to map runtime-owned roots to target-scoped directories, wired factory state slots and screenshots through scoped paths, and verified FireRed/LeafGreen state directories cannot collide.
 
 ## Validation Evidence
 
@@ -89,6 +90,8 @@
 | 2026-06-04 | M5.T1 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `71 passed, 10 skipped`; compile and whitespace checks clean. |
 | 2026-06-04 | M5.T2 LeafGreen tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_leafgreen_profile_should_select_leafgreen_adapter.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py tools/runtime/tests/test_firered_saveblock_fixture_should_decode_position.py -vv` | pass | `13 passed`; covers LeafGreen adapter selection, LeafGreen runtime factory telemetry, LeafGreen symbol discovery, and FireRed regression fixtures. |
 | 2026-06-04 | M5.T2 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `74 passed, 10 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M5.T3 storage tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_runtime_storage_should_stay_under_target_directory.py tools/runtime/tests/test_state_slot_should_stay_in_runtime_directory.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass | `11 passed`; covers target-scoped storage roots, unsafe profile-key rejection, state-slot containment, and FireRed/LeafGreen state-dir isolation. |
+| 2026-06-04 | M5.T3 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `77 passed, 10 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 
@@ -112,6 +115,7 @@
   - `.vault/solutions/telemetry-schema-normalization-2026-06-04.md`
   - `.vault/solutions/runtime-web-control-deck-solution-2026-06-04.md`
   - `.vault/solutions/codex-agent-loop-solution-2026-06-04.md`
+  - `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`
 - Encounters:
   - `.vault/encounters/mgba-wsl-bridge-2026-06-04.md`
   - `.vault/encounters/mgba-socket-concurrency-2026-06-04.md`

@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M5.T3
+- Current milestone/task: M5.T4
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -55,11 +55,12 @@
 - M4.T5 and plan 004 are complete at fake-runtime/API/browser level: agent endpoints and the Agent panel are implemented, live endpoint smoke passed, and desktop/mobile browser screenshots were captured. Real mGBA objective smoke remains a later environment check.
 - M5.T1 is complete: target profiles now cover FireRed Rev 1 and LeafGreen Rev 1, config verifies ROM SHA-1 by default, fixture configs can opt out with `verify_hash = false`, and wrong-hash/LeafGreen profile tests pass. Durable decision: `.vault/decisions/target-profile-hash-verification-2026-06-04.md`.
 - M5.T2 is complete: runtime factory selects FireRed or LeafGreen telemetry readers from target profiles, LeafGreen publishes `target.game = leafgreen`, and profile-based symbol discovery finds `pokeleafgreen_rev1.sym`.
+- M5.T3 is complete: runtime-owned storage roots are scoped by target profile key for states, traces, logs, screenshots, and cache paths; factory uses scoped state and screenshot paths. Durable pattern: `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`.
 - Current local venv has stale `starlette 1.2.1`; repo requirements now pin `starlette<1.0`, but DNS prevented re-sync. Endpoint tests skip in this stale env rather than hanging.
 
 ## Next Action
 
-Execute M5.T3 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: harden runtime storage so states, traces, logs, screenshots, and cache paths stay target-scoped.
+Execute M5.T4 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: evaluate whether BizHawk fallback is justified by current mGBA evidence; do not implement BizHawk without documented need.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot
