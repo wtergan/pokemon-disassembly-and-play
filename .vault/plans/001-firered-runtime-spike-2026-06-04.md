@@ -131,7 +131,7 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
   - GOTCHA: `git clone .` will fail because `.vault` already exists; use a controlled bootstrap that keeps `.vault`.
   - VALIDATE: `test -f Makefile`, `test -f include/global.h`, and `find . -name '*.gba' -print` returns no tracked workspace ROMs.
 
-- [ ] Step 2: Establish runtime-local configuration and ignores.
+- [x] Step 2: Establish runtime-local configuration and ignores.
   - ACTION: Add sample config and ignore rules for ROM paths, runtime states, logs, traces, screenshots, and mGBA local artifacts.
   - IMPLEMENT: Use a committed example such as `tools/runtime/runtime.example.toml`; keep `runtime.local.toml` ignored.
   - FILES: `.gitignore`, `tools/runtime/runtime.example.toml`, `tools/runtime/README.md`
@@ -139,7 +139,7 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
   - GOTCHA: Never commit the actual `C:\Emulation` ROM path if it exposes private local layout beyond the example.
   - VALIDATE: Config loader rejects missing ROM path and accepts a test fixture path.
 
-- [ ] Step 3: Create the Python runtime skeleton.
+- [x] Step 3: Create the Python runtime skeleton.
   - ACTION: Add a small FastAPI runtime package with app creation, runtime core, action validation, trace recorder, and adapter interfaces.
   - IMPLEMENT: Keep `runtime_core` emulator-agnostic; place mGBA specifics under `tools/runtime/emulators/`.
   - FILES: `tools/runtime/server.py`, `tools/runtime/runtime_app.py`, `tools/runtime/runtime_core.py`, `tools/runtime/action_executor.py`, `tools/runtime/trace_recorder.py`, `tools/runtime/emulators/base.py`
@@ -325,3 +325,4 @@ Final evidence:
 
 - 2026-06-04: Plan created from prior brainstorm, research note, and accepted ADRs.
 - 2026-06-04: Completed M1.T1 by bootstrapping the workspace from the local `pret/pokefirered` reference clone, preserving `.vault`, initializing git on `main`, and committing the source baseline.
+- 2026-06-04: Completed M1.T2 and M1.T3 with ignored runtime-local config, a FastAPI runtime skeleton, emulator bridge contract, fake emulator, action validation, trace recording, and five passing runtime tests.

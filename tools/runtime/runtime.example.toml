@@ -1,0 +1,16 @@
+[target]
+game = "firered"
+revision = "rev1"
+rom_path = "/mnt/c/Emulation/ROMs/Game Boy Advance/Pokemon - FireRed Version (USA, Europe) (Rev 1).gba"
+
+[mgba]
+executable = "mgba"
+lua_bridge = "tools/runtime/emulators/mgba_bridge.lua"
+
+[runtime]
+state_dir = ".runtime-state"
+trace_dir = ".runtime-traces"
+log_dir = ".runtime-logs"
+screenshot_dir = ".runtime-screenshots"
+cache_dir = ".runtime-cache"
+

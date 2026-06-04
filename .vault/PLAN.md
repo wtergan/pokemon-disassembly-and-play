@@ -2,7 +2,7 @@
 project: "Pokemon Disassembly And Play"
 date: "2026-06-04"
 status: "Active"
-progress: 16
+progress: 22
 ---
 
 # Project Roadmap
@@ -21,7 +21,7 @@ detail in `.vault/plans/`.
 
 | Feature Plan | Feature | Status | Next Action |
 |---|---|---|---|
-| `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap the `pret/pokefirered` workspace and prove mGBA launch, screenshot, input, and minimal telemetry. | In Progress | Execute M1.T2: runtime-local config and ignore boundaries. |
+| `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap the `pret/pokefirered` workspace and prove mGBA launch, screenshot, input, and minimal telemetry. | In Progress | Execute M1.T4: mGBA bridge spike. |
 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Expand FireRed symbol, save block, map, text, mode, party, bag, and event telemetry. | Planned | Start after plan 001 proves mGBA memory reads. |
 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Build the Pocodex-style browser control deck, trace UX, manual controls, and save-state surfaces. | Planned | Start after stable `/snapshot`, `/telemetry`, and `/action` APIs exist. |
 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add planner-safe Codex agent integration, `agent_context`, action policy, and objective loop. | Planned | Start after manual runtime controls and traces are reliable. |

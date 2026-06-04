@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M1.T2
+- Current milestone/task: M1.T4
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -33,11 +33,11 @@
 
 ## Open Risks
 
-- mGBA launch and Lua/socket IPC from WSL/Windows may need environment-specific handling.
+- mGBA launch and Lua/socket IPC from WSL/Windows need environment-specific handling; a code-res subagent found no local mGBA install and confirmed the Qt frontend supports `--script`.
 - The workspace bootstrap must preserve `.vault` while bringing in `pret/pokefirered` source.
 - `pret/pokefirered` build toolchain may need setup before symbol generation works.
 - FireRed telemetry must avoid overclaiming uncertain pointer, encrypted, or mode state.
 
 ## Next Action
 
-Execute M1.T2 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: add runtime-local config and ignore rules for ROM paths, traces, states, logs, screenshots, and mGBA artifacts, then validate config loading and git status.
+Execute M1.T4 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: implement the mGBA socket bridge and Lua script, install/configure a Windows mGBA executable if needed, and validate launch/screenshot/input/memory behavior.
