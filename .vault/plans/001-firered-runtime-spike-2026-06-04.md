@@ -64,11 +64,11 @@ goal_ready: true
 
 ## Success Criteria
 
-- [ ] The workspace contains `pret/pokefirered` source plus `.vault`, with ROMs and runtime-local artifacts ignored.
-- [ ] FireRed Rev 1 ROM path is configured through an ignored local config or environment variable.
-- [ ] A dedicated visible mGBA instance can launch FireRed Rev 1 from the runtime.
-- [ ] Runtime can capture a frame or screenshot for `/snapshot`.
-- [ ] Runtime can press and release at least one button through `/action` and observe frame/state progression.
+- [x] The workspace contains `pret/pokefirered` source plus `.vault`, with ROMs and runtime-local artifacts ignored.
+- [x] FireRed Rev 1 ROM path is configured through an ignored local config or environment variable.
+- [x] A dedicated visible mGBA instance can launch FireRed Rev 1 from the runtime.
+- [x] Runtime can capture a frame or screenshot for `/snapshot`.
+- [x] Runtime can press and release at least one button through `/action` and observe frame/state progression.
 - [ ] Runtime can read enough memory to expose frame count, ROM identity/hash, `gSaveBlock1Ptr`, `gSaveBlock2Ptr`, map group/number, and player/camera coordinates when available.
 - [ ] `/health`, `/snapshot`, `/telemetry`, `/action`, and basic static UI routes exist.
 - [ ] Focused tests cover config validation, action validation, emulator interface behavior through a fake bridge, and FireRed minimal telemetry decoding from fixture bytes.
@@ -147,13 +147,14 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
   - GOTCHA: Do not copy Game Boy-specific PyBoy or `w*` symbol logic.
   - VALIDATE: `pytest -q tools/runtime/tests`
 
-- [ ] Step 4: Implement the mGBA bridge spike.
+- [x] Step 4: Implement the mGBA bridge spike.
   - ACTION: Add an mGBA adapter and Lua/socket script that can launch, report health, send button input, capture a screenshot/frame, and read memory.
   - IMPLEMENT: Keep protocol tiny: `ping`, `frame`, `screenshot`, `press`, `release`, `read8`, `read16`, `read32`, `save_state`, `load_state` if available.
   - FILES: `tools/runtime/emulators/mgba_bridge.py`, `tools/runtime/emulators/mgba_bridge.lua`
   - MIRROR: mGBA Lua API concepts documented in the research note.
   - GOTCHA: If mGBA launch or socket IPC blocks progress, capture an encounter and switch to BizHawk only after preserving the adapter boundary.
   - VALIDATE: Fake bridge tests pass; manual smoke can launch a visible mGBA instance.
+  - RESULT: Official stable mGBA `0.10.5` rejected `--script`; official dev build `mGBA-build-2026-06-02-win64-9072-92621ea01d7a809b0cd3b1a687f30f0ea8db7c7a` worked with `connection_mode=lua_client`, `frame_advance_mode=realtime_wait`, Windows-local Lua/screenshot staging, and WSLENV exports. Real smoke produced health, ROM read, input frame progression, and screenshot evidence.
 
 - [ ] Step 5: Add minimal FireRed Rev 1 telemetry.
   - ACTION: Decode ROM identity, raw pointer symbols, map/location, and player/camera coordinates from mGBA memory reads.
@@ -203,7 +204,7 @@ ignored config -> FastAPI runtime -> mGBA adapter -> mGBA Lua/socket -> FireRed
 
 - [x] Unit tests for config/action/telemetry decoding
 - [x] Integration tests with fake emulator adapter
-- [ ] Manual workflow smoke with real mGBA
+- [x] Manual workflow smoke with real mGBA
 - [ ] Browser smoke once static deck exists
 
 ## Execution Lanes

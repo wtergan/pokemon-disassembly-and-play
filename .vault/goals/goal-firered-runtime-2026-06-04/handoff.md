@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M1.T4
+- Current milestone/task: M1.T5
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -33,11 +33,30 @@
 
 ## Open Risks
 
-- mGBA launch and Lua/socket IPC from WSL/Windows need environment-specific handling; a code-res subagent found no local mGBA install and confirmed the Qt frontend supports `--script`.
-- The workspace bootstrap must preserve `.vault` while bringing in `pret/pokefirered` source.
-- `pret/pokefirered` build toolchain may need setup before symbol generation works.
 - FireRed telemetry must avoid overclaiming uncertain pointer, encrypted, or mode state.
+- `pret/pokefirered` build toolchain may need setup before symbol generation works.
+- mGBA's live GUI bridge cannot call `emu:runFrame()` from the socket callback; Windows/WSL runtime config must use `frame_advance_mode = "realtime_wait"`.
 
 ## Next Action
 
-Execute M1.T4 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: implement the mGBA socket bridge and Lua script, install/configure a Windows mGBA executable if needed, and validate launch/screenshot/input/memory behavior.
+Execute M1.T5 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: add minimal FireRed Rev 1 telemetry using source-backed symbols/offsets, fixture tests, and real mGBA memory reads.
+
+<!-- codex-vault-memory-advisor:start -->
+## Automated Handoff Snapshot
+
+- Updated: 2026-06-04T03:31:02-04:00
+- Event: `precompact`
+- Repo: `/home/gilgames/Code/pokemon-disassembly-and-play`
+- Branch: `main`
+- Active goal: `.vault/goals/goal-firered-runtime-2026-06-04/`
+- Active plan: `.vault/plans/001-firered-runtime-spike-2026-06-04.md`
+- Changed files: 4
+  - `tools/runtime/emulators/mgba_bridge.lua`
+  - `tools/runtime/emulators/mgba_bridge.py`
+  - `tools/runtime/tests/test_mgba_launch_command_should_include_script_and_rom.py`
+  - `tools/runtime/tests/test_mgba_socket_bridge_should_parse_socket_responses.py`
+- Last progress: - Encounters: none yet.
+
+### Capture Queue
+- Solution candidate: progress suggests a fix/resolution with production changes, but no `.vault/solutions/` file changed.
+<!-- codex-vault-memory-advisor:end -->

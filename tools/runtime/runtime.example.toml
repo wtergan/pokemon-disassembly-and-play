@@ -6,6 +6,17 @@ rom_path = "/mnt/c/Emulation/ROMs/Game Boy Advance/Pokemon - FireRed Version (US
 [mgba]
 executable = "mgba"
 lua_bridge = "tools/runtime/emulators/mgba_bridge.lua"
+host = "127.0.0.1"
+port = 8766
+windows_paths = false
+connection_mode = "lua_server"
+frame_advance_mode = "lua_run_frame"
+# For Windows mGBA launched from WSL, use:
+# windows_paths = true
+# connection_mode = "lua_client"
+# frame_advance_mode = "realtime_wait"
+# script_cache_dir = "/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache"
+# log_file = "/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache/mgba_bridge.log"
 
 [runtime]
 state_dir = ".runtime-state"
@@ -13,4 +24,3 @@ trace_dir = ".runtime-traces"
 log_dir = ".runtime-logs"
 screenshot_dir = ".runtime-screenshots"
 cache_dir = ".runtime-cache"
-

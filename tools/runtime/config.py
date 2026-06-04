@@ -37,6 +37,14 @@ class MgbaConfig:
 
     executable: str
     lua_bridge: Path
+    host: str
+    bind_host: str | None
+    port: int
+    windows_paths: bool
+    connection_mode: str
+    frame_advance_mode: str
+    script_cache_dir: Path | None
+    log_file: Path | None
 
 
 @dataclass(frozen=True)
@@ -83,6 +91,19 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
         mgba=MgbaConfig(
             executable=_required_str(mgba, "executable"),
             lua_bridge=Path(_required_str(mgba, "lua_bridge")),
+            host=_optional_str(mgba, "host", "127.0.0.1"),
+            bind_host=_optional_str(mgba, "bind_host", None),
+            port=_optional_int(mgba, "port", 8766),
+            windows_paths=_optional_bool(mgba, "windows_paths", False),
+            connection_mode=_optional_choice(mgba, "connection_mode", "lua_server", {"lua_server", "lua_client"}),
+            frame_advance_mode=_optional_choice(
+                mgba,
+                "frame_advance_mode",
+                "lua_run_frame",
+                {"lua_run_frame", "realtime_wait"},
+            ),
+            script_cache_dir=_optional_path(mgba, "script_cache_dir"),
+            log_file=_optional_path(mgba, "log_file"),
         ),
         runtime=RuntimePaths(
             state_dir=Path(_required_str(runtime, "state_dir")),
@@ -107,3 +128,39 @@ def _required_str(data: dict[str, Any], name: str) -> str:
         raise ConfigError(f"missing string config value: {name}")
     return value
 
+
+def _optional_str(data: dict[str, Any], name: str, default: str | None) -> str | None:
+    value = data.get(name, default)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value:
+        raise ConfigError(f"invalid string config value: {name}")
+    return value
+
+
+def _optional_path(data: dict[str, Any], name: str) -> Path | None:
+    value = _optional_str(data, name, None)
+    if value is None:
+        return None
+    return Path(value)
+
+
+def _optional_bool(data: dict[str, Any], name: str, default: bool) -> bool:
+    value = data.get(name, default)
+    if not isinstance(value, bool):
+        raise ConfigError(f"invalid boolean config value: {name}")
+    return value
+
+
+def _optional_int(data: dict[str, Any], name: str, default: int) -> int:
+    value = data.get(name, default)
+    if not isinstance(value, int):
+        raise ConfigError(f"invalid integer config value: {name}")
+    return value
+
+
+def _optional_choice(data: dict[str, Any], name: str, default: str, allowed: set[str]) -> str:
+    value = _optional_str(data, name, default)
+    if value not in allowed:
+        raise ConfigError(f"invalid config value for {name}: {value}")
+    return value
