@@ -12,6 +12,7 @@ def write_config(path: Path, rom_path: Path) -> None:
 game = "firered"
 revision = "rev1"
 rom_path = "{rom_path}"
+verify_hash = false
 
 [mgba]
 executable = "mgba"
@@ -82,6 +83,7 @@ def test_windows_mgba_config_should_load_bridge_settings(tmp_path: Path) -> None
 game = "firered"
 revision = "rev1"
 rom_path = "{fixture_rom_path}"
+verify_hash = false
 
 [mgba]
 executable = "/mnt/c/Emulation/Emulators/mGBA-dev/mGBA.exe"
@@ -127,6 +129,7 @@ game = "firered"
 revision = "rev1"
 rom_path = "{fixture_rom_path}"
 symbol_path = "{symbol_path}"
+verify_hash = false
 
 [mgba]
 executable = "mgba"
@@ -158,6 +161,7 @@ def test_runtime_config_should_load_agent_section(tmp_path: Path) -> None:
 game = "firered"
 revision = "rev1"
 rom_path = "{fixture_rom_path}"
+verify_hash = false
 
 [mgba]
 executable = "mgba"
@@ -198,6 +202,7 @@ def test_runtime_config_should_reject_unknown_agent_mode(tmp_path: Path) -> None
 game = "firered"
 revision = "rev1"
 rom_path = "{fixture_rom_path}"
+verify_hash = false
 
 [mgba]
 executable = "mgba"

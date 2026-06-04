@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M5.T1
+- Current milestone/task: M5.T2
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -53,11 +53,12 @@
 - M4.T3 is complete: `AgentService` can run one planner step through disabled/fake/app-server clients; optional `[agent]` config defaults to disabled, fake mode is wired for tests, and `codex app-server --stdio` initialize was probed successfully. Durable default decision: `.vault/decisions/agent-client-disabled-default-2026-06-04.md`.
 - M4.T4 is complete: `ObjectiveRunner` runs short capped objectives with quick checkpoint/recovery hooks, explicit stop handling, context deltas, and success criteria that must match observed context. Durable pattern: `.vault/solutions/codex-agent-loop-solution-2026-06-04.md`.
 - M4.T5 and plan 004 are complete at fake-runtime/API/browser level: agent endpoints and the Agent panel are implemented, live endpoint smoke passed, and desktop/mobile browser screenshots were captured. Real mGBA objective smoke remains a later environment check.
+- M5.T1 is complete: target profiles now cover FireRed Rev 1 and LeafGreen Rev 1, config verifies ROM SHA-1 by default, fixture configs can opt out with `verify_hash = false`, and wrong-hash/LeafGreen profile tests pass. Durable decision: `.vault/decisions/target-profile-hash-verification-2026-06-04.md`.
 - Current local venv has stale `starlette 1.2.1`; repo requirements now pin `starlette<1.0`, but DNS prevented re-sync. Endpoint tests skip in this stale env rather than hanging.
 
 ## Next Action
 
-Execute M5.T1 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: add target profiles and hash checks for FireRed/LeafGreen support.
+Execute M5.T2 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: add a LeafGreen adapter path while reusing shared FireRed-compatible behavior only where source evidence supports it.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot

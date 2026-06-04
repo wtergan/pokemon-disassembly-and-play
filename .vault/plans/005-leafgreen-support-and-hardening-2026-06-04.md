@@ -1,5 +1,5 @@
 ---
-status: Planned
+status: In Progress
 priority: Medium
 date: 2026-06-04
 worktree_required: yes
@@ -44,6 +44,7 @@ goal_ready: true
   - [x] `.vault/research/pocodex-pokefirered-runtime-2026-06-03.md`
 - Decisions:
   - [x] `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
+  - [x] `.vault/decisions/target-profile-hash-verification-2026-06-04.md`
 - Solutions:
   - [ ] `.vault/solutions/leafgreen-support-and-hardening-solution-2026-06-04.md`
 - Encounters:
@@ -55,8 +56,8 @@ goal_ready: true
 
 ## Success Criteria
 
-- [ ] Runtime config supports FireRed Rev 1 and LeafGreen Rev 1 target profiles.
-- [ ] ROM identity checks reject mismatched files with explicit errors.
+- [x] Runtime config supports FireRed Rev 1 and LeafGreen Rev 1 target profiles.
+- [x] ROM identity checks reject mismatched files with explicit errors.
 - [ ] Symbol/telemetry adapter handles LeafGreen Rev 1 differences or clearly documents shared behavior.
 - [ ] Smoke tests launch both configured targets and verify health/snapshot/action/basic telemetry.
 - [ ] Runtime directories for states, traces, logs, and screenshots are isolated by target profile.
@@ -109,13 +110,13 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
 
 ## Execution Steps
 
-- [ ] Step 1: Introduce target profiles.
+- [x] Step 1: Introduce target profiles.
   - ACTION: Add target profile config for FireRed Rev 1 and LeafGreen Rev 1.
   - IMPLEMENT: Include expected SHA-1, display name, symbol file, game adapter, and runtime directories.
-  - FILES: `tools/runtime/config.py`, `tools/runtime/runtime.example.toml`, `tools/runtime/games/`
+  - FILES: `tools/runtime/config.py`, `tools/runtime/runtime.example.toml`, `tools/runtime/target_profiles.py`
   - MIRROR: `pret/pokefirered` target names and SHA files.
   - GOTCHA: Reject mismatched ROMs explicitly.
-  - VALIDATE: Profile config tests.
+  - VALIDATE: `12 passed` focused profile/config/factory tests; `71 passed, 10 skipped` full runtime tests.
 
 - [ ] Step 2: Add LeafGreen adapter path.
   - ACTION: Reuse FireRed adapter where source-compatible and isolate differences where needed.
@@ -151,7 +152,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
 
 ## Code Documentation Contract
 
-- [ ] Target profile schema documents required fields and identity checks.
+- [x] Target profile schema documents required fields and identity checks.
 - [ ] Storage helpers document path containment invariants.
 - [ ] LeafGreen differences document source evidence.
 
@@ -204,7 +205,7 @@ target profile -> ROM identity -> game adapter -> mGBA bridge -> runtime API/UI/
   - `M5.T5` Setup docs
 - Dependencies:
   - `M5` depends on plans 001 through 004.
-- Current state: planned
+- Current state: M5.T1 complete; M5.T2 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -283,3 +284,4 @@ Final evidence:
 ## Progress Log
 
 - 2026-06-04: Plan created as post-FireRed hardening and LeafGreen support follow-up.
+- 2026-06-04: M5.T1 complete. Added explicit FireRed Rev 1 and LeafGreen Rev 1 target profiles, default SHA-1 verification, visible mismatch metadata under explicit `verify_hash = false`, and profile/config/factory tests.

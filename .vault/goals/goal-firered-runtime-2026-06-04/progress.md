@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M5
-- Current task: M5.T1
-- Last action: 2026-06-04 - Completed M4.T5 and plan 004 with agent endpoints plus browser control-deck agent UI.
-- Next action: Execute M5.T1 by adding target profiles and hash checks for FireRed/LeafGreen support.
+- Current task: M5.T2
+- Last action: 2026-06-04 - Completed M5.T1 by adding explicit target profiles and default ROM SHA-1 verification.
+- Next action: Execute M5.T2 by adding a LeafGreen adapter path while reusing shared FireRed-compatible behavior only where evidence supports it.
 
 ## Execution Ledger
 
@@ -32,6 +32,7 @@
 - 2026-06-04 - M4.T3 complete: added `tools/runtime/codex_client.py`, `tools/runtime/agent_service.py`, optional `[agent]` config, runtime factory wiring for disabled/fake/app-server clients, fake planner step tests, and a disabled-mode preservation test proving manual `/action` style runtime control still works without agent credentials.
 - 2026-06-04 - M4.T4 complete: added `tools/runtime/objective_runner.py`, `objective_memory.py`, and `objective_scoring.py`; `RuntimeCore.run_objective()` now runs short capped objectives with quick checkpoint/recovery hooks, explicit stop handling, context deltas, and success criteria that must match observed context.
 - 2026-06-04 - M4.T5 and plan 004 complete: added `/agent/status`, `/agent/step`, `/agent/objective`, and `/agent/stop`; added browser API methods and an Agent panel with step/run/stop controls, objective JSON, status metrics, and logs; validated with focused API/static tests, live fake-runtime endpoint smoke, and desktop/mobile browser smoke.
+- 2026-06-04 - M5.T1 complete: added `tools/runtime/target_profiles.py` with FireRed Rev 1 and LeafGreen Rev 1 metadata, default SHA-1 verification in config loading, explicit `verify_hash = false` fixture escape hatch that preserves mismatch metadata, and target-profile/hash tests.
 
 ## Validation Evidence
 
@@ -83,6 +84,8 @@
 | 2026-06-04 | M4.T5 endpoint smoke | Live fake runtime at `http://127.0.0.1:18767` with injected `FakeAgentClient` | pass | `/agent/status`, `/agent/step`, `/agent/objective`, and `/agent/stop` returned expected status, decision, context-delta success, and stop payloads. |
 | 2026-06-04 | M4.T5 browser smoke | Playwright against live fake runtime at `http://127.0.0.1:18768` | pass | Desktop/mobile screenshots saved to `/tmp/pokemon-runtime-m4-agent-desktop.png` and `/tmp/pokemon-runtime-m4-agent-mobile.png`; clicked Step, Run, and Stop through the Agent panel. |
 | 2026-06-04 | M4.T5 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `68 passed, 10 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M5.T1 profile tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_wrong_rom_hash_should_fail_target_profile.py tools/runtime/tests/test_missing_rom_config_should_fail_fast.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass | `12 passed`; covers wrong-hash rejection, explicit hash bypass metadata, LeafGreen Rev 1 profile metadata, existing config defaults, and factory wiring. |
+| 2026-06-04 | M5.T1 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `71 passed, 10 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 
@@ -99,6 +102,7 @@
   - `.vault/decisions/first-spike-scope-boundaries-2026-06-04.md`
   - `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`
   - `.vault/decisions/agent-client-disabled-default-2026-06-04.md`
+  - `.vault/decisions/target-profile-hash-verification-2026-06-04.md`
 - Solutions:
   - `.vault/solutions/mgba-wsl-reverse-socket-2026-06-04.md`
   - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`

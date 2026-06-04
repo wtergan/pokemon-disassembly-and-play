@@ -15,6 +15,7 @@ def test_runtime_factory_should_create_configured_firered_runtime_without_launch
 game = "firered"
 revision = "rev1"
 rom_path = "{rom_path}"
+verify_hash = false
 
 [mgba]
 executable = "mgba"
@@ -58,6 +59,7 @@ def test_runtime_factory_should_auto_discover_default_firered_symbols(tmp_path: 
 game = "firered"
 revision = "rev1"
 rom_path = "{rom_path}"
+verify_hash = false
 
 [mgba]
 executable = "mgba"
@@ -91,6 +93,7 @@ def test_runtime_factory_should_configure_fake_agent_client(tmp_path: Path) -> N
 game = "firered"
 revision = "rev1"
 rom_path = "{rom_path}"
+verify_hash = false
 
 [mgba]
 executable = "mgba"

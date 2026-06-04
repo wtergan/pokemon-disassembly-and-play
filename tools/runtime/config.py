@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .target_profiles import TargetProfile, TargetProfileError, get_target_profile, verify_rom_identity
+
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover - Python < 3.11 fallback
@@ -28,8 +30,13 @@ class TargetConfig:
 
     game: str
     revision: str
+    profile: TargetProfile
     rom_path: Path
     symbol_path: Path | None
+    verify_hash: bool
+    rom_sha1: str
+    expected_sha1: str
+    matches_expected: bool
 
 
 @dataclass(frozen=True)
@@ -93,19 +100,36 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
     if not isinstance(agent, dict):
         raise ConfigError("invalid [agent] config section")
 
+    game = _required_str(target, "game").lower()
+    revision = _required_str(target, "revision").lower()
+    try:
+        profile = get_target_profile(game, revision)
+    except TargetProfileError as exc:
+        raise ConfigError(str(exc)) from exc
+
     rom_path = Path(_required_str(target, "rom_path")).expanduser()
     if not rom_path.exists():
         raise ConfigError(f"ROM path does not exist: {rom_path}")
+    verify_hash = _optional_bool(target, "verify_hash", True)
+    try:
+        rom_identity = verify_rom_identity(rom_path, profile, verify_hash=verify_hash)
+    except TargetProfileError as exc:
+        raise ConfigError(str(exc)) from exc
     symbol_path = _optional_path(target, "symbol_path")
     if symbol_path is not None and not symbol_path.exists():
         raise ConfigError(f"symbol path does not exist: {symbol_path}")
 
     return RuntimeConfig(
         target=TargetConfig(
-            game=_required_str(target, "game").lower(),
-            revision=_required_str(target, "revision").lower(),
+            game=game,
+            revision=revision,
+            profile=profile,
             rom_path=rom_path,
             symbol_path=symbol_path,
+            verify_hash=verify_hash,
+            rom_sha1=str(rom_identity["sha1"]),
+            expected_sha1=str(rom_identity["expected_sha1"]),
+            matches_expected=bool(rom_identity["matches_expected"]),
         ),
         mgba=MgbaConfig(
             executable=_required_str(mgba, "executable"),

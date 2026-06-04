@@ -67,6 +67,7 @@ def _create_telemetry_reader(config: RuntimeConfig, repo_root: Path) -> FireRedT
         rom_path=config.target.rom_path,
         map_registry=try_load_map_registry(repo_root),
         text_decoder=try_load_charmap(repo_root),
+        expected_sha1=config.target.expected_sha1,
     )
 
 
