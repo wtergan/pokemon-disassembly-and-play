@@ -65,6 +65,10 @@ def test_fixture_rom_config_should_load_runtime_paths(tmp_path: Path) -> None:
     assert config.runtime.log_dir == Path(".runtime-logs")
     assert config.runtime.screenshot_dir == Path(".runtime-screenshots")
     assert config.runtime.cache_dir == Path(".runtime-cache")
+    assert config.agent.mode == "disabled"
+    assert config.agent.executable == "codex"
+    assert config.agent.model is None
+    assert config.agent.reasoning_effort is None
 
 
 def test_windows_mgba_config_should_load_bridge_settings(tmp_path: Path) -> None:
@@ -141,3 +145,76 @@ cache_dir = ".runtime-cache"
     config = load_runtime_config(config_path)
 
     assert config.target.symbol_path == symbol_path
+
+
+def test_runtime_config_should_load_agent_section(tmp_path: Path) -> None:
+    config_path = tmp_path / "runtime.local.toml"
+    fixture_rom_path = tmp_path / "fixtures" / "firered_rev1.gba"
+    fixture_rom_path.parent.mkdir()
+    fixture_rom_path.write_bytes(b"fixture rom")
+    config_path.write_text(
+        f"""
+[target]
+game = "firered"
+revision = "rev1"
+rom_path = "{fixture_rom_path}"
+
+[mgba]
+executable = "mgba"
+lua_bridge = "tools/runtime/emulators/mgba_bridge.lua"
+
+[runtime]
+state_dir = ".runtime-state"
+trace_dir = ".runtime-traces"
+log_dir = ".runtime-logs"
+screenshot_dir = ".runtime-screenshots"
+cache_dir = ".runtime-cache"
+
+[agent]
+mode = "app_server"
+executable = "codex"
+model = "gpt-5"
+reasoning_effort = "medium"
+""",
+        encoding="utf-8",
+    )
+
+    config = load_runtime_config(config_path)
+
+    assert config.agent.mode == "app_server"
+    assert config.agent.executable == "codex"
+    assert config.agent.model == "gpt-5"
+    assert config.agent.reasoning_effort == "medium"
+
+
+def test_runtime_config_should_reject_unknown_agent_mode(tmp_path: Path) -> None:
+    config_path = tmp_path / "runtime.local.toml"
+    fixture_rom_path = tmp_path / "fixtures" / "firered_rev1.gba"
+    fixture_rom_path.parent.mkdir()
+    fixture_rom_path.write_bytes(b"fixture rom")
+    config_path.write_text(
+        f"""
+[target]
+game = "firered"
+revision = "rev1"
+rom_path = "{fixture_rom_path}"
+
+[mgba]
+executable = "mgba"
+lua_bridge = "tools/runtime/emulators/mgba_bridge.lua"
+
+[runtime]
+state_dir = ".runtime-state"
+trace_dir = ".runtime-traces"
+log_dir = ".runtime-logs"
+screenshot_dir = ".runtime-screenshots"
+cache_dir = ".runtime-cache"
+
+[agent]
+mode = "raw"
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigError, match="invalid config value for mode"):
+        load_runtime_config(config_path)

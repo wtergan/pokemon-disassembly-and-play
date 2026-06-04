@@ -27,3 +27,12 @@ trace_dir = ".runtime-traces"
 log_dir = ".runtime-logs"
 screenshot_dir = ".runtime-screenshots"
 cache_dir = ".runtime-cache"
+
+[agent]
+# Manual runtime operation does not require Codex credentials or an app-server.
+mode = "disabled"
+# Future options: "fake" for deterministic local tests, "app_server" once the
+# bounded objective runner and UI controls are enabled.
+executable = "codex"
+# model = "gpt-5"
+# reasoning_effort = "medium"

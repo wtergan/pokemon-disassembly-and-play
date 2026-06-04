@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M4
-- Current task: M4.T3
-- Last action: 2026-06-04 - Completed M4.T2 by adding strict agent action policy validation and blocked-action traces.
-- Next action: Execute M4.T3 by adding Codex client/app-server integration with disabled/fake-first behavior.
+- Current task: M4.T4
+- Last action: 2026-06-04 - Completed M4.T3 by adding planner client/service integration with disabled/fake-first behavior and an opt-in app-server adapter.
+- Next action: Execute M4.T4 by adding a bounded objective runner with step caps, stop conditions, and telemetry-delta verification hooks.
 
 ## Execution Ledger
 
@@ -29,6 +29,7 @@
 - 2026-06-04 - M3.T5 complete: browser verification passed against fake runtime at `http://127.0.0.1:18765/`; desktop/mobile screenshots were captured under `/tmp`, and a Playwright interaction smoke verified held input state, save/load state feedback, and trace rendering. Plan 003 is complete.
 - 2026-06-04 - M4.T1 complete: added `tools/runtime/agent_context.py`, `RuntimeCore.agent_context()`, and `/agent_context`; the context includes compact target/runtime/state summaries, objective placeholder, available state slots, allowed action affordances, capped recent traces, planner rules, and output contract while omitting private paths, hashes, and raw image payloads.
 - 2026-06-04 - M4.T2 complete: added `tools/runtime/interaction_policy.py` as the source of truth for agent affordances, wired `RuntimeCore.execute_agent_action()`, rejected unknown fields and mismatched button/frame/slot overrides, and traced proposed, validated, rejected, failed, and executed agent action states.
+- 2026-06-04 - M4.T3 complete: added `tools/runtime/codex_client.py`, `tools/runtime/agent_service.py`, optional `[agent]` config, runtime factory wiring for disabled/fake/app-server clients, fake planner step tests, and a disabled-mode preservation test proving manual `/action` style runtime control still works without agent credentials.
 
 ## Validation Evidence
 
@@ -71,6 +72,9 @@
 | 2026-06-04 | M4.T1 endpoint smoke | Fake runtime server at `http://127.0.0.1:18766/agent_context` | pass | Returned schema version 1 with explicit unavailable state, quick slot metadata, and allowed actions. |
 | 2026-06-04 | M4.T2 policy tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_blocked_agent_action_should_be_traced.py tools/runtime/tests/test_agent_context_should_omit_private_paths.py -vv` | pass with skip | `8 passed, 1 skipped`; covers rejected unknown agent actions, override rejection, bounded tap, quick save/load, inspect, stop, and context affordances. |
 | 2026-06-04 | M4.T2 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `58 passed, 6 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M4.T3 app-server probe | `timeout 8s python - <<probe>>` against `codex app-server --stdio` initialize | pass | App-server returned initialize result over JSON-line stdio; app-server mode remains opt-in. |
+| 2026-06-04 | M4.T3 client/config tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_agent_disabled_should_preserve_manual_runtime.py tools/runtime/tests/test_missing_rom_config_should_fail_fast.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass | `12 passed`; covers disabled preservation, fake planner step, invalid fake planner action, agent config parsing, invalid mode rejection, and factory fake-client wiring. |
+| 2026-06-04 | M4.T3 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `64 passed, 6 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 
@@ -86,6 +90,7 @@
   - `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
   - `.vault/decisions/first-spike-scope-boundaries-2026-06-04.md`
   - `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`
+  - `.vault/decisions/agent-client-disabled-default-2026-06-04.md`
 - Solutions:
   - `.vault/solutions/mgba-wsl-reverse-socket-2026-06-04.md`
   - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`

@@ -2,7 +2,7 @@
 project: "Pokemon Disassembly And Play"
 date: "2026-06-04"
 status: "Active"
-progress: 88
+progress: 92
 ---
 
 # Project Roadmap
@@ -17,7 +17,7 @@ detail in `.vault/plans/`.
 - The committed first implementation path is FireRed Rev 1, a separate dedicated runtime emulator instance, mGBA as the first bridge target, and BizHawk as the fallback.
 - Real Windows mGBA bridge proof is complete using the official dev build, Lua-client reverse socket mode, WSLENV exports, Windows-local script/screenshot staging, and real-time frame waits.
 - Plan 003 is complete: the static web control deck has a tested API client, hold-capable manual controls, telemetry/trace summaries, runtime-owned savestate controls, and desktop/mobile browser verification against a fake runtime. Real runtime decoded state still needs generated `pokefirered_rev1.sym`.
-- Plan 004 is in progress: `/agent_context` now publishes a compact planner-safe schema, and `RuntimeCore.execute_agent_action()` executes a strict advertised action policy with traces for proposed, validated, rejected, and executed agent actions.
+- Plan 004 is in progress: `/agent_context` and strict agent action policy are complete, and `AgentService` can run disabled, fake, or opt-in `codex app-server` planner clients without requiring credentials for manual runtime use.
 - Plan 001 is complete: the runtime can launch real mGBA, serve the basic deck, capture snapshots, accept validated actions, record traces, and expose minimal FireRed telemetry.
 - Active goal overlay: `.vault/goals/goal-firered-runtime-2026-06-04/`.
 
@@ -28,7 +28,7 @@ detail in `.vault/plans/`.
 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap the `pret/pokefirered` workspace and prove mGBA launch, screenshot, input, and minimal telemetry. | Complete | Preserve as baseline; continue with plan 002. |
 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Expand FireRed symbol, save block, map, text, mode, party, bag, and event telemetry. | Complete | Preserve as telemetry baseline; runtime symbol-generation smoke remains a later environment task. |
 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Build the Pocodex-style browser control deck, trace UX, manual controls, and save-state surfaces. | Complete | Preserve as manual operation baseline; continue with plan 004. |
-| `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add planner-safe Codex agent integration, `agent_context`, action policy, and objective loop. | In Progress | Execute M4.T3: add Codex client/app-server integration. |
+| `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add planner-safe Codex agent integration, `agent_context`, action policy, and objective loop. | In Progress | Execute M4.T4: add bounded objective runner. |
 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add LeafGreen Rev 1 support, fallback bridge checks, packaging/docs, and regression hardening. | Planned | Start after FireRed runtime and agent loop are stable. |
 
 ## Active Goal Runs
@@ -38,7 +38,7 @@ time or across multiple feature plans.
 
 | Goal Run | Coordinates | Status | Next Action |
 |---|---|---|---|
-| `.vault/goals/goal-firered-runtime-2026-06-04/` | Plans 001 through 005 | Active | Continue M4.T3 from `task-graph.md` and `handoff.md`. |
+| `.vault/goals/goal-firered-runtime-2026-06-04/` | Plans 001 through 005 | Active | Continue M4.T4 from `task-graph.md` and `handoff.md`. |
 
 ## Primary Goals
 
@@ -90,6 +90,7 @@ Owned ROM path -> ignored config -> WSL FastAPI runtime -> mGBA adapter -> dedic
 | mGBA first runtime bridge | Direct GBA fit with Lua memory/input/savestate primitives; BizHawk remains fallback. | 2026-06-04 | `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md` |
 | First-spike scope boundaries | Resolve open planning choices before goal execution begins. | 2026-06-04 | `.vault/decisions/first-spike-scope-boundaries-2026-06-04.md` |
 | Agent action policy boundaries | Planner actions use advertised IDs with fixed affordances and traced rejections. | 2026-06-04 | `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md` |
+| Agent client disabled by default | Manual runtime does not require Codex credentials; fake/app-server clients are opt-in. | 2026-06-04 | `.vault/decisions/agent-client-disabled-default-2026-06-04.md` |
 
 ## Risk Register
 

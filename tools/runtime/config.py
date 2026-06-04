@@ -60,12 +60,23 @@ class RuntimePaths:
 
 
 @dataclass(frozen=True)
+class AgentConfig:
+    """Optional planner backend configuration."""
+
+    mode: str
+    executable: str
+    model: str | None
+    reasoning_effort: str | None
+
+
+@dataclass(frozen=True)
 class RuntimeConfig:
     """Validated local runtime configuration."""
 
     target: TargetConfig
     mgba: MgbaConfig
     runtime: RuntimePaths
+    agent: AgentConfig
 
 
 def load_runtime_config(path: Path) -> RuntimeConfig:
@@ -78,6 +89,9 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
     target = _required_table(data, "target")
     mgba = _required_table(data, "mgba")
     runtime = _required_table(data, "runtime")
+    agent = data.get("agent") or {}
+    if not isinstance(agent, dict):
+        raise ConfigError("invalid [agent] config section")
 
     rom_path = Path(_required_str(target, "rom_path")).expanduser()
     if not rom_path.exists():
@@ -116,6 +130,12 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
             log_dir=Path(_required_str(runtime, "log_dir")),
             screenshot_dir=Path(_required_str(runtime, "screenshot_dir")),
             cache_dir=Path(_required_str(runtime, "cache_dir")),
+        ),
+        agent=AgentConfig(
+            mode=_optional_choice(agent, "mode", "disabled", {"disabled", "fake", "app_server"}),
+            executable=_optional_str(agent, "executable", "codex") or "codex",
+            model=_optional_str(agent, "model", None),
+            reasoning_effort=_optional_str(agent, "reasoning_effort", None),
         ),
     )
 

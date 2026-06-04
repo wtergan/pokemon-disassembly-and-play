@@ -8,6 +8,8 @@ from typing import Any
 
 from .action_executor import ActionExecutor
 from .agent_context import build_agent_context
+from .agent_service import AgentService
+from .codex_client import PlannerClient
 from .emulators.base import EmulatorBridge
 from .interaction_policy import AgentActionPolicy
 from .state_models import empty_telemetry_snapshot
@@ -44,6 +46,7 @@ class RuntimeCore:
             save_state=self.save_state,
             load_state=self.load_state,
         )
+        self.agent_service = AgentService(self)
 
     def health(self) -> dict[str, Any]:
         health = self.emulator.health()
@@ -74,6 +77,15 @@ class RuntimeCore:
     def execute_agent_action(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.agent_actions.execute(payload)
 
+    def configure_agent_client(self, client: PlannerClient) -> None:
+        self.agent_service.configure_client(client)
+
+    def agent_status(self) -> dict[str, Any]:
+        return self.agent_service.status()
+
+    def run_agent_step(self, operator_prompt: str | None = None) -> dict[str, Any]:
+        return self.agent_service.run_step(operator_prompt=operator_prompt)
+
     def recent_traces(self) -> list[dict[str, Any]]:
         return self.traces.recent()
 
@@ -89,6 +101,7 @@ class RuntimeCore:
     def close(self) -> None:
         """Release emulator resources owned by this runtime."""
 
+        self.agent_service.close()
         close = getattr(self.emulator, "close", None)
         if callable(close):
             close()

@@ -46,6 +46,7 @@ goal_ready: true
 - Decisions:
   - [x] `.vault/decisions/dedicated-runtime-emulator-instance-2026-06-03.md`
   - [x] `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`
+  - [x] `.vault/decisions/agent-client-disabled-default-2026-06-04.md`
 - Solutions:
   - [ ] `.vault/solutions/codex-agent-loop-solution-2026-06-04.md`
 - Encounters:
@@ -127,13 +128,13 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - GOTCHA: Avoid direct arbitrary Lua/memory write exposure.
   - VALIDATE: `8 passed, 1 skipped` focused policy/context tests; `58 passed, 6 skipped` full runtime tests.
 
-- [ ] Step 3: Add Codex client/app-server integration.
+- [x] Step 3: Add Codex client/app-server integration.
   - ACTION: Add a client layer that can call Codex app-server or local agent interface as configured.
   - IMPLEMENT: Keep credentials/config ignored; support disabled/no-agent mode.
-  - FILES: `tools/runtime/codex_client.py`, `tools/runtime/agent_service.py`
+  - FILES: `tools/runtime/codex_client.py`, `tools/runtime/agent_service.py`, `tools/runtime/config.py`, `tools/runtime/runtime_factory.py`
   - MIRROR: Pocodex `codex_client.py`, `agent_service.py`
   - GOTCHA: Do not require agent credentials to run manual runtime.
-  - VALIDATE: Fake client tests.
+  - VALIDATE: `12 passed` focused client/config/factory tests; `64 passed, 6 skipped` full runtime tests; `codex app-server --stdio` initialize probe.
 
 - [ ] Step 4: Implement bounded objective runner.
   - ACTION: Add observe -> decide -> act -> verify loop with step caps, state deltas, savestate recovery hooks, and stop conditions.
@@ -207,7 +208,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - `M4.T5` Agent endpoints/UI
 - Dependencies:
   - `M4` depends on plans 001 through 003.
-- Current state: M4.T2 complete; M4.T3 ready
+- Current state: M4.T3 complete; M4.T4 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -279,10 +280,12 @@ Final evidence:
 
 ## Open Questions
 
-- [ ] Which Codex client surface should be used first in this environment: Pocodex-style `codex app-server` or a simpler local disabled/fake-first path?
+- [x] Which Codex client surface should be used first in this environment: Pocodex-style `codex app-server` or a simpler local disabled/fake-first path?
+  - Answer: disabled/fake-first by default, with an opt-in `codex app-server` adapter available from ignored local config.
 
 ## Progress Log
 
 - 2026-06-04: Plan created as agent-loop follow-up after manual runtime stabilization.
 - 2026-06-04: M4.T1 complete. Added privacy-safe `tools/runtime/agent_context.py`, exposed `RuntimeCore.agent_context()` and `/agent_context`, added context privacy/size/action tests, verified POSIX and Windows path omission, and smoked the endpoint against the fake runtime.
 - 2026-06-04: M4.T2 complete. Added `tools/runtime/interaction_policy.py`, moved advertised agent affordances behind the policy source of truth, wired `RuntimeCore.execute_agent_action()`, traced proposed/validated/rejected/executed agent actions, and covered blocked overrides plus bounded tap/wait/save/load/inspect/stop behavior.
+- 2026-06-04: M4.T3 complete. Added disabled/fake/app-server planner clients, `AgentService`, runtime client configuration hooks, optional `[agent]` config, fake planner step tests, disabled manual-runtime preservation tests, and an app-server stdio initialize probe.

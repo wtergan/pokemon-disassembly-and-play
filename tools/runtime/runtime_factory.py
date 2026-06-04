@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import cast
 
 from .config import RuntimeConfig, load_runtime_config
+from .codex_client import CodexAppServerClient, FakeAgentClient
 from .emulators.mgba_bridge import ConnectionMode, FrameAdvanceMode, MgbaLaunchConfig, MgbaSocketBridge
 from .games.firered.map_data import try_load_map_registry
 from .games.firered.symbols import discover_symbol_table
@@ -33,7 +34,9 @@ def create_runtime_from_config(config: RuntimeConfig, launch: bool = True, repo_
     if launch:
         emulator.launch()
     telemetry_reader = _create_telemetry_reader(config, repo_root=repo_root or Path.cwd())
-    return RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=config.runtime.state_dir)
+    runtime = RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=config.runtime.state_dir)
+    _configure_agent(runtime, config, repo_root=repo_root or Path.cwd())
+    return runtime
 
 
 def _create_mgba_bridge(config: RuntimeConfig) -> MgbaSocketBridge:
@@ -65,3 +68,17 @@ def _create_telemetry_reader(config: RuntimeConfig, repo_root: Path) -> FireRedT
         map_registry=try_load_map_registry(repo_root),
         text_decoder=try_load_charmap(repo_root),
     )
+
+
+def _configure_agent(runtime: RuntimeCore, config: RuntimeConfig, repo_root: Path) -> None:
+    if config.agent.mode == "fake":
+        runtime.configure_agent_client(FakeAgentClient())
+    elif config.agent.mode == "app_server":
+        runtime.configure_agent_client(
+            CodexAppServerClient(
+                repo_root=repo_root,
+                executable=config.agent.executable,
+                model=config.agent.model,
+                reasoning_effort=config.agent.reasoning_effort,
+            )
+        )
