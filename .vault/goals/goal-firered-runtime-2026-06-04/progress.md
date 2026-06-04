@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M4
-- Current task: M4.T2
-- Last action: 2026-06-04 - Completed M4.T1 by adding compact privacy-safe agent context and `/agent_context`.
-- Next action: Execute M4.T2 by implementing action policy validation and blocked-action traces.
+- Current task: M4.T3
+- Last action: 2026-06-04 - Completed M4.T2 by adding strict agent action policy validation and blocked-action traces.
+- Next action: Execute M4.T3 by adding Codex client/app-server integration with disabled/fake-first behavior.
 
 ## Execution Ledger
 
@@ -28,6 +28,7 @@
 - 2026-06-04 - M3.T4 complete: added contained runtime state slots, mGBA/fake bridge save/load methods, `/states` endpoints, a state panel, and path-containment tests. Git was blocked at the time because `.git` was mounted read-only.
 - 2026-06-04 - M3.T5 complete: browser verification passed against fake runtime at `http://127.0.0.1:18765/`; desktop/mobile screenshots were captured under `/tmp`, and a Playwright interaction smoke verified held input state, save/load state feedback, and trace rendering. Plan 003 is complete.
 - 2026-06-04 - M4.T1 complete: added `tools/runtime/agent_context.py`, `RuntimeCore.agent_context()`, and `/agent_context`; the context includes compact target/runtime/state summaries, objective placeholder, available state slots, allowed action affordances, capped recent traces, planner rules, and output contract while omitting private paths, hashes, and raw image payloads.
+- 2026-06-04 - M4.T2 complete: added `tools/runtime/interaction_policy.py` as the source of truth for agent affordances, wired `RuntimeCore.execute_agent_action()`, rejected unknown fields and mismatched button/frame/slot overrides, and traced proposed, validated, rejected, failed, and executed agent action states.
 
 ## Validation Evidence
 
@@ -68,6 +69,8 @@
 | 2026-06-04 | M4.T1 context/schema tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_agent_context_should_omit_private_paths.py tools/runtime/tests/test_telemetry_schema_should_publish_stable_contract.py -vv` | pass with skips | `6 passed, 2 skipped`; covers compact context shape, POSIX/Windows path omission, hash omission, capped traces, and action affordances. |
 | 2026-06-04 | M4.T1 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `53 passed, 6 skipped`; compile and whitespace checks clean. |
 | 2026-06-04 | M4.T1 endpoint smoke | Fake runtime server at `http://127.0.0.1:18766/agent_context` | pass | Returned schema version 1 with explicit unavailable state, quick slot metadata, and allowed actions. |
+| 2026-06-04 | M4.T2 policy tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_blocked_agent_action_should_be_traced.py tools/runtime/tests/test_agent_context_should_omit_private_paths.py -vv` | pass with skip | `8 passed, 1 skipped`; covers rejected unknown agent actions, override rejection, bounded tap, quick save/load, inspect, stop, and context affordances. |
+| 2026-06-04 | M4.T2 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `58 passed, 6 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 
@@ -82,6 +85,7 @@
   - `.vault/decisions/dedicated-runtime-emulator-instance-2026-06-03.md`
   - `.vault/decisions/mgba-first-runtime-bridge-2026-06-04.md`
   - `.vault/decisions/first-spike-scope-boundaries-2026-06-04.md`
+  - `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`
 - Solutions:
   - `.vault/solutions/mgba-wsl-reverse-socket-2026-06-04.md`
   - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`

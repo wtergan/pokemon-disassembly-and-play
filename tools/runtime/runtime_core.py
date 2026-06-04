@@ -9,6 +9,7 @@ from typing import Any
 from .action_executor import ActionExecutor
 from .agent_context import build_agent_context
 from .emulators.base import EmulatorBridge
+from .interaction_policy import AgentActionPolicy
 from .state_models import empty_telemetry_snapshot
 from .state_slots import StateSlotManager
 from .trace_recorder import TraceRecorder
@@ -37,6 +38,12 @@ class RuntimeCore:
         self.actions = ActionExecutor(emulator, self.traces)
         self._telemetry_reader = telemetry_reader
         self.states = StateSlotManager(emulator, self.traces, state_dir or Path(".runtime-state"))
+        self.agent_actions = AgentActionPolicy(
+            self.actions,
+            self.traces,
+            save_state=self.save_state,
+            load_state=self.load_state,
+        )
 
     def health(self) -> dict[str, Any]:
         health = self.emulator.health()
@@ -63,6 +70,9 @@ class RuntimeCore:
 
     def execute_action(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.actions.execute(payload)
+
+    def execute_agent_action(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self.agent_actions.execute(payload)
 
     def recent_traces(self) -> list[dict[str, Any]]:
         return self.traces.recent()

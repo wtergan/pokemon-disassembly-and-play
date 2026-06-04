@@ -45,6 +45,7 @@ goal_ready: true
   - [x] `.vault/research/pocodex-pokefirered-runtime-2026-06-03.md`
 - Decisions:
   - [x] `.vault/decisions/dedicated-runtime-emulator-instance-2026-06-03.md`
+  - [x] `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`
 - Solutions:
   - [ ] `.vault/solutions/codex-agent-loop-solution-2026-06-04.md`
 - Encounters:
@@ -57,7 +58,7 @@ goal_ready: true
 ## Success Criteria
 
 - [x] `/agent_context` returns compact, high-signal state for model use without large raw dumps or private paths.
-- [ ] Action policy exposes a small validated tool set such as tap, hold, wait, save_state, load_state, inspect, and stop.
+- [x] Action policy exposes a small validated tool set such as tap, hold, wait, save_state, load_state, inspect, and stop.
 - [ ] Agent loop records every proposed action, validation decision, execution result, and post-action telemetry delta.
 - [ ] Objective runner can execute short bounded goals such as "open menu", "walk one tile", or "wait until field mode" using savestate-backed recovery.
 - [ ] UI exposes agent state, current objective, last action, stop/pause controls, and logs.
@@ -118,13 +119,13 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - GOTCHA: Do not include local ROM paths, secrets, or large raw memory dumps.
   - VALIDATE: `6 passed, 2 skipped` focused context/schema tests; `53 passed, 6 skipped` full runtime tests; `/agent_context` fake-server smoke.
 
-- [ ] Step 2: Implement action policy.
+- [x] Step 2: Implement action policy.
   - ACTION: Define allowed actions, cooldowns, preconditions, and stop controls.
   - IMPLEMENT: Validate before execution and trace rejected actions too.
-  - FILES: `tools/runtime/interaction_policy.py`, `tools/runtime/action_executor.py`
+  - FILES: `tools/runtime/interaction_policy.py`, `tools/runtime/action_executor.py`, `tools/runtime/runtime_core.py`
   - MIRROR: Pocodex interaction policy and action executor.
   - GOTCHA: Avoid direct arbitrary Lua/memory write exposure.
-  - VALIDATE: Blocked/allowed action tests.
+  - VALIDATE: `8 passed, 1 skipped` focused policy/context tests; `58 passed, 6 skipped` full runtime tests.
 
 - [ ] Step 3: Add Codex client/app-server integration.
   - ACTION: Add a client layer that can call Codex app-server or local agent interface as configured.
@@ -153,7 +154,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
 ## Code Documentation Contract
 
 - [x] Agent context schema documents size limits and privacy boundaries.
-- [ ] Action policy documents safety invariants and cooldowns.
+- [x] Action policy documents safety invariants and cooldowns.
 - [ ] Objective runner documents stop conditions and verification expectations.
 
 ## Testing Strategy (TDD)
@@ -206,7 +207,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - `M4.T5` Agent endpoints/UI
 - Dependencies:
   - `M4` depends on plans 001 through 003.
-- Current state: M4.T1 complete; M4.T2 ready
+- Current state: M4.T2 complete; M4.T3 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -284,3 +285,4 @@ Final evidence:
 
 - 2026-06-04: Plan created as agent-loop follow-up after manual runtime stabilization.
 - 2026-06-04: M4.T1 complete. Added privacy-safe `tools/runtime/agent_context.py`, exposed `RuntimeCore.agent_context()` and `/agent_context`, added context privacy/size/action tests, verified POSIX and Windows path omission, and smoked the endpoint against the fake runtime.
+- 2026-06-04: M4.T2 complete. Added `tools/runtime/interaction_policy.py`, moved advertised agent affordances behind the policy source of truth, wired `RuntimeCore.execute_agent_action()`, traced proposed/validated/rejected/executed agent actions, and covered blocked overrides plus bounded tap/wait/save/load/inspect/stop behavior.

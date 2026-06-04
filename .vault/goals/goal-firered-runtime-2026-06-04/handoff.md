@@ -3,7 +3,7 @@
 ## Resume Here
 
 - Active goal run: `.vault/goals/goal-firered-runtime-2026-06-04/`
-- Current milestone/task: M4.T2
+- Current milestone/task: M4.T3
 - Current branch/worktree: `/home/gilgames/Code/pokemon-disassembly-and-play` on git branch `main`.
 - Read first:
   - `.vault/goals/goal-firered-runtime-2026-06-04/progress.md`
@@ -49,11 +49,12 @@
 - M3.T4 is complete: runtime state slots are contained under `state_dir`, exposed through `/states` endpoints, and rendered by the state panel.
 - M3.T5 and plan 003 are complete: desktop/mobile screenshots and Playwright interaction smoke passed against the fake runtime. `.git` is writable again as of the full-access permission change, so commits can proceed.
 - M4.T1 is complete: `/agent_context` now returns a compact privacy-safe planner context with target/runtime/state summaries, objective placeholder, quick slot metadata, allowed action affordances, capped traces, rules, and output contract. Tests cover POSIX/Windows path omission, hash omission, trace caps, and safe action affordances.
+- M4.T2 is complete: `RuntimeCore.execute_agent_action()` validates advertised agent action IDs, rejects unknown fields and mismatched button/frame/slot overrides, traces proposed/validated/rejected/failed/executed states, and executes bounded tap/wait/save/load/inspect/stop behavior. Durable boundary decision: `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`.
 - Current local venv has stale `starlette 1.2.1`; repo requirements now pin `starlette<1.0`, but DNS prevented re-sync. Endpoint tests skip in this stale env rather than hanging.
 
 ## Next Action
 
-Execute M4.T2 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: implement action policy validation and blocked-action traces.
+Execute M4.T3 from `.vault/goals/goal-firered-runtime-2026-06-04/task-graph.md`: add Codex client/app-server integration with disabled/fake-first behavior.
 
 <!-- codex-vault-memory-advisor:start -->
 ## Automated Handoff Snapshot

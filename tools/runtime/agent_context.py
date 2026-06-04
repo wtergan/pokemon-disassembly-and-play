@@ -11,11 +11,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .interaction_policy import allowed_agent_actions
+
 
 AGENT_CONTEXT_SCHEMA_VERSION = 1
 MAX_RECENT_TRACES = 8
 MAX_CONTEXT_JSON_BYTES = 16_000
-_BUTTONS = ("up", "down", "left", "right", "a", "b", "start", "select", "l", "r")
 
 
 def build_agent_context(
@@ -62,33 +63,6 @@ def build_agent_context(
     context["size"] = {"json_bytes": len(json.dumps(context, separators=(",", ":"), ensure_ascii=False))}
     context["truncated"] = context["size"]["json_bytes"] > MAX_CONTEXT_JSON_BYTES
     return context
-
-
-def allowed_agent_actions() -> list[dict[str, Any]]:
-    """Return action affordances exposed to the planner before policy execution."""
-
-    actions: list[dict[str, Any]] = [
-        {"id": "inspect", "type": "observe", "description": "Re-read agent context without pressing inputs."},
-        {"id": "wait_short", "type": "wait", "frames": 15, "description": "Wait briefly and observe again."},
-        {"id": "save_quick", "type": "save_state", "slot": "quick", "description": "Save a runtime-owned quick checkpoint."},
-        {"id": "load_quick", "type": "load_state", "slot": "quick", "description": "Restore the quick checkpoint when recovery is needed."},
-        {"id": "stop", "type": "control", "description": "Stop the current objective loop."},
-    ]
-    actions.extend(
-        {"id": f"tap_{button}", "type": "tap", "button": button, "frames": 12, "description": f"Tap {button.upper()}."}
-        for button in _BUTTONS
-    )
-    actions.extend(
-        {
-            "id": f"hold_{button}",
-            "type": "hold",
-            "button": button,
-            "frames": 20,
-            "description": f"Hold {button.upper()} for a short bounded interval.",
-        }
-        for button in ("up", "down", "left", "right", "a", "b")
-    )
-    return actions
 
 
 def _state_summary(telemetry: dict[str, Any]) -> dict[str, Any]:
