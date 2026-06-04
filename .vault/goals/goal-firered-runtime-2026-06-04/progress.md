@@ -3,10 +3,10 @@
 ## Current Status
 
 - Phase: implementation
-- Current milestone: M4
-- Current task: M4.T5
-- Last action: 2026-06-04 - Completed M4.T4 by adding bounded objective runner, objective memory, and context-delta scoring.
-- Next action: Execute M4.T5 by adding agent/objective endpoints and web UI state controls/logs.
+- Current milestone: M5
+- Current task: M5.T1
+- Last action: 2026-06-04 - Completed M4.T5 and plan 004 with agent endpoints plus browser control-deck agent UI.
+- Next action: Execute M5.T1 by adding target profiles and hash checks for FireRed/LeafGreen support.
 
 ## Execution Ledger
 
@@ -31,6 +31,7 @@
 - 2026-06-04 - M4.T2 complete: added `tools/runtime/interaction_policy.py` as the source of truth for agent affordances, wired `RuntimeCore.execute_agent_action()`, rejected unknown fields and mismatched button/frame/slot overrides, and traced proposed, validated, rejected, failed, and executed agent action states.
 - 2026-06-04 - M4.T3 complete: added `tools/runtime/codex_client.py`, `tools/runtime/agent_service.py`, optional `[agent]` config, runtime factory wiring for disabled/fake/app-server clients, fake planner step tests, and a disabled-mode preservation test proving manual `/action` style runtime control still works without agent credentials.
 - 2026-06-04 - M4.T4 complete: added `tools/runtime/objective_runner.py`, `objective_memory.py`, and `objective_scoring.py`; `RuntimeCore.run_objective()` now runs short capped objectives with quick checkpoint/recovery hooks, explicit stop handling, context deltas, and success criteria that must match observed context.
+- 2026-06-04 - M4.T5 and plan 004 complete: added `/agent/status`, `/agent/step`, `/agent/objective`, and `/agent/stop`; added browser API methods and an Agent panel with step/run/stop controls, objective JSON, status metrics, and logs; validated with focused API/static tests, live fake-runtime endpoint smoke, and desktop/mobile browser smoke.
 
 ## Validation Evidence
 
@@ -78,6 +79,10 @@
 | 2026-06-04 | M4.T3 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `64 passed, 6 skipped`; compile and whitespace checks clean. |
 | 2026-06-04 | M4.T4 objective tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_objective_step_limit_should_stop_runner.py tools/runtime/tests/test_objective_delta_missing_should_not_claim_success.py tools/runtime/tests/test_agent_disabled_should_preserve_manual_runtime.py -vv` | pass | `7 passed`; covers step cap, frame-based success, stop action, and no-delta no-success behavior. |
 | 2026-06-04 | M4.T4 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `68 passed, 6 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M4.T5 focused UI/API tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_agent_endpoints_should_run_bounded_objectives.py tools/runtime/tests/test_runtime_api_client_should_handle_endpoint_contracts.py tools/runtime/tests/test_static_deck_should_serve_index.py -vv` | pass with skips | `3 passed, 5 skipped`; skipped endpoint/static ASGI tests are due stale local `starlette 1.2.1`. Node API-client tests passed. |
+| 2026-06-04 | M4.T5 endpoint smoke | Live fake runtime at `http://127.0.0.1:18767` with injected `FakeAgentClient` | pass | `/agent/status`, `/agent/step`, `/agent/objective`, and `/agent/stop` returned expected status, decision, context-delta success, and stop payloads. |
+| 2026-06-04 | M4.T5 browser smoke | Playwright against live fake runtime at `http://127.0.0.1:18768` | pass | Desktop/mobile screenshots saved to `/tmp/pokemon-runtime-m4-agent-desktop.png` and `/tmp/pokemon-runtime-m4-agent-mobile.png`; clicked Step, Run, and Stop through the Agent panel. |
+| 2026-06-04 | M4.T5 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `68 passed, 10 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 

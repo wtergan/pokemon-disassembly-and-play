@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 
 from .action_executor import ActionValidationError
+from .codex_client import AgentClientError
 from .emulators.fake import FakeEmulatorBridge
 from .runtime_core import RuntimeCore
 from .state_slots import StateSlotError
@@ -47,6 +48,29 @@ def create_app(
     @app.get("/agent_context")
     def agent_context() -> dict[str, Any]:
         return runtime_core.agent_context()
+
+    @app.get("/agent/status")
+    def agent_status() -> dict[str, Any]:
+        return runtime_core.agent_status()
+
+    @app.post("/agent/step")
+    def agent_step(payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        try:
+            return runtime_core.run_agent_step((payload or {}).get("operator_prompt"))
+        except (AgentClientError, ActionValidationError, StateSlotError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/agent/objective")
+    def agent_objective(payload: dict[str, Any]) -> dict[str, Any]:
+        objective = payload.get("objective", payload)
+        if not isinstance(objective, dict):
+            raise HTTPException(status_code=400, detail="objective must be an object")
+        return runtime_core.run_objective(objective, operator_prompt=payload.get("operator_prompt"))
+
+    @app.post("/agent/stop")
+    def agent_stop() -> dict[str, Any]:
+        runtime_core.stop_objective()
+        return {"ok": True, "status": runtime_core.agent_status()}
 
     @app.get("/traces")
     def traces() -> dict[str, Any]:

@@ -108,7 +108,8 @@ h2 {
 .controls-panel,
 .telemetry-panel,
 .trace-panel,
-.state-panel {
+.state-panel,
+.agent-panel {
   display: grid;
   align-content: start;
 }
@@ -294,6 +295,74 @@ dd {
   font-weight: 700;
 }
 
+.agent-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 16px;
+}
+
+.agent-controls button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f9fbf8;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.objective-label {
+  display: block;
+  padding: 0 16px 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#objective-json {
+  width: calc(100% - 32px);
+  min-height: 120px;
+  margin: 0 16px 16px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.agent-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0 16px 16px;
+}
+
+.agent-metrics div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfa;
+}
+
+.agent-log {
+  display: grid;
+  gap: 8px;
+  max-height: 180px;
+  margin: 0;
+  padding: 0 16px 16px 36px;
+  overflow: auto;
+}
+
+.agent-log li {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .state-list {
   display: grid;
   gap: 8px;
@@ -337,7 +406,8 @@ dd {
 
 #action-status,
 #rom-match,
-#state-status {
+#state-status,
+#agent-status {
   color: var(--muted);
   font-size: 0.85rem;
 }
@@ -377,6 +447,10 @@ dd {
   }
 
   .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-metrics {
     grid-template-columns: 1fr;
   }
 

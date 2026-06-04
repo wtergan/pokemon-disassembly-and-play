@@ -61,7 +61,7 @@
 | M4.T2 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Implement action policy and blocked-action traces. | complete | M1.T6 | implementer/security | Policy tests |
 | M4.T3 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add Codex client/app-server integration. | complete | M4.T1 M4.T2 | implementer | Fake client tests |
 | M4.T4 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add bounded objective runner. | complete | M4.T3 | implementer/reviewer | Runner stop-condition tests |
-| M4.T5 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Expose agent endpoints and UI state. | ready | M4.T4 M3.T5 | implementer/validator | Short objective smoke |
+| M4.T5 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Expose agent endpoints and UI state. | complete | M4.T4 M3.T5 | implementer/validator | Short objective smoke |
 
 ### M5: LeafGreen Support And Hardening
 
@@ -72,7 +72,7 @@
 
 | Task ID | Plan | Task | State | Depends On | Owner/Lane | Validation |
 |---|---|---|---|---|---|---|
-| M5.T1 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add target profiles and hash checks. | planned | M1.T6 | implementer/security | Profile/hash tests |
+| M5.T1 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add target profiles and hash checks. | ready | M1.T6 | implementer/security | Profile/hash tests |
 | M5.T2 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add LeafGreen adapter path. | planned | M5.T1 M2.T5 | implementer | LeafGreen fixture/smoke tests |
 | M5.T3 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Harden runtime storage by target. | planned | M5.T1 M3.T4 | implementer/security | Path containment tests |
 | M5.T4 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Evaluate BizHawk fallback only if evidence requires it. | planned | M1.T4 | reviewer/implementer | Adapter contract tests if implemented |

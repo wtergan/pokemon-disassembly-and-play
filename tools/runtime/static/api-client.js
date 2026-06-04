@@ -30,6 +30,28 @@ export class RuntimeApiClient {
     return this.requestJson("/states");
   }
 
+  agentStatus() {
+    return this.requestJson("/agent/status");
+  }
+
+  agentStep(payload = {}) {
+    return this.requestJson("/agent/step", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  agentObjective(payload) {
+    return this.requestJson("/agent/objective", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  agentStop() {
+    return this.requestJson("/agent/stop", { method: "POST" });
+  }
+
   saveState(slot) {
     return this.requestJson(`/states/${encodeURIComponent(slot)}/save`, { method: "POST" });
   }

@@ -1,5 +1,5 @@
 ---
-status: In Progress
+status: Complete
 priority: High
 date: 2026-06-04
 worktree_required: yes
@@ -62,8 +62,8 @@ goal_ready: true
 - [x] Action policy exposes a small validated tool set such as tap, hold, wait, save_state, load_state, inspect, and stop.
 - [x] Agent loop records every proposed action, validation decision, execution result, and post-action telemetry delta.
 - [x] Objective runner can execute short bounded goals such as "open menu", "walk one tile", or "wait until field mode" using savestate-backed recovery.
-- [ ] UI exposes agent state, current objective, last action, stop/pause controls, and logs.
-- [ ] Tests cover action validation, blocked actions, context compaction, objective runner stop conditions, and trace recording.
+- [x] UI exposes agent state, current objective, last action, stop/pause controls, and logs.
+- [x] Tests cover action validation, blocked actions, context compaction, objective runner stop conditions, and trace recording.
 
 ## Architecture Diagram
 
@@ -144,13 +144,13 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - GOTCHA: Avoid claiming progress from action count alone; verify against telemetry deltas.
   - VALIDATE: `7 passed` focused objective/agent tests; `68 passed, 6 skipped` full runtime tests.
 
-- [ ] Step 5: Expose agent endpoints and UI state.
+- [x] Step 5: Expose agent endpoints and UI state.
   - ACTION: Add endpoints and web controls for agent context, planner step, routine/objective run, pause, stop, and logs.
   - IMPLEMENT: Keep endpoints disabled or guarded when no agent config exists.
   - FILES: `tools/runtime/server.py`, `tools/runtime/static/*`
   - MIRROR: Pocodex agent endpoints.
   - GOTCHA: Do not let UI start unbounded sessions by accident.
-  - VALIDATE: Endpoint tests and manual short objective smoke.
+  - VALIDATE: API-client/static tests, live fake-runtime endpoint smoke, and desktop/mobile browser smoke.
 
 ## Code Documentation Contract
 
@@ -208,7 +208,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - `M4.T5` Agent endpoints/UI
 - Dependencies:
   - `M4` depends on plans 001 through 003.
-- Current state: M4.T4 complete; M4.T5 ready
+- Current state: complete at fake-runtime/API/browser level; real mGBA objective smoke remains a later environment check
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -290,3 +290,4 @@ Final evidence:
 - 2026-06-04: M4.T2 complete. Added `tools/runtime/interaction_policy.py`, moved advertised agent affordances behind the policy source of truth, wired `RuntimeCore.execute_agent_action()`, traced proposed/validated/rejected/executed agent actions, and covered blocked overrides plus bounded tap/wait/save/load/inspect/stop behavior.
 - 2026-06-04: M4.T3 complete. Added disabled/fake/app-server planner clients, `AgentService`, runtime client configuration hooks, optional `[agent]` config, fake planner step tests, disabled manual-runtime preservation tests, and an app-server stdio initialize probe.
 - 2026-06-04: M4.T4 complete. Added bounded `ObjectiveRunner`, objective memory, scoring/delta helpers, `RuntimeCore.run_objective()`, step-limit/stop/success tests, and no-delta no-success regression coverage.
+- 2026-06-04: M4.T5 and plan 004 complete. Added agent status/step/objective/stop endpoints, browser API methods, an Agent panel with step/run/stop controls and log display, endpoint/API/static tests, live fake-runtime endpoint smoke, and desktop/mobile browser smoke screenshots.

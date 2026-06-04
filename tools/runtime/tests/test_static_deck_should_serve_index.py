@@ -9,4 +9,8 @@ def test_static_deck_should_serve_index() -> None:
 
     assert response.status_code == 200
     assert "FireRed Runtime" in response.text
+    assert 'id="agent-status"' in response.text
+    assert 'id="agent-step"' in response.text
+    assert 'id="run-objective"' in response.text
+    assert 'id="stop-agent"' in response.text
     assert "/app.js" in response.text

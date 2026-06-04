@@ -2,7 +2,7 @@
 project: "Pokemon Disassembly And Play"
 date: "2026-06-04"
 status: "Active"
-progress: 96
+progress: 98
 ---
 
 # Project Roadmap
@@ -17,7 +17,7 @@ detail in `.vault/plans/`.
 - The committed first implementation path is FireRed Rev 1, a separate dedicated runtime emulator instance, mGBA as the first bridge target, and BizHawk as the fallback.
 - Real Windows mGBA bridge proof is complete using the official dev build, Lua-client reverse socket mode, WSLENV exports, Windows-local script/screenshot staging, and real-time frame waits.
 - Plan 003 is complete: the static web control deck has a tested API client, hold-capable manual controls, telemetry/trace summaries, runtime-owned savestate controls, and desktop/mobile browser verification against a fake runtime. Real runtime decoded state still needs generated `pokefirered_rev1.sym`.
-- Plan 004 is in progress: context, action policy, planner service, and bounded objective runner are complete; remaining work is exposing agent/objective state through HTTP endpoints and the web control deck.
+- Plan 004 is complete at fake-runtime/API/browser level: context, action policy, planner service, bounded objective runner, HTTP endpoints, and web control-deck agent state are implemented. Real mGBA objective smoke remains an environment check.
 - Plan 001 is complete: the runtime can launch real mGBA, serve the basic deck, capture snapshots, accept validated actions, record traces, and expose minimal FireRed telemetry.
 - Active goal overlay: `.vault/goals/goal-firered-runtime-2026-06-04/`.
 
@@ -28,8 +28,8 @@ detail in `.vault/plans/`.
 | `.vault/plans/001-firered-runtime-spike-2026-06-04.md` | Bootstrap the `pret/pokefirered` workspace and prove mGBA launch, screenshot, input, and minimal telemetry. | Complete | Preserve as baseline; continue with plan 002. |
 | `.vault/plans/002-firered-telemetry-adapter-2026-06-04.md` | Expand FireRed symbol, save block, map, text, mode, party, bag, and event telemetry. | Complete | Preserve as telemetry baseline; runtime symbol-generation smoke remains a later environment task. |
 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Build the Pocodex-style browser control deck, trace UX, manual controls, and save-state surfaces. | Complete | Preserve as manual operation baseline; continue with plan 004. |
-| `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add planner-safe Codex agent integration, `agent_context`, action policy, and objective loop. | In Progress | Execute M4.T5: expose agent endpoints and UI state. |
-| `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add LeafGreen Rev 1 support, fallback bridge checks, packaging/docs, and regression hardening. | Planned | Start after FireRed runtime and agent loop are stable. |
+| `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add planner-safe Codex agent integration, `agent_context`, action policy, and objective loop. | Complete | Preserve as agent-loop baseline; real mGBA objective smoke remains a later environment check. |
+| `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add LeafGreen Rev 1 support, fallback bridge checks, packaging/docs, and regression hardening. | Planned | Execute M5.T1: add target profiles and hash checks. |
 
 ## Active Goal Runs
 
@@ -38,7 +38,7 @@ time or across multiple feature plans.
 
 | Goal Run | Coordinates | Status | Next Action |
 |---|---|---|---|
-| `.vault/goals/goal-firered-runtime-2026-06-04/` | Plans 001 through 005 | Active | Continue M4.T5 from `task-graph.md` and `handoff.md`. |
+| `.vault/goals/goal-firered-runtime-2026-06-04/` | Plans 001 through 005 | Active | Continue M5.T1 from `task-graph.md` and `handoff.md`. |
 
 ## Primary Goals
 
@@ -52,9 +52,9 @@ time or across multiple feature plans.
 - [x] A dedicated mGBA runtime instance can launch FireRed Rev 1 from ignored local configuration.
 - [x] `/health`, `/snapshot`, `/telemetry`, `/action`, and `/agent_context` exist with tests around public behavior.
 - [x] The web UI shows a live frame, manual controls, current telemetry, savestates, and traces.
-- [ ] The web UI shows agent state after plan 004 adds agent context and runner endpoints.
+- [x] The web UI shows agent state after plan 004 adds agent context and runner endpoints.
 - [x] The runtime decodes FireRed map/player/mode and core inventory/party/event state from symbols or documented offsets.
-- [ ] The Codex agent loop can observe, choose validated actions, execute them, and verify results without uncontrolled inputs.
+- [x] The Codex agent loop can observe, choose validated actions, execute them, and verify results without uncontrolled inputs.
 - [ ] LeafGreen Rev 1 can be configured and smoke-tested after FireRed stabilizes.
 
 ## Architecture Snapshot

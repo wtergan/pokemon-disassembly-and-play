@@ -83,6 +83,26 @@
         </div>
         <ol id="states" class="state-list"></ol>
       </section>
+
+      <section class="agent-panel" aria-labelledby="agent-title">
+        <div class="panel-header">
+          <h2 id="agent-title">Agent</h2>
+          <span id="agent-status">agent: --</span>
+        </div>
+        <div class="agent-controls">
+          <button id="agent-step" type="button">Step</button>
+          <button id="run-objective" type="button">Run</button>
+          <button id="stop-agent" type="button">Stop</button>
+        </div>
+        <label class="objective-label" for="objective-json">Objective</label>
+        <textarea id="objective-json" rows="5">{"description":"wait for next frame interval","max_steps":1,"success":{"runtime_frame_at_least":15}}</textarea>
+        <dl class="agent-metrics">
+          <div><dt>Client</dt><dd id="agent-client">--</dd></div>
+          <div><dt>Steps</dt><dd id="agent-steps">--</dd></div>
+          <div><dt>Last</dt><dd id="agent-last">--</dd></div>
+        </dl>
+        <ol id="agent-log" class="agent-log"></ol>
+      </section>
     </main>
     <script type="module" src="/app.js"></script>
   </body>

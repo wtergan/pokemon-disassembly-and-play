@@ -29,13 +29,19 @@ assert.deepEqual(await client.snapshot(), { path: "/snapshot", method: "GET" });
 assert.deepEqual(await client.telemetry(), { path: "/telemetry", method: "GET" });
 assert.deepEqual(await client.traces(), { path: "/traces", method: "GET" });
 assert.deepEqual(await client.states(), { path: "/states", method: "GET" });
+assert.deepEqual(await client.agentStatus(), { path: "/agent/status", method: "GET" });
+assert.deepEqual(await client.agentStep({}), { path: "/agent/step", method: "POST" });
+assert.deepEqual(await client.agentObjective({ objective: { max_steps: 1 } }), { path: "/agent/objective", method: "POST" });
+assert.deepEqual(await client.agentStop(), { path: "/agent/stop", method: "POST" });
 assert.deepEqual(await client.saveState("quick slot"), { path: "/states/quick%20slot/save", method: "POST" });
 assert.deepEqual(await client.loadState("quick"), { path: "/states/quick/load", method: "POST" });
 assert.deepEqual(await client.action({ action: "tap", button: "a", frames: 12 }), {
   path: "/action",
   method: "POST",
 });
-assert.equal(calls[7].options.body, JSON.stringify({ action: "tap", button: "a", frames: 12 }));
+assert.equal(calls[6].options.body, JSON.stringify({}));
+assert.equal(calls[7].options.body, JSON.stringify({ objective: { max_steps: 1 } }));
+assert.equal(calls[11].options.body, JSON.stringify({ action: "tap", button: "a", frames: 12 }));
 """,
         text=True,
         capture_output=True,

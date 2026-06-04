@@ -33,6 +33,15 @@ const nodes = {
   states: document.querySelector("#states"),
   saveState: document.querySelector("#save-state"),
   loadState: document.querySelector("#load-state"),
+  agentStatus: document.querySelector("#agent-status"),
+  agentClient: document.querySelector("#agent-client"),
+  agentSteps: document.querySelector("#agent-steps"),
+  agentLast: document.querySelector("#agent-last"),
+  agentLog: document.querySelector("#agent-log"),
+  agentStep: document.querySelector("#agent-step"),
+  runObjective: document.querySelector("#run-objective"),
+  stopAgent: document.querySelector("#stop-agent"),
+  objectiveJson: document.querySelector("#objective-json"),
 };
 
 function setStatus(message, warn = false) {
@@ -102,11 +111,21 @@ async function refreshStates({ updateStatus = true } = {}) {
   );
 }
 
+async function refreshAgent() {
+  const status = await api.agentStatus();
+  nodes.agentStatus.textContent = `agent: ${status.state}`;
+  nodes.agentClient.textContent = `${status.client.mode}${status.client.available ? "" : " unavailable"}`;
+  nodes.agentSteps.textContent = String(status.step_count);
+  nodes.agentLast.textContent = status.last_decision
+    ? `${status.last_decision.action_id}: ${status.last_decision.reason}`
+    : status.last_error || "--";
+}
+
 async function refreshAll() {
   if (state.refreshing) return;
   state.refreshing = true;
   try {
-    await Promise.all([refreshHealth(), refreshSnapshot(), refreshTelemetry(), refreshTraces(), refreshStates()]);
+    await Promise.all([refreshHealth(), refreshSnapshot(), refreshTelemetry(), refreshTraces(), refreshStates(), refreshAgent()]);
     setStatus("ready");
   } catch (error) {
     setStatus(error.message, true);
@@ -150,6 +169,48 @@ async function loadCurrentState() {
   }
 }
 
+function appendAgentLog(message, warn = false) {
+  const item = document.createElement("li");
+  item.textContent = message;
+  item.classList.toggle("warn", warn);
+  nodes.agentLog.prepend(item);
+  while (nodes.agentLog.children.length > 8) {
+    nodes.agentLog.lastElementChild.remove();
+  }
+}
+
+async function runAgentStep() {
+  try {
+    const result = await api.agentStep({});
+    appendAgentLog(`step ${result.step}: ${result.decision.action_id}`);
+    await refreshAll();
+  } catch (error) {
+    appendAgentLog(error.message, true);
+    await refreshAgent();
+  }
+}
+
+async function runObjective() {
+  try {
+    const objective = JSON.parse(nodes.objectiveJson.value);
+    const result = await api.agentObjective({ objective });
+    appendAgentLog(`${result.status}: ${result.steps} step${result.steps === 1 ? "" : "s"}`, result.ok !== true);
+    await refreshAll();
+  } catch (error) {
+    appendAgentLog(error.message, true);
+  }
+}
+
+async function stopAgent() {
+  try {
+    await api.agentStop();
+    appendAgentLog("stop requested");
+    await refreshAgent();
+  } catch (error) {
+    appendAgentLog(error.message, true);
+  }
+}
+
 function pressButton(button) {
   if (state.heldButtons.has(button)) return;
   state.heldButtons.add(button);
@@ -181,6 +242,9 @@ function bindControls() {
   nodes.refresh.addEventListener("click", refreshAll);
   nodes.saveState.addEventListener("click", saveCurrentState);
   nodes.loadState.addEventListener("click", loadCurrentState);
+  nodes.agentStep.addEventListener("click", runAgentStep);
+  nodes.runObjective.addEventListener("click", runObjective);
+  nodes.stopAgent.addEventListener("click", stopAgent);
   document.addEventListener("keydown", (event) => {
     if (event.target instanceof HTMLInputElement) return;
     const button = {
