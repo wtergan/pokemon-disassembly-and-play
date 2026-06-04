@@ -4,9 +4,9 @@
 
 - Phase: implementation
 - Current milestone: M4
-- Current task: M4.T4
-- Last action: 2026-06-04 - Completed M4.T3 by adding planner client/service integration with disabled/fake-first behavior and an opt-in app-server adapter.
-- Next action: Execute M4.T4 by adding a bounded objective runner with step caps, stop conditions, and telemetry-delta verification hooks.
+- Current task: M4.T5
+- Last action: 2026-06-04 - Completed M4.T4 by adding bounded objective runner, objective memory, and context-delta scoring.
+- Next action: Execute M4.T5 by adding agent/objective endpoints and web UI state controls/logs.
 
 ## Execution Ledger
 
@@ -30,6 +30,7 @@
 - 2026-06-04 - M4.T1 complete: added `tools/runtime/agent_context.py`, `RuntimeCore.agent_context()`, and `/agent_context`; the context includes compact target/runtime/state summaries, objective placeholder, available state slots, allowed action affordances, capped recent traces, planner rules, and output contract while omitting private paths, hashes, and raw image payloads.
 - 2026-06-04 - M4.T2 complete: added `tools/runtime/interaction_policy.py` as the source of truth for agent affordances, wired `RuntimeCore.execute_agent_action()`, rejected unknown fields and mismatched button/frame/slot overrides, and traced proposed, validated, rejected, failed, and executed agent action states.
 - 2026-06-04 - M4.T3 complete: added `tools/runtime/codex_client.py`, `tools/runtime/agent_service.py`, optional `[agent]` config, runtime factory wiring for disabled/fake/app-server clients, fake planner step tests, and a disabled-mode preservation test proving manual `/action` style runtime control still works without agent credentials.
+- 2026-06-04 - M4.T4 complete: added `tools/runtime/objective_runner.py`, `objective_memory.py`, and `objective_scoring.py`; `RuntimeCore.run_objective()` now runs short capped objectives with quick checkpoint/recovery hooks, explicit stop handling, context deltas, and success criteria that must match observed context.
 
 ## Validation Evidence
 
@@ -75,6 +76,8 @@
 | 2026-06-04 | M4.T3 app-server probe | `timeout 8s python - <<probe>>` against `codex app-server --stdio` initialize | pass | App-server returned initialize result over JSON-line stdio; app-server mode remains opt-in. |
 | 2026-06-04 | M4.T3 client/config tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_agent_disabled_should_preserve_manual_runtime.py tools/runtime/tests/test_missing_rom_config_should_fail_fast.py tools/runtime/tests/test_runtime_factory_should_create_configured_runtime.py -vv` | pass | `12 passed`; covers disabled preservation, fake planner step, invalid fake planner action, agent config parsing, invalid mode rejection, and factory fake-client wiring. |
 | 2026-06-04 | M4.T3 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `64 passed, 6 skipped`; compile and whitespace checks clean. |
+| 2026-06-04 | M4.T4 objective tests | `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests/test_objective_step_limit_should_stop_runner.py tools/runtime/tests/test_objective_delta_missing_should_not_claim_success.py tools/runtime/tests/test_agent_disabled_should_preserve_manual_runtime.py -vv` | pass | `7 passed`; covers step cap, frame-based success, stop action, and no-delta no-success behavior. |
+| 2026-06-04 | M4.T4 runtime checks | `timeout 60s /tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests`; `timeout 30s /tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime`; `git diff --check` | pass with skips | `68 passed, 6 skipped`; compile and whitespace checks clean. |
 
 ## Review Ledger
 
@@ -96,6 +99,7 @@
   - `.vault/solutions/firered-symbol-resolution-2026-06-04.md`
   - `.vault/solutions/telemetry-schema-normalization-2026-06-04.md`
   - `.vault/solutions/runtime-web-control-deck-solution-2026-06-04.md`
+  - `.vault/solutions/codex-agent-loop-solution-2026-06-04.md`
 - Encounters:
   - `.vault/encounters/mgba-wsl-bridge-2026-06-04.md`
   - `.vault/encounters/mgba-socket-concurrency-2026-06-04.md`

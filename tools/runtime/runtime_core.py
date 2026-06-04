@@ -12,6 +12,7 @@ from .agent_service import AgentService
 from .codex_client import PlannerClient
 from .emulators.base import EmulatorBridge
 from .interaction_policy import AgentActionPolicy
+from .objective_runner import ObjectiveRunner
 from .state_models import empty_telemetry_snapshot
 from .state_slots import StateSlotManager
 from .trace_recorder import TraceRecorder
@@ -47,6 +48,7 @@ class RuntimeCore:
             load_state=self.load_state,
         )
         self.agent_service = AgentService(self)
+        self.objectives = ObjectiveRunner(self)
 
     def health(self) -> dict[str, Any]:
         health = self.emulator.health()
@@ -85,6 +87,12 @@ class RuntimeCore:
 
     def run_agent_step(self, operator_prompt: str | None = None) -> dict[str, Any]:
         return self.agent_service.run_step(operator_prompt=operator_prompt)
+
+    def run_objective(self, objective: dict[str, Any], operator_prompt: str | None = None) -> dict[str, Any]:
+        return self.objectives.run(objective, operator_prompt=operator_prompt)
+
+    def stop_objective(self) -> None:
+        self.objectives.request_stop()
 
     def recent_traces(self) -> list[dict[str, Any]]:
         return self.traces.recent()

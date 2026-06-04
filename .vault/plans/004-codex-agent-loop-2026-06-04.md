@@ -48,7 +48,7 @@ goal_ready: true
   - [x] `.vault/decisions/agent-action-policy-boundaries-2026-06-04.md`
   - [x] `.vault/decisions/agent-client-disabled-default-2026-06-04.md`
 - Solutions:
-  - [ ] `.vault/solutions/codex-agent-loop-solution-2026-06-04.md`
+  - [x] `.vault/solutions/codex-agent-loop-solution-2026-06-04.md`
 - Encounters:
   - [ ] `.vault/encounters/codex-agent-loop-encounter-2026-06-04.md`
 - Visual companion:
@@ -60,8 +60,8 @@ goal_ready: true
 
 - [x] `/agent_context` returns compact, high-signal state for model use without large raw dumps or private paths.
 - [x] Action policy exposes a small validated tool set such as tap, hold, wait, save_state, load_state, inspect, and stop.
-- [ ] Agent loop records every proposed action, validation decision, execution result, and post-action telemetry delta.
-- [ ] Objective runner can execute short bounded goals such as "open menu", "walk one tile", or "wait until field mode" using savestate-backed recovery.
+- [x] Agent loop records every proposed action, validation decision, execution result, and post-action telemetry delta.
+- [x] Objective runner can execute short bounded goals such as "open menu", "walk one tile", or "wait until field mode" using savestate-backed recovery.
 - [ ] UI exposes agent state, current objective, last action, stop/pause controls, and logs.
 - [ ] Tests cover action validation, blocked actions, context compaction, objective runner stop conditions, and trace recording.
 
@@ -136,13 +136,13 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - GOTCHA: Do not require agent credentials to run manual runtime.
   - VALIDATE: `12 passed` focused client/config/factory tests; `64 passed, 6 skipped` full runtime tests; `codex app-server --stdio` initialize probe.
 
-- [ ] Step 4: Implement bounded objective runner.
+- [x] Step 4: Implement bounded objective runner.
   - ACTION: Add observe -> decide -> act -> verify loop with step caps, state deltas, savestate recovery hooks, and stop conditions.
   - IMPLEMENT: Start with short objectives only.
   - FILES: `tools/runtime/objective_runner.py`, `tools/runtime/objective_memory.py`, `tools/runtime/objective_scoring.py`
   - MIRROR: Pocodex objective runner and memory.
   - GOTCHA: Avoid claiming progress from action count alone; verify against telemetry deltas.
-  - VALIDATE: Fake runtime objective tests.
+  - VALIDATE: `7 passed` focused objective/agent tests; `68 passed, 6 skipped` full runtime tests.
 
 - [ ] Step 5: Expose agent endpoints and UI state.
   - ACTION: Add endpoints and web controls for agent context, planner step, routine/objective run, pause, stop, and logs.
@@ -156,7 +156,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
 
 - [x] Agent context schema documents size limits and privacy boundaries.
 - [x] Action policy documents safety invariants and cooldowns.
-- [ ] Objective runner documents stop conditions and verification expectations.
+- [x] Objective runner documents stop conditions and verification expectations.
 
 ## Testing Strategy (TDD)
 
@@ -208,7 +208,7 @@ telemetry -> agent_context -> Codex planner -> action policy -> runtime action -
   - `M4.T5` Agent endpoints/UI
 - Dependencies:
   - `M4` depends on plans 001 through 003.
-- Current state: M4.T3 complete; M4.T4 ready
+- Current state: M4.T4 complete; M4.T5 ready
 - Handoff source: `.vault/goals/goal-firered-runtime-2026-06-04/handoff.md`
 
 ## Verification Contract
@@ -289,3 +289,4 @@ Final evidence:
 - 2026-06-04: M4.T1 complete. Added privacy-safe `tools/runtime/agent_context.py`, exposed `RuntimeCore.agent_context()` and `/agent_context`, added context privacy/size/action tests, verified POSIX and Windows path omission, and smoked the endpoint against the fake runtime.
 - 2026-06-04: M4.T2 complete. Added `tools/runtime/interaction_policy.py`, moved advertised agent affordances behind the policy source of truth, wired `RuntimeCore.execute_agent_action()`, traced proposed/validated/rejected/executed agent actions, and covered blocked overrides plus bounded tap/wait/save/load/inspect/stop behavior.
 - 2026-06-04: M4.T3 complete. Added disabled/fake/app-server planner clients, `AgentService`, runtime client configuration hooks, optional `[agent]` config, fake planner step tests, disabled manual-runtime preservation tests, and an app-server stdio initialize probe.
+- 2026-06-04: M4.T4 complete. Added bounded `ObjectiveRunner`, objective memory, scoring/delta helpers, `RuntimeCore.run_objective()`, step-limit/stop/success tests, and no-delta no-success regression coverage.
