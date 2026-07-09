@@ -20,7 +20,9 @@ detail in `.vault/plans/`.
 - Plan 004 is complete at fake-runtime/API/browser level: context, action policy, planner service, bounded objective runner, HTTP endpoints, and web control-deck agent state are implemented. Real mGBA objective smoke remains an environment check.
 - Plan 005 is complete: FireRed/LeafGreen Rev 1 profiles, hash checks, LeafGreen adapter path, target-scoped runtime storage, the evidence-based BizHawk fallback decision, setup docs, and real target smokes are complete.
 - Plan 001 is complete: the runtime can launch real mGBA, serve the basic deck, capture snapshots, accept validated actions, record traces, and expose minimal FireRed telemetry.
-- Active goal overlay: `.vault/goals/goal-firered-runtime-2026-06-04/`.
+- A fresh 2026-07-09 validation/follow-up plan hardened reverse-socket startup
+  and objective smoke scoring, then recorded a real three-input autonomous
+  FireRed trace. Semantic gameplay remains unproven until symbols expose state.
 
 ## Active Plans
 
@@ -31,6 +33,7 @@ detail in `.vault/plans/`.
 | `.vault/plans/003-runtime-web-control-deck-2026-06-04.md` | Build the Pocodex-style browser control deck, trace UX, manual controls, and save-state surfaces. | Complete | Preserve as manual operation baseline; continue with plan 004. |
 | `.vault/plans/004-codex-agent-loop-2026-06-04.md` | Add planner-safe Codex agent integration, `agent_context`, action policy, and objective loop. | Complete | Preserve as agent-loop baseline; real mGBA objective smoke remains a later environment check. |
 | `.vault/plans/005-leafgreen-support-and-hardening-2026-06-04.md` | Add LeafGreen Rev 1 support, fallback bridge checks, packaging/docs, and regression hardening. | Complete | Preserve as target-support baseline; revisit only for new target revisions or bridge failures. |
+| `.vault/plans/006-runtime-reconnect-and-autonomy-smoke-2026-07-09.md` | Harden Windows/WSL mGBA reconnect behavior and prove a bounded autonomous input smoke. | Complete | Generate symbols before attempting semantic autonomous play claims. |
 
 ## Active Goal Runs
 

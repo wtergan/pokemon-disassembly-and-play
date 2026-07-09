@@ -54,7 +54,7 @@ class MgbaSocketBridge:
         self,
         launch_config: MgbaLaunchConfig,
         screenshot_dir: Path,
-        connect_timeout: float = 10.0,
+        connect_timeout: float = 20.0,
         request_timeout: float = 5.0,
     ) -> None:
         self._config = launch_config

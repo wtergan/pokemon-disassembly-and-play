@@ -5,12 +5,27 @@ from __future__ import annotations
 from typing import Any
 
 
-def evaluate_objective(context: dict[str, Any], objective: dict[str, Any]) -> dict[str, Any]:
+def evaluate_objective(
+    context: dict[str, Any],
+    objective: dict[str, Any],
+    *,
+    agent_steps: int = 0,
+) -> dict[str, Any]:
     """Evaluate supported objective success criteria against agent context."""
 
     success = objective.get("success") or {}
     if not success:
         return {"success": False, "reason": "no_success_criteria"}
+
+    agent_steps_at_least = success.get("agent_steps_at_least")
+    if agent_steps_at_least is not None:
+        target = int(agent_steps_at_least)
+        return {
+            "success": agent_steps >= target,
+            "reason": "agent_steps_at_least",
+            "observed": agent_steps,
+            "target": target,
+        }
 
     runtime_frame_at_least = success.get("runtime_frame_at_least")
     if runtime_frame_at_least is not None:

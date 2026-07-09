@@ -22,6 +22,15 @@ local log_file = getenv("POKEMON_RUNTIME_LOG_FILE", nil)
 local server = nil
 local clients = {}
 local next_client_id = 1
+local client_connected = false
+local client_connect_attempts = 0
+local next_client_connect_frame = 0
+
+-- Windows-to-WSL loopback forwarding can become available a few frames after
+-- mGBA starts. Keep retries finite and frame-spaced so a missing runtime does
+-- not continuously block the emulator's Lua callback.
+local MAX_CLIENT_CONNECT_ATTEMPTS = 20
+local CLIENT_CONNECT_RETRY_FRAMES = 30
 
 local KEYS = {
 	a = 1,
@@ -192,22 +201,48 @@ local function accept_client()
 end
 
 local function start_client()
-	local sock = socket.tcp()
+	if client_connected or client_connect_attempts >= MAX_CLIENT_CONNECT_ATTEMPTS then
+		return false
+	end
+	client_connect_attempts = client_connect_attempts + 1
+	local sock, connect_err = socket.connect(connect_host, port)
+	if not sock then
+		next_client_connect_frame = emu:currentFrame() + CLIENT_CONNECT_RETRY_FRAMES
+		runtime_log(
+			"connect attempt "
+				.. tostring(client_connect_attempts)
+				.. "/"
+				.. tostring(MAX_CLIENT_CONNECT_ATTEMPTS)
+				.. " failed to "
+				.. tostring(connect_host)
+				.. ":"
+				.. tostring(port)
+				.. ": "
+				.. tostring(connect_err),
+			true
+		)
+		return false
+	end
 	local id = next_client_id
 	next_client_id = id + 1
 	clients[id] = sock
 	sock:add("received", function() client_received(id) end)
 	sock:add("error", function() stop_client(id) end)
-	if sock:connect(connect_host, port) then
-		runtime_log("connected to " .. tostring(connect_host) .. ":" .. tostring(port))
-	else
-		runtime_log("failed to connect to " .. tostring(connect_host) .. ":" .. tostring(port), true)
-		stop_client(id)
+	client_connected = true
+	runtime_log("connected to " .. tostring(connect_host) .. ":" .. tostring(port))
+	return true
+end
+
+local function retry_client_connection()
+	if client_connected or emu:currentFrame() < next_client_connect_frame then
+		return
 	end
+	start_client()
 end
 
 if connection_mode == "client" then
 	start_client()
+	callbacks:add("frame", retry_client_connection)
 else
 	server = socket.bind(bind_host, port)
 	if not server then

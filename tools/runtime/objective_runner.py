@@ -70,7 +70,7 @@ class ObjectiveRunner:
                 memory.append_step({"kind": "checkpoint_failed", "error": str(exc)})
 
         initial_context = self._runtime.agent_context()
-        initial_score = evaluate_objective(initial_context, objective)
+        initial_score = evaluate_objective(initial_context, objective, agent_steps=0)
         if initial_score["success"]:
             memory.finish()
             return _result("success", objective, memory, initial_score)
@@ -91,7 +91,7 @@ class ObjectiveRunner:
                 return _result("error", objective, memory, initial_score, error=str(exc))
 
             after = self._runtime.agent_context()
-            score = evaluate_objective(after, objective)
+            score = evaluate_objective(after, objective, agent_steps=step_index)
             delta = summarize_context_delta(before, after)
             memory.append_step(
                 {
@@ -111,7 +111,7 @@ class ObjectiveRunner:
                 return _result("success", objective, memory, score)
 
         final_context = self._runtime.agent_context()
-        final_score = evaluate_objective(final_context, objective)
+        final_score = evaluate_objective(final_context, objective, agent_steps=settings.max_steps)
         memory.finish()
         return _result("step_limit", objective, memory, final_score)
 
