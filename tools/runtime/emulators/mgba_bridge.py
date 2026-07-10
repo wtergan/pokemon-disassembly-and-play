@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from ..storage import prepare_disposable_rom
 from .base import EmulatorHealth, Snapshot
 
 
@@ -45,6 +46,7 @@ class MgbaLaunchConfig:
     target_fps: float = 60.0
     script_cache_dir: Path | None = None
     log_file: Path | None = None
+    battery_workspace: Path | None = None
 
 
 class MgbaSocketBridge:
@@ -75,11 +77,12 @@ class MgbaSocketBridge:
     def build_launch_command(self) -> list[str]:
         """Build the mGBA command without starting a process."""
 
+        rom_path = self._runtime_rom_path()
         return [
             str(self._config.executable),
             "--script",
             self._path_for_emulator(self._lua_bridge_for_emulator()),
-            self._path_for_emulator(self._config.rom_path),
+            self._path_for_emulator(rom_path),
         ]
 
     def launch(self) -> None:
@@ -282,6 +285,13 @@ class MgbaSocketBridge:
         if not self._config.windows_paths:
             return self._config.lua_bridge
         return self._stage_windows_lua_bridge()
+
+    def _runtime_rom_path(self) -> Path:
+        """Return the owned ROM or an isolated copy that contains battery saves."""
+
+        if self._config.battery_workspace is None:
+            return self._config.rom_path
+        return prepare_disposable_rom(self._config.rom_path, self._config.battery_workspace)
 
     def _stage_windows_lua_bridge(self) -> Path:
         cache_dir = self._windows_cache_dir()

@@ -5,7 +5,7 @@ from pathlib import Path
 from tools.runtime.runtime_factory import create_runtime_from_config_path
 
 
-def test_runtime_factory_should_create_configured_firered_runtime_without_launch(tmp_path: Path) -> None:
+def test_runtime_factory_should_create_configured_firered_runtime_without_launch(tmp_path: Path, monkeypatch) -> None:
     rom_path = tmp_path / "firered_rev1.gba"
     config_path = tmp_path / "runtime.local.toml"
     rom_path.write_bytes(b"fixture rom")
@@ -31,6 +31,7 @@ cache_dir = ".runtime-cache"
         encoding="utf-8",
     )
 
+    monkeypatch.chdir(tmp_path)
     runtime = create_runtime_from_config_path(config_path, launch=False)
     telemetry = runtime.telemetry()
 

@@ -111,8 +111,13 @@ class FireRedTelemetryReader:
             if self.map_registry is not None
             else {"available": False, "reason": "map_registry_unavailable"}
         )
+        map_available = bool(map_context.get("available"))
         return {
-            "available": True,
+            # Allocated save blocks exist before the player reaches a real
+            # field map. A known source map is the minimum semantic proof that
+            # coordinates describe a controllable overworld location.
+            "available": map_available,
+            "reason": None if map_available else map_context.get("reason", "unknown_map"),
             "map_group": map_group,
             "map_num": map_num,
             "warp_id": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_WARP_ID),

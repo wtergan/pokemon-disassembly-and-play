@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import re
+import shutil
 from typing import Protocol
 
 
@@ -49,6 +50,25 @@ def target_scoped_runtime_paths(paths: RuntimePathRoots, profile_key: str) -> Ru
         screenshot_dir=_scoped(paths.screenshot_dir, profile_key),
         cache_dir=_scoped(paths.cache_dir, profile_key),
     )
+
+
+def prepare_disposable_rom(owned_rom: Path, workspace: Path) -> Path:
+    """Copy `owned_rom` into a contained mGBA battery-save workspace.
+
+    mGBA derives its battery-save filename from the ROM path. Launching the
+    copy therefore forces the adjacent `.sav` file to remain runtime-owned,
+    while configuration hash validation continues to identify the original ROM.
+    """
+
+    source = owned_rom.expanduser().resolve()
+    root = workspace.expanduser()
+    root.mkdir(parents=True, exist_ok=True)
+    root = root.resolve()
+    destination = (root / source.name).resolve()
+    if destination.parent != root:
+        raise ValueError("disposable ROM path escaped runtime workspace")
+    shutil.copy2(source, destination)
+    return destination
 
 
 def _scoped(root: Path, profile_key: str) -> Path:

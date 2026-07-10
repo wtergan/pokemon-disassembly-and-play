@@ -15,7 +15,11 @@ from .config import RuntimeConfig, load_runtime_config
 from .codex_client import CodexAppServerClient, FakeAgentClient
 from .emulators.mgba_bridge import ConnectionMode, FrameAdvanceMode, MgbaLaunchConfig, MgbaSocketBridge
 from .games.firered.map_data import try_load_map_registry
-from .games.firered.symbols import discover_symbol_table
+from .games.firered.symbols import (
+    FIRERED_REV1_RUNTIME_SYMBOLS,
+    discover_symbol_table,
+    validate_firered_rev1_runtime_symbols,
+)
 from .games.firered.telemetry import FireRedTelemetryReader
 from .games.firered.text import try_load_charmap
 from .games.leafgreen.telemetry import LeafGreenTelemetryReader
@@ -33,16 +37,31 @@ def create_runtime_from_config(config: RuntimeConfig, launch: bool = True, repo_
     """Build a runtime core for the configured target and emulator."""
 
     storage = target_scoped_runtime_paths(config.runtime, config.target.profile.key)
-    emulator = _create_mgba_bridge(config, screenshot_dir=storage.screenshot_dir)
+    battery_workspace = storage.cache_dir / "battery"
+    if config.mgba.windows_paths and config.mgba.script_cache_dir is not None:
+        # Windows mGBA cannot read the Linux-only worktree. Reuse the existing
+        # Windows-visible staging root while retaining a target-scoped battery
+        # subdirectory.
+        battery_workspace = config.mgba.script_cache_dir / "battery" / config.target.profile.key
+    emulator = _create_mgba_bridge(
+        config,
+        screenshot_dir=storage.screenshot_dir,
+        battery_workspace=battery_workspace,
+    )
     if launch:
         emulator.launch()
     telemetry_reader = _create_telemetry_reader(config, repo_root=repo_root or Path.cwd())
-    runtime = RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=storage.state_dir)
+    state_dir = storage.state_dir
+    if config.mgba.windows_paths and config.mgba.script_cache_dir is not None:
+        # Savestates are written by mGBA, so they require the same
+        # Windows-visible staging boundary as the disposable ROM/battery file.
+        state_dir = config.mgba.script_cache_dir / "states" / config.target.profile.key
+    runtime = RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=state_dir)
     _configure_agent(runtime, config, repo_root=repo_root or Path.cwd())
     return runtime
 
 
-def _create_mgba_bridge(config: RuntimeConfig, *, screenshot_dir: Path) -> MgbaSocketBridge:
+def _create_mgba_bridge(config: RuntimeConfig, *, screenshot_dir: Path, battery_workspace: Path) -> MgbaSocketBridge:
     return MgbaSocketBridge(
         MgbaLaunchConfig(
             executable=Path(config.mgba.executable),
@@ -56,6 +75,7 @@ def _create_mgba_bridge(config: RuntimeConfig, *, screenshot_dir: Path) -> MgbaS
             frame_advance_mode=cast(FrameAdvanceMode, config.mgba.frame_advance_mode),
             script_cache_dir=config.mgba.script_cache_dir,
             log_file=config.mgba.log_file,
+            battery_workspace=battery_workspace,
         ),
         screenshot_dir=screenshot_dir,
     )
@@ -70,6 +90,13 @@ def _create_telemetry_reader(config: RuntimeConfig, repo_root: Path) -> FireRedT
         symbol_basename=config.target.profile.symbol_basename,
         build_name=config.target.profile.build_name,
     )
+    if config.target.profile.adapter == "firered" and symbols.coverage(FIRERED_REV1_RUNTIME_SYMBOLS).available:
+        # Fixture configs may deliberately disable hashing. Real local configs
+        # default to verification and cannot reach this point on a mismatch.
+        validate_firered_rev1_runtime_symbols(
+            symbols,
+            rom_matches_expected=config.target.matches_expected or not config.target.verify_hash,
+        )
     reader_class = FireRedTelemetryReader if config.target.profile.adapter == "firered" else LeafGreenTelemetryReader
     return reader_class(
         symbols=symbols,

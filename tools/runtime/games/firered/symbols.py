@@ -22,6 +22,10 @@ FIRERED_REV1_CORE_SYMBOLS = (
     "gTasks",
     "gMain",
 )
+FIRERED_REV1_RUNTIME_SYMBOLS = (
+    *FIRERED_REV1_CORE_SYMBOLS,
+    "gPaletteFade",
+)
 
 
 _OBJDUMP_SYMBOL_RE = re.compile(
@@ -33,6 +37,10 @@ _LD_MAP_SYMBOL_RE = re.compile(r"^\s*0x(?P<address>[0-9A-Fa-f]{8,})\s+(?P<name>[
 
 class SymbolTableError(ValueError):
     """Raised when a requested symbol is unavailable."""
+
+
+class SymbolValidationError(ValueError):
+    """Raised when symbols cannot safely describe the configured FireRed target."""
 
 
 @dataclass(frozen=True)
@@ -121,6 +129,25 @@ def load_symbol_table(path: Path) -> SymbolTable:
     return SymbolTable(addresses=parse_symbol_text(path.read_text(encoding="utf-8")), source=path)
 
 
+def validate_firered_rev1_runtime_symbols(symbols: SymbolTable, *, rom_matches_expected: bool) -> SymbolTable:
+    """Require a verified Rev 1 ROM and complete symbols before semantic decoding.
+
+    A symbol table describes source addresses, not the bytes presently running in
+    an emulator. The target hash gate is deliberately repeated here so a caller
+    cannot accidentally enable stateful telemetry by passing a table alone.
+    """
+
+    if not rom_matches_expected:
+        raise SymbolValidationError("semantic telemetry requires a verified FireRed Rev 1 ROM")
+    coverage = symbols.coverage(FIRERED_REV1_RUNTIME_SYMBOLS)
+    if coverage.missing:
+        raise SymbolValidationError(f"missing required symbols: {', '.join(coverage.missing)}")
+    invalid = [name for name, address in coverage.addresses.items() if not _is_gba_symbol_address(address)]
+    if invalid:
+        raise SymbolValidationError(f"symbols have invalid GBA addresses: {', '.join(invalid)}")
+    return symbols
+
+
 def parse_symbol_text(text: str) -> dict[str, int]:
     """Parse supported symbol text formats into `{name: address}`."""
 
@@ -134,3 +161,9 @@ def parse_symbol_text(text: str) -> dict[str, int]:
             continue
         symbols[match.group("name")] = int(match.group("address"), 16)
     return symbols
+
+
+def _is_gba_symbol_address(address: int) -> bool:
+    """Return whether an address belongs to a GBA ROM or writable memory region."""
+
+    return 0x02000000 <= address < 0x04000000 or 0x08000000 <= address < 0x0A000000

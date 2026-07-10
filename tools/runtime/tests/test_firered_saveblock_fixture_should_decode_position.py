@@ -180,6 +180,7 @@ def test_firered_saveblock_fixture_should_decode_position(tmp_path: Path) -> Non
     assert telemetry["save_blocks"]["gSaveBlock2Ptr"]["encryption_key"] == 0x12345678
     assert telemetry["location"] == {
         "available": True,
+        "reason": None,
         "map_group": 3,
         "map_num": 0,
         "warp_id": -1,
