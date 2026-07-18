@@ -20,6 +20,7 @@ from typing import Literal
 
 from ..storage import prepare_disposable_rom
 from .base import EmulatorHealth, Snapshot
+from .windows_process import WindowsProcess
 
 
 class MgbaBridgeError(RuntimeError):
@@ -64,6 +65,7 @@ class MgbaSocketBridge:
         self._connect_timeout = connect_timeout
         self._request_timeout = request_timeout
         self._process: subprocess.Popen[bytes] | None = None
+        self._windows_process: WindowsProcess | None = None
         self._socket: socket.socket | None = None
         self._listen_socket: socket.socket | None = None
         self._file = None
@@ -113,7 +115,16 @@ class MgbaSocketBridge:
         try:
             if self._config.connection_mode == "lua_client":
                 self._start_listener()
-            self._process = subprocess.Popen(self.build_launch_command(), env=env, cwd=cwd)
+            command = self.build_launch_command()
+            if self._config.windows_paths:
+                self._windows_process = WindowsProcess.start(
+                    wsl_to_windows_path(self._config.executable),
+                    command[1:],
+                    wsl_to_windows_path(self._config.executable.parent),
+                    env,
+                )
+            else:
+                self._process = subprocess.Popen(command, env=env, cwd=cwd)
             if self._config.connection_mode == "lua_client":
                 self._accept_connection()
             else:
@@ -155,6 +166,9 @@ class MgbaSocketBridge:
         if self._listen_socket is not None:
             self._listen_socket.close()
             self._listen_socket = None
+        if self._windows_process is not None:
+            self._windows_process.close()
+            self._windows_process = None
         if self._process is not None and self._process.poll() is None:
             self._process.terminate()
             self._process = None
@@ -204,6 +218,21 @@ class MgbaSocketBridge:
         self._update_frame_count(fields)
         return int(fields["value"])
 
+    def read_range(self, address: int, length: int) -> bytes:
+        """Read one bounded memory page instead of one socket request per byte."""
+
+        if not 1 <= length <= 4096:
+            raise ValueError("read_range length must be between 1 and 4096")
+        fields = self._request("read_range", str(address), str(length))
+        self._update_frame_count(fields)
+        try:
+            data = bytes.fromhex(fields["data"])
+        except (KeyError, ValueError) as exc:
+            raise MgbaBridgeError("mGBA returned invalid memory bytes") from exc
+        if len(data) != length:
+            raise MgbaBridgeError("mGBA returned an incomplete memory range")
+        return data
+
     def save_state(self, path: Path) -> None:
         """Save mGBA state to `path` through the Lua bridge."""
 
@@ -245,6 +274,7 @@ class MgbaSocketBridge:
 
     def _attach_socket(self, bridge_socket: socket.socket) -> None:
         self._socket = bridge_socket
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self._socket.settimeout(self._request_timeout)
         self._file = self._socket.makefile("rwb", buffering=0)
         self.health()

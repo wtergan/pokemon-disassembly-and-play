@@ -33,16 +33,17 @@ local MAX_CLIENT_CONNECT_ATTEMPTS = 20
 local CLIENT_CONNECT_RETRY_FRAMES = 30
 
 local KEYS = {
-	a = 1,
-	b = 2,
-	select = 4,
-	start = 8,
-	left = 16,
-	right = 32,
-	up = 64,
-	down = 128,
-	r = 256,
-	l = 512,
+	-- addKey/clearKey accept bit indices, unlike addKeys/clearKeys.
+	a = 0,
+	b = 1,
+	select = 2,
+	start = 3,
+	right = 4,
+	left = 5,
+	up = 6,
+	down = 7,
+	r = 8,
+	l = 9,
 }
 
 local function trim(value)
@@ -129,6 +130,16 @@ local function handle(sock, line)
 		ok(sock, { "value=" .. tostring(emu:read16(tonumber(parts[2]))), frame_field() })
 	elseif command == "read32" then
 		ok(sock, { "value=" .. tostring(emu:read32(tonumber(parts[2]))), frame_field() })
+	elseif command == "read_range" then
+		local address = tonumber(parts[2])
+		local length = tonumber(parts[3])
+		if not address or not length or length < 1 or length > 4096 then
+			err(sock, "read_range length must be between 1 and 4096")
+			return
+		end
+		local bytes = emu:readRange(address, length)
+		local hex = bytes:gsub(".", function(c) return string.format("%02x", string.byte(c)) end)
+		ok(sock, { "data=" .. hex, frame_field() })
 	elseif command == "screenshot" then
 		local path = parts[2]
 		if not path then

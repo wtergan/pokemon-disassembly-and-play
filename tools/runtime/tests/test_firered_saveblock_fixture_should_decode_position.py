@@ -101,7 +101,7 @@ def test_firered_saveblock_fixture_should_decode_position(tmp_path: Path) -> Non
             "gMain": 0x03003000,
             "gPaletteFade": 0x02002000,
             "gTasks": 0x03004000,
-            "CB2_ReturnToField": 0x08001000,
+            "CB2_Overworld": 0x08001000,
         },
         source=Path("pokefirered_rev1.sym"),
     )
@@ -110,9 +110,9 @@ def test_firered_saveblock_fixture_should_decode_position(tmp_path: Path) -> Non
     save_block_2 = 0x02024000
     emulator.write32(0x03005008, save_block_1)
     emulator.write32(0x0300500C, save_block_2)
-    emulator.write32(0x03003000 + 0x04, 0x08001000)
+    emulator.write32(0x03003000 + 0x04, 0x08001001)
     emulator.write16(save_block_1 + 0x0000, 10)
-    emulator.write16(save_block_1 + 0x0002, 20)
+    emulator.write16(save_block_1 + 0x0002, 19)
     emulator.write8(save_block_1 + 0x0004, 3)
     emulator.write8(save_block_1 + 0x0005, 0)
     emulator.write8(save_block_1 + 0x0006, 255)
@@ -185,14 +185,14 @@ def test_firered_saveblock_fixture_should_decode_position(tmp_path: Path) -> Non
         "map_num": 0,
         "warp_id": -1,
         "player_x": 10,
-        "player_y": 20,
+        "player_y": 19,
         "map": telemetry["location"]["map"],
     }
     assert telemetry["location"]["map"]["id"] == "MAP_PALLET_TOWN"
     assert telemetry["location"]["map"]["layout"]["width"] == 24
     assert telemetry["mode"]["name"] == "field"
-    assert telemetry["mode"]["confidence"] == "medium"
-    assert telemetry["mode"]["evidence"]["gMain"]["callback2_name"] == "CB2_ReturnToField"
+    assert telemetry["mode"]["confidence"] == "high"
+    assert telemetry["mode"]["evidence"]["gMain"]["callback2_name"] == "CB2_Overworld"
     assert telemetry["camera"] == {
         "available": True,
         "symbol_address": 0x02001000,
@@ -246,9 +246,12 @@ def test_invalid_saveblock2_pointer_should_not_read_encryption_key() -> None:
             "gSaveBlock1Ptr": 0x03005008,
             "gSaveBlock2Ptr": 0x0300500C,
             "gCamera": 0x02001000,
+            "gMain": 0x03003000,
+            "CB2_Overworld": 0x08001000,
         }
     )
     emulator = AddressedMemoryEmulator()
+    emulator.write32(0x03003000 + 0x04, 0x08001001)
     emulator.write32(0x03005008, 0x02025000)
     emulator.write32(0x0300500C, 0x00000001)
 
@@ -267,9 +270,12 @@ def test_bad_party_checksum_should_report_unavailable_member() -> None:
             "gSaveBlock1Ptr": 0x03005008,
             "gSaveBlock2Ptr": 0x0300500C,
             "gCamera": 0x02001000,
+            "gMain": 0x03003000,
+            "CB2_Overworld": 0x08001000,
         }
     )
     emulator = AddressedMemoryEmulator()
+    emulator.write32(0x03003000 + 0x04, 0x08001001)
     save_block_1 = 0x02025000
     save_block_2 = 0x02024000
     emulator.write32(0x03005008, save_block_1)

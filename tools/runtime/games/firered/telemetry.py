@@ -14,6 +14,7 @@ from typing import Any
 
 from ...emulators.base import EmulatorBridge
 from ...state_models import TELEMETRY_SCHEMA_VERSION, normalize_telemetry_snapshot
+from .memory import BufferedMemory
 from .map_data import FireRedMapRegistry
 from .mode import classify_runtime_mode
 from .save_blocks import (
@@ -23,7 +24,9 @@ from .save_blocks import (
     SAVE_BLOCK_1_POS_X,
     SAVE_BLOCK_1_POS_Y,
     SAVE_BLOCK_2_ENCRYPTION_KEY,
-    is_gba_address,
+    SAVE_BLOCK_1_SIZE,
+    SAVE_BLOCK_2_SIZE,
+    is_save_block_pointer,
     read_save_block_summary,
 )
 from .symbols import SymbolTable
@@ -50,11 +53,25 @@ class FireRedTelemetryReader:
     def __call__(self, emulator: EmulatorBridge) -> dict[str, Any]:
         """Read the smallest source-backed telemetry payload from `emulator`."""
 
+        if callable(getattr(emulator, "read_range", None)):
+            emulator = BufferedMemory(emulator)
         save_block_1 = self._read_pointer(emulator, "gSaveBlock1Ptr")
         save_block_2 = self._read_pointer(emulator, "gSaveBlock2Ptr")
         symbol_coverage = self.symbols.coverage(_TELEMETRY_SYMBOLS)
 
         location = self._read_location(emulator, save_block_1["value"])
+        mode = classify_runtime_mode(emulator, self.symbols, location_available=location["available"])
+        overworld_callback_active = mode["evidence"]["gMain"].get("callback2_name") == "CB2_Overworld"
+        save_summary = (
+            read_save_block_summary(
+                emulator,
+                save_block_1["value"],
+                save_block_2["value"],
+                text_decoder=self.text_decoder,
+            )
+            if overworld_callback_active
+            else {"available": False, "reason": "overworld_callback_not_confirmed"}
+        )
         payload: dict[str, Any] = {
             "schema_version": TELEMETRY_SCHEMA_VERSION,
             "game": self.game,
@@ -71,16 +88,11 @@ class FireRedTelemetryReader:
                 "gSaveBlock2Ptr": save_block_2,
             },
             "location": location,
-            "mode": classify_runtime_mode(emulator, self.symbols, location_available=location["available"]),
+            "mode": mode,
             "camera": self._read_camera(emulator),
-            "save": read_save_block_summary(
-                emulator,
-                save_block_1["value"],
-                save_block_2["value"],
-                text_decoder=self.text_decoder,
-            ),
+            "save": save_summary,
         }
-        if _is_valid_pointer(save_block_2["value"]):
+        if overworld_callback_active and is_save_block_pointer(save_block_2["value"], SAVE_BLOCK_2_SIZE):
             payload["save_blocks"]["gSaveBlock2Ptr"]["encryption_key"] = emulator.read32(
                 save_block_2["value"] + SAVE_BLOCK_2_ENCRYPTION_KEY
             )
@@ -91,7 +103,8 @@ class FireRedTelemetryReader:
         if symbol_address is None:
             return {"available": False, "symbol_address": None, "value": None, "reason": "missing_symbol"}
         pointer = emulator.read32(symbol_address)
-        pointer_is_valid = _is_valid_pointer(pointer)
+        pointer_size = SAVE_BLOCK_1_SIZE if symbol_name == "gSaveBlock1Ptr" else SAVE_BLOCK_2_SIZE
+        pointer_is_valid = is_save_block_pointer(pointer, pointer_size)
         return {
             "available": pointer_is_valid,
             "symbol_address": symbol_address,
@@ -100,7 +113,7 @@ class FireRedTelemetryReader:
         }
 
     def _read_location(self, emulator: EmulatorBridge, save_block_1: int | None) -> dict[str, Any]:
-        if not _is_valid_pointer(save_block_1):
+        if not is_save_block_pointer(save_block_1, SAVE_BLOCK_1_SIZE):
             return {"available": False, "reason": "missing_save_block_1"}
         map_group = _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_GROUP)
         map_num = _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_MAP_NUM)
@@ -112,12 +125,21 @@ class FireRedTelemetryReader:
             else {"available": False, "reason": "map_registry_unavailable"}
         )
         map_available = bool(map_context.get("available"))
+        position_available = False
+        position_reason = map_context.get("reason", "unknown_map")
+        if map_available:
+            layout = map_context.get("layout")
+            width = layout.get("width") if isinstance(layout, dict) else None
+            height = layout.get("height") if isinstance(layout, dict) else None
+            if not isinstance(width, int) or not isinstance(height, int) or width <= 0 or height <= 0:
+                position_reason = "map_layout_unavailable"
+            else:
+                position_available = 0 <= player_x < width and 0 <= player_y < height
+                position_reason = None if position_available else "position_outside_layout"
+                map_context["position"]["within_layout"] = position_available
         return {
-            # Allocated save blocks exist before the player reaches a real
-            # field map. A known source map is the minimum semantic proof that
-            # coordinates describe a controllable overworld location.
-            "available": map_available,
-            "reason": None if map_available else map_context.get("reason", "unknown_map"),
+            "available": position_available,
+            "reason": position_reason,
             "map_group": map_group,
             "map_num": map_num,
             "warp_id": _read_s8(emulator, save_block_1 + SAVE_BLOCK_1_LOCATION_WARP_ID),
@@ -149,10 +171,6 @@ class FireRedTelemetryReader:
             "expected_sha1": self.expected_sha1,
             "matches_expected": sha1 == self.expected_sha1,
         }
-
-def _is_valid_pointer(pointer: int | None) -> bool:
-    return pointer is not None and pointer != 0 and is_gba_address(pointer)
-
 
 def _read_s8(emulator: EmulatorBridge, address: int) -> int:
     value = emulator.read8(address)

@@ -16,7 +16,7 @@ from .symbols import SymbolTable
 G_MAIN_CALLBACK2 = 0x004
 G_MAIN_FLAGS = 0x439
 G_MAIN_IN_BATTLE = 0x02
-G_PALETTE_FADE_ACTIVE_BYTE = 0x08
+G_PALETTE_FADE_ACTIVE_BYTE = 0x07
 G_PALETTE_FADE_ACTIVE_MASK = 0x80
 TASK_SIZE = 40
 TASK_FUNC = 0x00
@@ -24,7 +24,7 @@ TASK_IS_ACTIVE = 0x04
 TASK_COUNT = 16
 
 _BATTLE_CALLBACKS = {"BattleMainCB2", "CB2_InitBattle", "CB2_HandleStartBattle", "CB2_InitBattleInternal"}
-_FIELD_CALLBACK_PREFIXES = ("CB2_ReturnToField", "CB2_LoadMap", "CB2_EnterField")
+_OVERWORLD_CALLBACK = "CB2_Overworld"
 _MENU_CALLBACK_KEYWORDS = ("Menu", "Bag", "Party", "Pokedex", "Option", "Summary", "Trade", "Shop", "PC")
 _DIALOGUE_TASK_KEYWORDS = ("Message", "Text", "Dialogue")
 _MENU_TASK_KEYWORDS = ("Menu", "Bag", "Party", "Pokedex", "Option", "Shop", "PC")
@@ -51,10 +51,10 @@ def classify_runtime_mode(emulator: EmulatorBridge, symbols: SymbolTable, locati
         return _mode("dialogue_textbox", "medium", "active_text_or_message_task", evidence)
     if any(_contains_keyword(name, _MENU_CALLBACK_KEYWORDS) for name in names):
         return _mode("menu", "medium", "callback_or_task_menu_name", evidence)
-    if callback_name and callback_name.startswith(_FIELD_CALLBACK_PREFIXES):
-        return _mode("field", "medium", "field_callback", evidence)
+    if callback_name == _OVERWORLD_CALLBACK:
+        return _mode("field", "high", "gMain.callback2_overworld", evidence)
     if location_available:
-        return _mode("field", "low", "valid_location_without_stronger_mode_signal", evidence)
+        return _mode("unknown", "low", "valid_location_without_overworld_callback", evidence)
     return _mode("unknown", "low", "insufficient_symbols_or_state", evidence)
 
 
@@ -63,12 +63,14 @@ def _read_main_evidence(emulator: EmulatorBridge, symbols: SymbolTable) -> dict[
     if address is None:
         return {"available": False, "reason": "missing_symbol"}
     callback2 = emulator.read32(address + G_MAIN_CALLBACK2)
+    callback2_normalized = _normalize_thumb_pointer(callback2)
     flags = emulator.read8(address + G_MAIN_FLAGS)
     return {
         "available": True,
         "symbol_address": address,
         "callback2": callback2,
-        "callback2_name": _symbol_name_for_address(symbols, callback2),
+        "callback2_normalized": callback2_normalized,
+        "callback2_name": _symbol_name_for_address(symbols, callback2_normalized),
         "flags": flags,
         "in_battle": bool(flags & G_MAIN_IN_BATTLE),
     }
@@ -97,11 +99,13 @@ def _read_task_evidence(emulator: EmulatorBridge, symbols: SymbolTable) -> dict[
         if emulator.read8(task_address + TASK_IS_ACTIVE) == 0:
             continue
         func = emulator.read32(task_address + TASK_FUNC)
+        func_normalized = _normalize_thumb_pointer(func)
         active_tasks.append(
             {
                 "index": index,
                 "func": func,
-                "func_name": _symbol_name_for_address(symbols, func),
+                "func_normalized": func_normalized,
+                "func_name": _symbol_name_for_address(symbols, func_normalized),
                 "priority": emulator.read8(task_address + 0x07),
             }
         )
@@ -109,10 +113,17 @@ def _read_task_evidence(emulator: EmulatorBridge, symbols: SymbolTable) -> dict[
 
 
 def _symbol_name_for_address(symbols: SymbolTable, address: int) -> str | None:
+    normalized_address = _normalize_thumb_pointer(address)
     for name, symbol_address in symbols.addresses.items():
-        if symbol_address == address:
+        if _normalize_thumb_pointer(symbol_address) == normalized_address:
             return name
     return None
+
+
+def _normalize_thumb_pointer(address: int) -> int:
+    """Clear the Thumb-state bit before matching a runtime function pointer."""
+
+    return address & ~1
 
 
 def _contains_keyword(value: str, keywords: tuple[str, ...]) -> bool:

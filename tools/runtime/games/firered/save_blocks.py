@@ -98,6 +98,10 @@ GBA_IWRAM_END = 0x03008000
 GBA_ROM_START = 0x08000000
 GBA_ROM_END = 0x0A000000
 
+# Exact Rev 1 sizes declared by struct SaveBlock1/SaveBlock2 in include/global.h.
+SAVE_BLOCK_1_SIZE = 0x3D68
+SAVE_BLOCK_2_SIZE = 0x0F24
+
 
 def is_gba_address(address: int) -> bool:
     """Return whether `address` is in a normal GBA ROM/RAM range."""
@@ -109,6 +113,18 @@ def is_gba_address(address: int) -> bool:
     )
 
 
+def is_save_block_pointer(pointer: int | None, size: int) -> bool:
+    """Return whether an aligned full SaveBlock extent fits inside GBA EWRAM."""
+
+    return (
+        pointer is not None
+        and pointer != 0
+        and pointer % 4 == 0
+        and GBA_EWRAM_START <= pointer
+        and pointer + size <= GBA_EWRAM_END
+    )
+
+
 def read_save_block_summary(
     emulator: EmulatorBridge,
     save_block_1: int | None,
@@ -117,7 +133,7 @@ def read_save_block_summary(
 ) -> dict[str, Any]:
     """Decode source-backed SaveBlock summary fields with explicit unavailable states."""
 
-    if not _is_runtime_pointer(save_block_1):
+    if not is_save_block_pointer(save_block_1, SAVE_BLOCK_1_SIZE):
         return {"available": False, "reason": "missing_save_block_1"}
 
     encryption_key = _read_encryption_key(emulator, save_block_2)
@@ -202,7 +218,7 @@ def _read_player_summary(
     save_block_2: int | None,
     text_decoder: FireRedCharmap | None,
 ) -> dict[str, Any]:
-    if not _is_runtime_pointer(save_block_2):
+    if not is_save_block_pointer(save_block_2, SAVE_BLOCK_2_SIZE):
         return {"available": False, "reason": "missing_save_block_2"}
     name_bytes = _read_bytes(emulator, save_block_2 + SAVE_BLOCK_2_PLAYER_NAME, PLAYER_NAME_LENGTH + 1)
     player = {
@@ -277,7 +293,7 @@ def _read_var_summary(emulator: EmulatorBridge, save_block_1: int) -> dict[str, 
 
 
 def _read_encryption_key(emulator: EmulatorBridge, save_block_2: int | None) -> int | None:
-    if not _is_runtime_pointer(save_block_2):
+    if not is_save_block_pointer(save_block_2, SAVE_BLOCK_2_SIZE):
         return None
     return emulator.read32(save_block_2 + SAVE_BLOCK_2_ENCRYPTION_KEY)
 
@@ -315,7 +331,3 @@ def _checksum_u16(data: bytes) -> int:
 
 def _u16(data: bytes, offset: int) -> int:
     return int.from_bytes(data[offset : offset + 2], "little")
-
-
-def _is_runtime_pointer(pointer: int | None) -> bool:
-    return pointer is not None and pointer != 0 and is_gba_address(pointer)

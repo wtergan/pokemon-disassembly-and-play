@@ -36,6 +36,7 @@ def create_runtime_from_config_path(config_path: Path, launch: bool = True) -> R
 def create_runtime_from_config(config: RuntimeConfig, launch: bool = True, repo_root: Path | None = None) -> RuntimeCore:
     """Build a runtime core for the configured target and emulator."""
 
+    telemetry_reader = _create_telemetry_reader(config, repo_root=repo_root or Path.cwd())
     storage = target_scoped_runtime_paths(config.runtime, config.target.profile.key)
     battery_workspace = storage.cache_dir / "battery"
     if config.mgba.windows_paths and config.mgba.script_cache_dir is not None:
@@ -48,16 +49,19 @@ def create_runtime_from_config(config: RuntimeConfig, launch: bool = True, repo_
         screenshot_dir=storage.screenshot_dir,
         battery_workspace=battery_workspace,
     )
-    if launch:
-        emulator.launch()
-    telemetry_reader = _create_telemetry_reader(config, repo_root=repo_root or Path.cwd())
     state_dir = storage.state_dir
     if config.mgba.windows_paths and config.mgba.script_cache_dir is not None:
         # Savestates are written by mGBA, so they require the same
         # Windows-visible staging boundary as the disposable ROM/battery file.
         state_dir = config.mgba.script_cache_dir / "states" / config.target.profile.key
     runtime = RuntimeCore(emulator, telemetry_reader=telemetry_reader, state_dir=state_dir)
-    _configure_agent(runtime, config, repo_root=repo_root or Path.cwd())
+    try:
+        _configure_agent(runtime, config, repo_root=repo_root or Path.cwd())
+        if launch:
+            emulator.launch()
+    except Exception:
+        runtime.close()
+        raise
     return runtime
 
 
@@ -90,7 +94,10 @@ def _create_telemetry_reader(config: RuntimeConfig, repo_root: Path) -> FireRedT
         symbol_basename=config.target.profile.symbol_basename,
         build_name=config.target.profile.build_name,
     )
-    if config.target.profile.adapter == "firered" and symbols.coverage(FIRERED_REV1_RUNTIME_SYMBOLS).available:
+    if config.target.profile.adapter == "firered" and (
+        symbols.coverage(FIRERED_REV1_RUNTIME_SYMBOLS).available
+        or (config.target.verify_hash and symbols.source is not None)
+    ):
         # Fixture configs may deliberately disable hashing. Real local configs
         # default to verification and cannot reach this point on a mismatch.
         validate_firered_rev1_runtime_symbols(

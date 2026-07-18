@@ -25,6 +25,7 @@ FIRERED_REV1_CORE_SYMBOLS = (
 FIRERED_REV1_RUNTIME_SYMBOLS = (
     *FIRERED_REV1_CORE_SYMBOLS,
     "gPaletteFade",
+    "CB2_Overworld",
 )
 
 

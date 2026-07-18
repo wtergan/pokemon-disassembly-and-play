@@ -30,7 +30,7 @@ def test_in_battle_flag_should_classify_battle_mode() -> None:
 def test_palette_fade_should_classify_transition_loading_mode() -> None:
     symbols = SymbolTable({"gMain": 0x03003000, "gPaletteFade": 0x02002000, "gTasks": 0x03004000})
     emulator = AddressedMemoryEmulator()
-    emulator.write8(0x02002000 + 0x08, 0x80)
+    emulator.write8(0x02002000 + 0x07, 0x80)
 
     mode = classify_runtime_mode(emulator, symbols, location_available=True)
 

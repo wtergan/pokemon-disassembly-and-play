@@ -126,26 +126,15 @@ def _build_group_number_index(
     maps_by_id: dict[str, dict[str, Any]],
 ) -> dict[tuple[int, int], str]:
     index: dict[tuple[int, int], str] = {}
+    ids_by_source_name = {metadata["name"]: map_id for map_id, metadata in maps_by_id.items()}
     for group_number, group_name in enumerate(map_groups["group_order"]):
         for map_number, map_name in enumerate(map_groups[group_name]):
-            map_id = f"MAP_{_constant_name(map_name)}"
-            if map_id in maps_by_id:
-                index[(group_number, map_number)] = map_id
+            # Source names and IDs are both explicit. Guessing IDs from CamelCase
+            # splits numeric floor names such as 2F and silently loses real maps.
+            if map_name not in ids_by_source_name:
+                raise ValueError(f"map group references missing source map: {map_name}")
+            index[(group_number, map_number)] = ids_by_source_name[map_name]
     return index
-
-
-def _constant_name(name: str) -> str:
-    chars: list[str] = []
-    for index, char in enumerate(name):
-        next_char = name[index + 1] if index + 1 < len(name) else ""
-        previous_char = name[index - 1] if index > 0 else ""
-        should_split = char.isupper() and index > 0 and (
-            previous_char.islower() or previous_char.isdigit() or (previous_char.isupper() and next_char.islower())
-        )
-        if should_split and chars and chars[-1] != "_":
-            chars.append("_")
-        chars.append(char.upper())
-    return "".join(chars)
 
 
 def _find_group_number(index: dict[tuple[int, int], str], map_id: str) -> tuple[int, int] | None:
