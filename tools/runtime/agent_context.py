@@ -49,7 +49,9 @@ def build_agent_context(
         "recent_traces": _recent_traces(traces),
         "rules": [
             "Choose one allowed action at a time.",
-            "Prefer wait_short when mode or telemetry is unavailable.",
+            "Each objective starts a new run: changes from earlier runs do not count. Use objective.starting_state as its baseline.",
+            "Use structured telemetry as the primary state source and a supplied screenshot as secondary visual evidence.",
+            "Prefer wait_short only when both structured telemetry and available screen evidence are ambiguous or show a state that needs time.",
             "Use save_quick before risky exploration and load_quick only for recovery.",
             "Do not request raw emulator, memory-write, filesystem, or unlisted actions.",
             "Stop after success, repeated failure, or unclear state.",

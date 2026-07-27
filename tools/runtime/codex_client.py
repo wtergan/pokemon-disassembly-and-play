@@ -8,6 +8,8 @@ fails closed unless explicitly configured and available.
 
 from __future__ import annotations
 
+import base64
+import binascii
 from collections import deque
 from dataclasses import dataclass
 import json
@@ -17,7 +19,11 @@ import subprocess
 from pathlib import Path
 from threading import Lock, Thread
 import time
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
+
+
+_SUPPORTED_SCREENSHOT_MIME_TYPES = {"image/png", "image/jpeg", "image/webp"}
+_MAX_SCREENSHOT_BYTES = 4_000_000
 
 
 class AgentClientError(RuntimeError):
@@ -112,11 +118,13 @@ class CodexAppServerClient:
         executable: str = "codex",
         model: str | None = None,
         reasoning_effort: str | None = None,
+        snapshot_provider: Callable[[], dict[str, Any]] | None = None,
     ) -> None:
         self.repo_root = repo_root
         self.executable = executable
         self.model = model
         self.reasoning_effort = reasoning_effort
+        self.snapshot_provider = snapshot_provider
         self.thread_id: str | None = None
         self._process: subprocess.Popen[str] | None = None
         self._pending: dict[int, queue.Queue[dict[str, Any]]] = {}
@@ -161,6 +169,14 @@ class CodexAppServerClient:
                 "text": json.dumps(context, ensure_ascii=True, separators=(",", ":")),
             },
         ]
+        screenshot_url = self._screenshot_data_url()
+        if screenshot_url is not None:
+            input_items.extend(
+                [
+                    {"type": "text", "text": "The following screenshot is secondary visual evidence of the current game screen."},
+                    {"type": "image", "url": screenshot_url},
+                ]
+            )
         if operator_prompt:
             input_items.append({"type": "text", "text": f"Operator note: {operator_prompt}"})
 
@@ -204,39 +220,46 @@ class CodexAppServerClient:
             encoding="utf-8",
             bufsize=1,
         )
-        if process.stdin is None or process.stdout is None or process.stderr is None:
-            process.kill()
-            raise AgentClientUnavailable("codex app-server is missing a stdio pipe")
         self._process = process
-        self._stdout_thread = Thread(target=self._read_stdout, daemon=True, name="pokemon-codex-stdout")
-        self._stderr_thread = Thread(target=self._read_stderr, daemon=True, name="pokemon-codex-stderr")
-        self._stdout_thread.start()
-        self._stderr_thread.start()
-        self._request(
-            "initialize",
-            {
-                "clientInfo": {"name": "pokemon-runtime", "title": "Pokemon Runtime", "version": "0.1.0"},
-                "capabilities": {"experimentalApi": True},
-            },
-            timeout=15.0,
-        )
-        self._notify("initialized", {})
-        result = self._request(
-            "thread/start",
-            {
-                "cwd": str(self.repo_root),
-                "approvalPolicy": "never",
-                "sandboxPolicy": {"type": "readOnly"},
-                "model": self.model,
-                "effort": self.reasoning_effort,
-                "personality": "pragmatic",
-                "dynamicTools": [],
-            },
-            timeout=15.0,
-        )
-        self.thread_id = (result.get("thread") or {}).get("id")
-        if not self.thread_id:
-            raise AgentClientUnavailable(f"missing thread id from codex app-server: {result}")
+        try:
+            if process.stdin is None or process.stdout is None or process.stderr is None:
+                raise AgentClientUnavailable("codex app-server is missing a stdio pipe")
+            self._stdout_thread = Thread(target=self._read_stdout, daemon=True, name="pokemon-codex-stdout")
+            self._stderr_thread = Thread(target=self._read_stderr, daemon=True, name="pokemon-codex-stderr")
+            self._stdout_thread.start()
+            self._stderr_thread.start()
+            self._request(
+                "initialize",
+                {
+                    "clientInfo": {"name": "pokemon-runtime", "title": "Pokemon Runtime", "version": "0.1.0"},
+                    "capabilities": {"experimentalApi": True},
+                },
+                timeout=15.0,
+            )
+            self._notify("initialized", {})
+            result = self._request(
+                "thread/start",
+                {
+                    "cwd": str(self.repo_root),
+                    "approvalPolicy": "never",
+                    "sandbox": "read-only",
+                    "developerInstructions": (
+                        "Choose exactly one action from the supplied allowed_actions. Do not call tools or use the filesystem. "
+                        "Return only a JSON object matching the supplied output schema, with action_id and reason."
+                    ),
+                    "model": self.model,
+                    "effort": self.reasoning_effort,
+                    "personality": "pragmatic",
+                    "dynamicTools": [],
+                },
+                timeout=15.0,
+            )
+            self.thread_id = (result.get("thread") or {}).get("id")
+            if not self.thread_id:
+                raise AgentClientUnavailable(f"missing thread id from codex app-server: {result}")
+        except BaseException:
+            self.close()
+            raise
 
     def close(self) -> None:
         """Stop the app-server subprocess if this client started it."""
@@ -244,16 +267,26 @@ class CodexAppServerClient:
         process = self._process
         if process is None:
             return
-        if process.stdin is not None:
-            process.stdin.close()
-        if process.poll() is None:
-            process.terminate()
-            try:
-                process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=2)
-        self._process = None
+        try:
+            if process.stdin is not None and not process.stdin.closed:
+                process.stdin.close()
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=2)
+        finally:
+            for thread in (self._stdout_thread, self._stderr_thread):
+                if thread is not None and thread.ident is not None:
+                    thread.join(timeout=1)
+            for stream in (process.stdout, process.stderr):
+                if stream is not None and not stream.closed:
+                    stream.close()
+            self._process = None
+            self._stdout_thread = None
+            self._stderr_thread = None
 
     def status(self) -> dict[str, Any]:
         return {
@@ -311,7 +344,9 @@ class CodexAppServerClient:
                 if turn.get("id") != turn_id:
                     continue
                 if turn.get("status") != "completed":
-                    raise AgentClientUnavailable(f"codex turn ended with status {turn.get('status')!r}")
+                    error = turn.get("error") or {}
+                    detail = error.get("message") or "no error detail supplied"
+                    raise AgentClientUnavailable(f"codex turn ended with status {turn.get('status')!r}: {detail}")
                 if not final_text:
                     final_text = _agent_text_from_turn(turn, message_text)
                 if not final_text:
@@ -362,6 +397,35 @@ class CodexAppServerClient:
         if not self.thread_id:
             raise AgentClientUnavailable("codex app-server thread is not initialized")
         return self.thread_id
+
+    def _screenshot_data_url(self) -> str | None:
+        """Return a validated screenshot URL for the planner's separate image input."""
+
+        if self.snapshot_provider is None:
+            return None
+        try:
+            snapshot = self.snapshot_provider()
+        except Exception:
+            # Screenshots are supplementary; a failed capture should leave text planning available.
+            return None
+        if not isinstance(snapshot, dict):
+            return None
+        mime_type = snapshot.get("mime_type")
+        image_base64 = snapshot.get("image_base64")
+        if (
+            not isinstance(mime_type, str)
+            or mime_type not in _SUPPORTED_SCREENSHOT_MIME_TYPES
+            or not isinstance(image_base64, str)
+            or len(image_base64) > ((_MAX_SCREENSHOT_BYTES + 2) // 3) * 4
+        ):
+            return None
+        try:
+            image_bytes = base64.b64decode(image_base64, validate=True)
+        except (binascii.Error, ValueError):
+            return None
+        if not image_bytes or len(image_bytes) > _MAX_SCREENSHOT_BYTES:
+            return None
+        return f"data:{mime_type};base64,{image_base64}"
 
 
 def _strip_fence(text: str) -> str:

@@ -124,5 +124,6 @@ def _configure_agent(runtime: RuntimeCore, config: RuntimeConfig, repo_root: Pat
                 executable=config.agent.executable,
                 model=config.agent.model,
                 reasoning_effort=config.agent.reasoning_effort,
+                snapshot_provider=runtime.snapshot,
             )
         )

@@ -70,8 +70,10 @@ class RuntimeCore:
     def telemetry(self) -> dict[str, Any]:
         return self._telemetry_reader(self.emulator)
 
-    def agent_context(self) -> dict[str, Any]:
-        return build_agent_context(self.telemetry(), self.recent_traces(), self.list_states())
+    def agent_context(self, objective: dict[str, Any] | None = None) -> dict[str, Any]:
+        """Build planner context, optionally including an active objective summary."""
+
+        return build_agent_context(self.telemetry(), self.recent_traces(), self.list_states(), objective=objective)
 
     def execute_action(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.actions.execute(payload)
@@ -85,8 +87,12 @@ class RuntimeCore:
     def agent_status(self) -> dict[str, Any]:
         return self.agent_service.status()
 
-    def run_agent_step(self, operator_prompt: str | None = None) -> dict[str, Any]:
-        return self.agent_service.run_step(operator_prompt=operator_prompt)
+    def run_agent_step(
+        self,
+        operator_prompt: str | None = None,
+        objective: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.agent_service.run_step(operator_prompt=operator_prompt, objective=objective)
 
     def run_objective(self, objective: dict[str, Any], operator_prompt: str | None = None) -> dict[str, Any]:
         return self.objectives.run(objective, operator_prompt=operator_prompt)
