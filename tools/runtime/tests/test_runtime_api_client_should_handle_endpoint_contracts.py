@@ -102,3 +102,21 @@ await assert.rejects(() => client.telemetry(), /request timed out: \\/telemetry/
     )
 
     assert result.returncode == 0, result.stderr
+
+
+def test_model_requests_should_outlive_short_health_timeout() -> None:
+    result = subprocess.run(
+        ['node', '--input-type=module'],
+        input='''
+import assert from "node:assert/strict";
+import { RuntimeApiClient } from "./tools/runtime/static/api-client.js";
+const client = new RuntimeApiClient({timeoutMs: 5, fetchImpl: (_path, {signal}) => new Promise((resolve,reject) => {
+  const timer = setTimeout(() => resolve({ok:true,json:async()=>({ok:true})}),30);
+  signal.addEventListener("abort",()=>{clearTimeout(timer);reject(new DOMException("aborted","AbortError"));});
+})});
+await assert.rejects(client.health(), /request timed out/);
+assert.deepEqual(await client.agentStep(), {ok:true});
+assert.deepEqual(await client.agentObjective({objective:{max_steps:1}}), {ok:true});
+''', text=True, capture_output=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr

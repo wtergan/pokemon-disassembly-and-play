@@ -1,4 +1,5 @@
 const DEFAULT_TIMEOUT_MS = 5000;
+const PLANNER_STEP_TIMEOUT_MS = 150000;
 
 export class RuntimeApiClient {
   constructor({ baseUrl = "", fetchImpl = globalThis.fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
@@ -38,14 +39,16 @@ export class RuntimeApiClient {
     return this.requestJson("/agent/step", {
       method: "POST",
       body: JSON.stringify(payload),
-    });
+    }, PLANNER_STEP_TIMEOUT_MS);
   }
 
   agentObjective(payload) {
+    const requestedSteps = Number(payload.objective?.max_steps ?? payload.max_steps ?? 5);
+    const steps = Number.isFinite(requestedSteps) ? Math.max(1, Math.min(requestedSteps, 20)) : 5;
     return this.requestJson("/agent/objective", {
       method: "POST",
       body: JSON.stringify(payload),
-    });
+    }, (steps + 1) * PLANNER_STEP_TIMEOUT_MS);
   }
 
   agentStop() {
@@ -67,9 +70,9 @@ export class RuntimeApiClient {
     });
   }
 
-  async requestJson(path, options = {}) {
+  async requestJson(path, options = {}, timeoutMs = this.timeoutMs) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const response = await this.fetch(`${this.baseUrl}${path}`, {
         headers: { "Content-Type": "application/json", ...options.headers },

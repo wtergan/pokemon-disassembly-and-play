@@ -194,7 +194,7 @@ async function runObjective() {
   try {
     const objective = JSON.parse(nodes.objectiveJson.value);
     const result = await api.agentObjective({ objective });
-    appendAgentLog(`${result.status}: ${result.steps} step${result.steps === 1 ? "" : "s"}`, result.ok !== true);
+    appendAgentLog(`${result.verification_class}: ${result.status}: ${result.steps} step${result.steps === 1 ? "" : "s"}`, result.ok !== true);
     await refreshAll();
   } catch (error) {
     appendAgentLog(error.message, true);
