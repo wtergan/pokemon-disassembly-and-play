@@ -264,4 +264,3 @@ def test_objective_without_new_checkpoint_should_not_recover_from_stale_quick_st
     assert result["status"] == "error"
     assert result["error"] == "planner failed"
     assert runtime.actions == []
-

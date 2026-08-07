@@ -1,7 +1,45 @@
+"""Tests for runtime HTTP endpoints and the static deck."""
+
 from __future__ import annotations
 
 import subprocess
 
+from tools.runtime.emulators.fake import FakeEmulatorBridge
+from tools.runtime.runtime_app import create_app
+from tools.runtime.runtime_core import RuntimeCore
+from tools.runtime.tests.http_client import request
+
+
+class CloseTrackingEmulator(FakeEmulatorBridge):
+    def __init__(self) -> None:
+        super().__init__()
+        self.closed = False
+
+    def close(self) -> None:
+        self.closed = True
+
+def test_health_endpoint_should_report_runtime_state() -> None:
+    runtime = RuntimeCore(FakeEmulatorBridge())
+
+    response = request(create_app(runtime), "GET", "/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"ok": True, "bridge": "fake", "frame": 0, "detail": ""}
+
+def test_configured_runtime_app_should_disable_docs_routes() -> None:
+    runtime = RuntimeCore(FakeEmulatorBridge())
+    app = create_app(runtime)
+
+    assert request(app, "GET", "/docs").status_code == 404
+    assert request(app, "GET", "/openapi.json").status_code == 404
+
+def test_runtime_close_should_release_emulator_resources() -> None:
+    emulator = CloseTrackingEmulator()
+    runtime = RuntimeCore(emulator)
+
+    runtime.close()
+
+    assert emulator.closed is True
 
 def test_runtime_api_client_should_call_expected_endpoints() -> None:
     result = subprocess.run(
@@ -50,7 +88,6 @@ assert.equal(calls[11].options.body, JSON.stringify({ action: "tap", button: "a"
 
     assert result.returncode == 0, result.stderr
 
-
 def test_runtime_api_client_should_surface_json_error_detail() -> None:
     result = subprocess.run(
         ["node", "--input-type=module"],
@@ -77,7 +114,6 @@ await assert.rejects(() => client.action({}), /bad action/);
 
     assert result.returncode == 0, result.stderr
 
-
 def test_runtime_api_client_should_report_timeouts() -> None:
     result = subprocess.run(
         ["node", "--input-type=module"],
@@ -102,6 +138,17 @@ await assert.rejects(() => client.telemetry(), /request timed out: \\/telemetry/
     )
 
     assert result.returncode == 0, result.stderr
+
+def test_static_deck_should_serve_index() -> None:
+    response = request(create_app(), "GET", "/")
+
+    assert response.status_code == 200
+    assert "FireRed Runtime" in response.text
+    assert 'id="agent-status"' in response.text
+    assert 'id="agent-step"' in response.text
+    assert 'id="run-objective"' in response.text
+    assert 'id="stop-agent"' in response.text
+    assert "/app.js" in response.text
 
 
 def test_model_requests_should_outlive_short_health_timeout() -> None:

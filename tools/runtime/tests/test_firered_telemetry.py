@@ -1,9 +1,13 @@
+"""Tests for FireRed text, save, map, and runtime telemetry decoding."""
+
 from __future__ import annotations
 
 import hashlib
 from pathlib import Path
 
 from tools.runtime.emulators.base import EmulatorHealth, Snapshot
+from tools.runtime.games.firered.map_data import load_map_registry
+from tools.runtime.games.firered.mode import classify_runtime_mode
 from tools.runtime.games.firered.symbols import (
     FIRERED_REV1_CORE_SYMBOLS,
     SymbolTable,
@@ -12,9 +16,28 @@ from tools.runtime.games.firered.symbols import (
     parse_symbol_text,
 )
 from tools.runtime.games.firered.telemetry import FireRedTelemetryReader
-from tools.runtime.games.firered.map_data import load_map_registry
-from tools.runtime.games.firered.text import load_charmap
+from tools.runtime.games.firered.text import load_charmap, parse_charmap_text
 
+
+def test_charmap_bytes_should_decode_english_player_name() -> None:
+    decoder = load_charmap(Path.cwd() / "charmap.txt")
+
+    assert decoder.decode([0xCC, 0xBF, 0xBE, 0xFF, 0x00]) == "RED"
+
+def test_multibyte_charmap_token_should_decode_greedily() -> None:
+    decoder = load_charmap(Path.cwd() / "charmap.txt")
+
+    assert decoder.decode([0x53, 0x54, 0x00, 0xFF]) == "{PKMN} "
+
+def test_unknown_charmap_byte_should_preserve_hex_escape() -> None:
+    decoder = load_charmap(Path.cwd() / "charmap.txt")
+
+    assert decoder.decode([0x7D, 0xFF]) == "\\x7D"
+
+def test_charmap_parser_should_ignore_japanese_section_duplicates() -> None:
+    tokens = parse_charmap_text("'A' = BB\n'$' = FF\n@ Hiragana\n'あ' = 01\n")
+
+    assert tokens == {(0xBB,): "A", (0xFF,): ""}
 
 SUBSTRUCT_ORDERS = (
     (0, 1, 2, 3),
@@ -87,7 +110,6 @@ class AddressedMemoryEmulator:
     def write32(self, address: int, value: int) -> None:
         self.write16(address, value)
         self.write16(address + 2, value >> 16)
-
 
 def test_firered_saveblock_fixture_should_decode_position(tmp_path: Path) -> None:
     rom_path = tmp_path / "firered_rev1.gba"
@@ -239,7 +261,6 @@ def test_firered_saveblock_fixture_should_decode_position(tmp_path: Path) -> Non
     assert telemetry["save"]["flags"] == {"bytes": 288, "nonzero_bytes": 1}
     assert telemetry["save"]["vars"] == {"entries": 256, "nonzero_entries": 1}
 
-
 def test_invalid_saveblock2_pointer_should_not_read_encryption_key() -> None:
     symbols = SymbolTable(
         {
@@ -262,7 +283,6 @@ def test_invalid_saveblock2_pointer_should_not_read_encryption_key() -> None:
     assert "encryption_key" not in telemetry["save_blocks"]["gSaveBlock2Ptr"]
     assert telemetry["save"]["money"]["available"] is False
     assert telemetry["save"]["bag_pockets"]["items"]["quantity_available"] is False
-
 
 def test_bad_party_checksum_should_report_unavailable_member() -> None:
     symbols = SymbolTable(
@@ -303,7 +323,6 @@ def test_bad_party_checksum_should_report_unavailable_member() -> None:
     assert member["reason"] == "checksum_mismatch"
     assert member["calculated_checksum"] != member["checksum"]
 
-
 def test_firered_telemetry_should_report_missing_symbols() -> None:
     telemetry = FireRedTelemetryReader(SymbolTable.empty())(AddressedMemoryEmulator())
 
@@ -312,7 +331,6 @@ def test_firered_telemetry_should_report_missing_symbols() -> None:
     assert telemetry["save_blocks"]["gSaveBlock1Ptr"]["reason"] == "missing_symbol"
     assert telemetry["location"] == {"available": False, "reason": "missing_save_block_1"}
     assert telemetry["camera"] == {"available": False, "reason": "missing_symbol"}
-
 
 def test_firered_symbol_text_should_parse_objdump_and_simple_formats() -> None:
     symbols = parse_symbol_text(
@@ -330,7 +348,6 @@ ignored
         "gSaveBlock2Ptr": 0x0300500C,
     }
 
-
 def test_firered_symbol_coverage_should_report_missing_core_symbols() -> None:
     coverage = SymbolTable({"gSaveBlock1Ptr": 0x03005008}).coverage(FIRERED_REV1_CORE_SYMBOLS)
 
@@ -339,14 +356,12 @@ def test_firered_symbol_coverage_should_report_missing_core_symbols() -> None:
     assert "gSaveBlock2Ptr" in coverage.missing
     assert "gMain" in coverage.missing
 
-
 def test_firered_default_symbol_file_should_be_discovered(tmp_path: Path) -> None:
     symbol_path = tmp_path / "pokefirered_rev1.sym"
     symbol_path.write_text("03005008 gSaveBlock1Ptr\n", encoding="utf-8")
 
     assert find_default_symbol_file(tmp_path) == symbol_path
     assert discover_symbol_table(tmp_path).require("gSaveBlock1Ptr") == 0x03005008
-
 
 def write_party_member(
     emulator: AddressedMemoryEmulator,
@@ -382,3 +397,104 @@ def write_party_member(
     emulator.write8(address + 0x54, level)
     emulator.write16(address + 0x56, hp)
     emulator.write16(address + 0x58, max_hp)
+
+def test_map_json_should_resolve_pallet_town_metadata() -> None:
+    registry = load_map_registry(Path.cwd())
+
+    pallet_town = registry.describe_map_id("MAP_PALLET_TOWN")
+
+    assert pallet_town["available"] is True
+    assert pallet_town["id"] == "MAP_PALLET_TOWN"
+    assert pallet_town["name"] == "PalletTown"
+    assert pallet_town["map_group"] == 3
+    assert pallet_town["layout"]["id"] == "LAYOUT_PALLET_TOWN"
+    assert pallet_town["layout"]["width"] == 24
+    assert pallet_town["layout"]["height"] == 20
+    assert {connection["map"] for connection in pallet_town["connections"]} == {"MAP_ROUTE1", "MAP_ROUTE21_NORTH"}
+
+def test_map_group_number_should_resolve_position_context() -> None:
+    registry = load_map_registry(Path.cwd())
+
+    location = registry.describe_location(3, 0, 6, 7)
+
+    assert location["available"] is True
+    assert location["id"] == "MAP_PALLET_TOWN"
+    assert location["position"]["x"] == 6
+    assert location["position"]["y"] == 7
+    assert location["position"]["warps_here"][0]["dest_map"] == "MAP_PALLET_TOWN_PLAYERS_HOUSE_1F"
+
+def test_unknown_map_group_should_report_unavailable() -> None:
+    registry = load_map_registry(Path.cwd())
+
+    assert registry.describe_location(99, 99) == {
+        "available": False,
+        "reason": "unknown_group_number",
+        "map_group": 99,
+        "map_num": 99,
+    }
+
+def test_missing_mode_symbols_should_report_unknown_with_evidence() -> None:
+    emulator = AddressedMemoryEmulator()
+
+    mode = classify_runtime_mode(emulator, SymbolTable.empty(), location_available=False)
+
+    assert mode["name"] == "unknown"
+    assert mode["reason"] == "insufficient_symbols_or_state"
+    assert mode["evidence"]["gMain"]["reason"] == "missing_symbol"
+
+def test_in_battle_flag_should_classify_battle_mode() -> None:
+    symbols = SymbolTable({"gMain": 0x03003000, "gPaletteFade": 0x02002000, "gTasks": 0x03004000})
+    emulator = AddressedMemoryEmulator()
+    emulator.write8(0x03003000 + 0x439, 0x02)
+
+    mode = classify_runtime_mode(emulator, symbols, location_available=True)
+
+    assert mode["name"] == "battle"
+    assert mode["confidence"] == "high"
+    assert mode["evidence"]["gMain"]["in_battle"] is True
+
+def test_palette_fade_should_classify_transition_loading_mode() -> None:
+    symbols = SymbolTable({"gMain": 0x03003000, "gPaletteFade": 0x02002000, "gTasks": 0x03004000})
+    emulator = AddressedMemoryEmulator()
+    emulator.write8(0x02002000 + 0x07, 0x80)
+
+    mode = classify_runtime_mode(emulator, symbols, location_available=True)
+
+    assert mode["name"] == "transition_loading"
+    assert mode["confidence"] == "high"
+    assert mode["evidence"]["gPaletteFade"]["active"] is True
+
+def test_callback_name_should_classify_menu_mode() -> None:
+    symbols = SymbolTable(
+        {
+            "gMain": 0x03003000,
+            "gPaletteFade": 0x02002000,
+            "gTasks": 0x03004000,
+            "CB2_BagMenuRun": 0x08003000,
+        }
+    )
+    emulator = AddressedMemoryEmulator()
+    emulator.write32(0x03003000 + 0x04, 0x08003000)
+
+    mode = classify_runtime_mode(emulator, symbols, location_available=True)
+
+    assert mode["name"] == "menu"
+    assert mode["reason"] == "callback_or_task_menu_name"
+
+def test_active_message_task_should_classify_dialogue_textbox_mode() -> None:
+    symbols = SymbolTable(
+        {
+            "gMain": 0x03003000,
+            "gPaletteFade": 0x02002000,
+            "gTasks": 0x03004000,
+            "Task_DrawFieldMessageBox": 0x08004000,
+        }
+    )
+    emulator = AddressedMemoryEmulator()
+    emulator.write32(0x03004000, 0x08004000)
+    emulator.write8(0x03004000 + 0x04, 1)
+
+    mode = classify_runtime_mode(emulator, symbols, location_available=True)
+
+    assert mode["name"] == "dialogue_textbox"
+    assert mode["evidence"]["gTasks"]["active"][0]["func_name"] == "Task_DrawFieldMessageBox"
