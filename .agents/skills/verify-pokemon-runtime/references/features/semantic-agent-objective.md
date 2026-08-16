@@ -7,7 +7,7 @@ scoring path. **Live verification:** one FireRed movement passed on
 For the retained check, a fresh server loaded the model-created
 `first_overworld` checkpoint. Telemetry showed high-confidence field mode
 from `CB2_Overworld`, map `MAP_PALLET_TOWN_PLAYERS_HOUSE_2F`, and starting
-position `(6,6)`. A Luna xhigh planner made one `tap_left` decision. The
+position `(6,6)`. The configured planner made one `tap_left` decision. The
 runtime observed `(6,6) → (5,6)` on the same map and returned
 `semantic_state_verified`; all six checks passed: location, coordinates,
 mode, map, target position, and changed position.

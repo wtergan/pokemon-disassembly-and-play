@@ -204,7 +204,7 @@ cache_dir = ".runtime-cache"
 [agent]
 mode = "app_server"
 executable = "codex"
-model = "gpt-5"
+model = "gpt-5.6-sol"
 reasoning_effort = "medium"
 """,
         encoding="utf-8",
@@ -214,7 +214,7 @@ reasoning_effort = "medium"
 
     assert config.agent.mode == "app_server"
     assert config.agent.executable == "codex"
-    assert config.agent.model == "gpt-5"
+    assert config.agent.model == "gpt-5.6-sol"
     assert config.agent.reasoning_effort == "medium"
 
 def test_runtime_config_should_reject_unknown_agent_mode(tmp_path: Path) -> None:

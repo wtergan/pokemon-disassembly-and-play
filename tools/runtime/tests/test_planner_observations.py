@@ -121,7 +121,7 @@ def test_codex_client_should_start_read_only_thread_without_replacing_model(
 ) -> None:
     process = _FakeProcess()
     monkeypatch.setattr("tools.runtime.codex_client.subprocess.Popen", lambda *args, **kwargs: process)
-    client = CodexAppServerClient(repo_root=Path.cwd(), model="gpt-6-luna", reasoning_effort="xhigh")
+    client = CodexAppServerClient(repo_root=Path.cwd(), model="gpt-5.6-luna", reasoning_effort="xhigh")
     requests: list[tuple[str, dict[str, Any]]] = []
 
     def request(method: str, params: dict[str, Any], *, timeout: float) -> dict[str, Any]:
@@ -135,7 +135,7 @@ def test_codex_client_should_start_read_only_thread_without_replacing_model(
     params = next(params for method, params in requests if method == "thread/start")
     assert params["sandbox"] == "read-only"
     assert "sandboxPolicy" not in params
-    assert params["model"] == "gpt-6-luna"
+    assert params["model"] == "gpt-5.6-luna"
     assert params["effort"] == "xhigh"
     instructions = params["developerInstructions"].lower()
     assert "one" in instructions and "json" in instructions and "action" in instructions

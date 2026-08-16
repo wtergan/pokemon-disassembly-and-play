@@ -209,9 +209,13 @@ configured model and reasoning effort are passed through unchanged.
 [agent]
 mode = "app_server"
 executable = "codex"
-model = "gpt-6-luna"
+model = "gpt-5.6-luna"
 reasoning_effort = "xhigh"
 ```
+
+The project's original model options are **GPT-5.6 Sol** (`gpt-5.6-sol`) and
+**GPT-5.6 Luna** (`gpt-5.6-luna`). Select either through `agent.model`; the
+current house-exit verification uses GPT-5.6 Luna at xhigh reasoning effort.
 
 Use a current signed-in CLI context. A workspace-routing 401 is an authentication
 failure, not a game or bridge failure. On a workstation whose CLI wrapper can

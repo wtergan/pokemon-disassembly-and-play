@@ -110,8 +110,7 @@ steps. Save the request and response in the run folder:
 
 A semantic pass needs `status: success`, `score.success: true`, all reported
 semantic checks true, and the requested before/after map and position. A frame
-advance or action count alone does not prove progress. Do not use the web
-deck's **Run** button as verified until its current browser check completes.
+advance or action count alone does not prove progress. The web deck's **Run** path has also passed a fresh-browser bounded movement check; broader objectives need their own semantic evidence.
 
 ## Evidence
 

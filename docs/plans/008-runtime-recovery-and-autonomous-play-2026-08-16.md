@@ -4,7 +4,7 @@ Status: Verified bounded acceptance. Observation date: 2026-08-16 (America/New_Y
 
 ## Outcome and scope
 
-Resumed the unfinished July 9 implementation and proved that a real GPT-6 Luna xhigh planner can play the owned FireRed Rev 1 through the intro into the first controllable overworld, followed by a state-verified movement. Simplified documentation and tests and restored emulator launch access.
+Resumed the unfinished July 9 implementation and proved that a model planner can play the owned FireRed Rev 1 through the intro into the first controllable overworld, followed by a state-verified movement. Simplified documentation and tests and restored emulator launch access.
 
 ROMs, normal saves, generated symbols/binaries, private configuration and credentials stay outside Git. Retain the mGBA-first design and runtime-owned saves. Full campaign completion, battles and LeafGreen autonomous progression are outside the verified result.
 
@@ -28,7 +28,7 @@ ROMs, normal saves, generated symbols/binaries, private configuration and creden
 - [x] Migrate useful legacy context into concise docs and retain original material locally.
 - [x] Consolidate test files while retaining meaningful existing behavior coverage.
 - [x] Create/verify emulator launch shortcuts and all seven taskbar pins.
-- [x] Native-session review of each GPT-6 Luna xhigh delegated result.
+- [x] Native-session review of each delegated result.
 - [x] Full suite, compile and diff checks; each source milestone tested as its own tree.
 
 ## Verified behavior and corrections
@@ -41,7 +41,7 @@ A Windows ownership helper records the actual launched PID and creation time; cl
 
 The app-server planner works with the desktop sign-in through the existing CLI wrapper's `CODEX_CLI_HOME` option. The separate WSL CLI sign-in returned workspace-discovery 401. No credentials were copied or printed. The local executable wrapper and configuration are ignored. Planner turns receive a screenshot plus structured state, advertised bounded actions and the current objective; private local paths are omitted.
 
-Luna completed 35 bounded planner decisions through intro/naming into the starting bedroom after native startup navigation reached Oak's introduction. An initial naming attempt stopped honestly under an overly restrictive instruction. With map lookup corrected, the retained model-created `first_overworld` checkpoint reported exact `CB2_Overworld`, high-confidence field mode, `MAP_PALLET_TOWN_PLAYERS_HOUSE_2F`, `(6,6)` within a 12x9 layout. A fresh Luna movement objective then changed `(6,6)` to `(5,6)` in one step; all six conjunctive semantic checks passed. No game-memory writes or injected saves were used. Frame counts are diagnostic only.
+The planner completed 35 bounded decisions through intro/naming into the starting bedroom after native startup navigation reached Oak's introduction. An initial naming attempt stopped honestly under an overly restrictive instruction. With map lookup corrected, the retained model-created `first_overworld` checkpoint reported exact `CB2_Overworld`, high-confidence field mode, `MAP_PALLET_TOWN_PLAYERS_HOUSE_2F`, `(6,6)` within a 12x9 layout. A fresh model-driven movement objective then changed `(6,6)` to `(5,6)` in one step; all six conjunctive semantic checks passed. No game-memory writes or injected saves were used. Frame counts are diagnostic only.
 
 A fresh browser context independently exercised **Run** end to end and displayed `semantic: success: 1 step`, field/high and held:none. Browser model requests now have a separate bounded inference timeout, and every new objective includes its starting state. At 390px the deck and feature map had no horizontal overflow; the 240px live image loaded. Manual A press/release and UI Save/Load passed. Full accessibility and every deck interaction were not audited.
 
@@ -60,10 +60,12 @@ Full suite: **123 passed**. The original 93 cases remain represented in seven re
 
 All seven canonical emulator targets exist. Fourteen per-user Desktop/Start Menu links passed target checks, all seven taskbar pins were inspected independently, and launch checks confirmed actual windows. The shortcut helper is idempotent and backs up repaired links. An obsolete protected Public Desktop PCSX2 link still points to its old missing path; per-user links work, and no protected shortcut was force-replaced.
 
-## Publication, risks and continuation
-
-Seven milestones cover save/symbol isolation (July 10), live runtime correctness (July 18), semantic planner (July 27), browser objectives (August 3), grouped tests (August 7), Windows launch access (August 11), and verification/docs (August 16).
+## Risks and continuation
 
 A ROM mismatch, save escape, invalid symbols or non-fast-forward remote stops the dependent operation. Local archive and original patches support rollback; normal saves are never recovery targets. Original legacy content remains in Git history. Full story/battle progression and LeafGreen semantic play require new observed evidence.
 
 For local continuation, use the ignored runtime config and desktop-backed planner launcher, start `python -m tools.runtime.server --config ...` as documented in the runtime guide, and load the retained `first_overworld` checkpoint before the exact movement recipe. The local control deck listens on `http://127.0.0.1:8795/`. Keep one runtime per bridge port and close its owner before running the doctor.
+
+## House-exit follow-up
+
+Verification in progress on 2026-08-16: use the existing runtime and GPT-5.6 Luna xhigh planner to leave the upstairs bedroom, descend the stairs and exit into Pallet Town. Acceptance requires high-confidence field telemetry on `MAP_PALLET_TOWN` at `(6,8)`, an observed transition through the ground floor, a retained screenshot/trace, and unchanged normal-save fingerprints. Use only advertised actions and runtime-owned checkpoints.

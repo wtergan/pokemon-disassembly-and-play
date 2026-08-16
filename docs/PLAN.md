@@ -4,7 +4,7 @@ The runtime launches a dedicated mGBA instance, exposes a browser control deck a
 
 ## Current state
 
-Verified on 2026-08-16: GPT-6 Luna xhigh completed the FireRed intro into the first controllable overworld, then performed a one-step movement confirmed by named map, coordinates and high-confidence field telemetry. The live browser Run path passed too. FireRed and LeafGreen input/checkpoint checks preserved normal saves. Full story, battles and LeafGreen autonomous progression remain unverified.
+Verified on 2026-08-16: the configured model completed the FireRed intro into the first controllable overworld, then performed a one-step movement confirmed by named map, coordinates and high-confidence field telemetry. The live browser Run path passed too. FireRed and LeafGreen input/checkpoint checks preserved normal saves. Full story, battles and LeafGreen autonomous progression remain unverified.
 
 Seven installed emulators have working per-user Desktop/Start Menu shortcuts and verified taskbar pins. The runtime test suite has 123 passing cases in 11 responsibility modules; the 93 original cases were retained while 30 small files became seven grouped modules.
 
