@@ -1,7 +1,7 @@
 [target]
 game = "firered"
 revision = "rev1"
-rom_path = "/mnt/c/Emulation/ROMs/Game Boy Advance/Pokemon - FireRed Version (USA, Europe) (Rev 1).gba"
+rom_path = "/mnt/t/Emulation/ROMs/Game Boy Advance/Pokemon - FireRed Version (USA, Europe) (Rev 1).gba"
 # Defaults to true. Leave enabled for real runtime use so mismatched ROMs fail
 # before launch.
 # verify_hash = true
@@ -21,8 +21,8 @@ frame_advance_mode = "lua_run_frame"
 # windows_paths = true
 # connection_mode = "lua_client"
 # frame_advance_mode = "realtime_wait"
-# script_cache_dir = "/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache"
-# log_file = "/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache/mgba_bridge.log"
+# script_cache_dir = "/mnt/t/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache"
+# log_file = "/mnt/t/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache/mgba_bridge.log"
 
 [runtime]
 state_dir = ".runtime-state"
@@ -34,8 +34,8 @@ cache_dir = ".runtime-cache"
 [agent]
 # Manual runtime operation does not require Codex credentials or an app-server.
 mode = "disabled"
-# Future options: "fake" for deterministic local tests, "app_server" once the
-# bounded objective runner and UI controls are enabled.
+# Options: "fake" for deterministic local tests, "app_server" for the bounded
+# screenshot-aware planner. Choose a current signed-in CLI context.
 executable = "codex"
-# model = "gpt-5"
+# model = "your-available-model"
 # reasoning_effort = "medium"

@@ -84,29 +84,10 @@ tools/runtime/.runtime-logs/
 tools/runtime/.runtime-screenshots/
 tools/runtime/.runtime-cache/
 
-# Runtime-local FireRed automation config and artifacts.
-tools/runtime/runtime.local.toml
-tools/runtime/.runtime-state/
-tools/runtime/.runtime-traces/
-tools/runtime/.runtime-logs/
-tools/runtime/.runtime-screenshots/
-tools/runtime/.runtime-cache/
-.runtime-state/
-.runtime-traces/
-.runtime-logs/
-.runtime-screenshots/
-.runtime-cache/
+# Dedicated runtime instances and cartridge save data.
 .runtime-mgba/
-*.ss0
-*.ss1
-*.ss2
-*.ss3
-*.ss4
-*.ss5
-*.ss6
-*.ss7
-*.ss8
-*.ss9
+*.ss
+*.ss[0-9]
 *.sav
 *.srm
 *.rtc
@@ -115,3 +96,10 @@ tools/runtime/.runtime-cache/
 # Upstream ignores JavaScript globally; the runtime deck owns static JS.
 !tools/runtime/static/
 !tools/runtime/static/**/*.js
+
+.worktrees/
+
+# Local verification/browser sessions.
+*.runtime.local.toml
+.playwright-cli/
+.playwright/

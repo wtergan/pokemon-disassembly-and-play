@@ -38,16 +38,15 @@ files, emulator binaries, and local config stay outside git.
 
 ## Python Setup
 
-From the repo root, create an isolated Python environment and install the runtime
-dependencies:
+From the repo root, install the existing runtime requirements in a local environment:
 
 ```bash
-python3 -m venv /tmp/pokemon-runtime-venv
-/tmp/pokemon-runtime-venv/bin/python -m pip install -r tools/runtime/requirements.txt
+uv venv .venv
+uv pip install --python .venv/bin/python -r tools/runtime/requirements.txt
 ```
 
-Use another venv path if you prefer. The commands below assume
-`/tmp/pokemon-runtime-venv`.
+Alternatively, use `python3 -m venv .venv` and pip when Python's venv/ensurepip
+package is installed. The commands below use `.venv/bin/python`.
 
 ## Local Config
 
@@ -63,7 +62,7 @@ For FireRed Rev 1:
 [target]
 game = "firered"
 revision = "rev1"
-rom_path = "/mnt/c/Emulation/ROMs/Game Boy Advance/Pokemon - FireRed Version (USA, Europe) (Rev 1).gba"
+rom_path = "/mnt/t/Emulation/ROMs/Game Boy Advance/Pokemon - FireRed Version (USA, Europe) (Rev 1).gba"
 verify_hash = true
 # symbol_path = "pokefirered_rev1.sym"
 ```
@@ -74,7 +73,7 @@ For LeafGreen Rev 1:
 [target]
 game = "leafgreen"
 revision = "rev1"
-rom_path = "/mnt/c/Emulation/ROMs/Game Boy Advance/Pokemon - LeafGreen Version (USA, Europe) (Rev 1).gba"
+rom_path = "/mnt/t/Emulation/ROMs/Game Boy Advance/Pokemon - LeafGreen Version (USA, Europe) (Rev 1).gba"
 verify_hash = true
 # symbol_path = "pokeleafgreen_rev1.sym"
 ```
@@ -91,19 +90,20 @@ Lua-client reverse socket:
 
 ```toml
 [mgba]
-executable = "/mnt/c/Emulation/Emulators/mGBA-dev/mgba-qt.exe"
+executable = "/mnt/t/Emulation/Emulators/mGBA-dev/mGBA.exe"
 lua_bridge = "tools/runtime/emulators/mgba_bridge.lua"
 host = "127.0.0.1"
 port = 8766
 windows_paths = true
 connection_mode = "lua_client"
 frame_advance_mode = "realtime_wait"
-script_cache_dir = "/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache"
-log_file = "/mnt/c/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache/mgba_bridge.log"
+script_cache_dir = "/mnt/t/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache"
+log_file = "/mnt/t/Emulation/Emulators/mGBA-dev/pokemon-runtime-cache/mgba_bridge.log"
 ```
 
 Notes:
 
+- Set `executable` to the actual `mGBA.exe` in your extracted development build directory.
 - The stable Windows mGBA `0.10.5` frontend rejected `--script` in local smoke
   testing. Use a development build whose Qt frontend accepts `--script`.
 - `windows_paths = true` lets Python convert WSL paths with `wslpath`.
@@ -158,14 +158,16 @@ Expected symbol filenames are:
 
 If the GBA toolchain is not set up yet, follow the upstream build instructions in
 `INSTALL.md` first. Symbol generation is not required for launch, screenshots,
-manual controls, traces, or target hash verification.
+manual controls, traces, or target hash verification. Semantic gameplay requires
+compatible symbols. Build the same target and compare its ROM SHA-1 to the owned
+ROM before trusting generated addresses.
 
 ## Run The Runtime
 
 Start the server from the repo root:
 
 ```bash
-/tmp/pokemon-runtime-venv/bin/python -m tools.runtime.server \
+.venv/bin/python -m tools.runtime.server \
   --config tools/runtime/runtime.local.toml \
   --host 127.0.0.1 \
   --port 8765
@@ -198,15 +200,31 @@ mode = "disabled"
 executable = "codex"
 ```
 
-Use `mode = "fake"` only for deterministic local tests. `mode = "app_server"` is
-opt-in and should stay behind the bounded action policy and objective runner.
+Use `mode = "fake"` only for deterministic local tests. `mode = "app_server"` enables screenshot-aware planning through the local Codex
+app-server. The planner receives structured state and a separate game image; it
+can only select advertised actions. Objective scoring uses telemetry. The
+configured model and reasoning effort are passed through unchanged.
+
+```toml
+[agent]
+mode = "app_server"
+executable = "codex"
+model = "gpt-6-luna"
+reasoning_effort = "xhigh"
+```
+
+Use a current signed-in CLI context. A workspace-routing 401 is an authentication
+failure, not a game or bridge failure. On a workstation whose CLI wrapper can
+select the desktop sign-in, set its existing context option only for the runtime
+process; keep account paths in local configuration. Never copy or publish auth
+files. The protocol follows the [official app-server documentation](https://developers.openai.com/codex/app-server).
 
 ## Verification
 
 Run focused bridge checks:
 
 ```bash
-/tmp/pokemon-runtime-venv/bin/python -m pytest -q \
+.venv/bin/python -m pytest -q \
   tools/runtime/tests/test_mgba_launch_command_should_include_script_and_rom.py \
   tools/runtime/tests/test_mgba_socket_bridge_should_parse_socket_responses.py -vv
 ```
@@ -214,13 +232,13 @@ Run focused bridge checks:
 Run the full runtime test suite:
 
 ```bash
-/tmp/pokemon-runtime-venv/bin/python -m pytest -q tools/runtime/tests
+.venv/bin/python -m pytest -q tools/runtime/tests
 ```
 
 Run compile and whitespace checks:
 
 ```bash
-/tmp/pokemon-runtime-venv/bin/python -m compileall -q tools/runtime
+.venv/bin/python -m compileall -q tools/runtime
 git diff --check
 ```
 
@@ -268,3 +286,60 @@ Telemetry reports unavailable sections
 This is expected before generated symbols exist or before the game has initialized
 save-block pointers. Generate the matching `.sym` file and keep the game running
 past boot/title screens before expecting decoded location/save data.
+
+
+## Verified gameplay and repeatable checks
+
+The runtime launches an isolated ROM copy for battery saves. Checkpoints stay
+under the target's runtime-owned storage; Windows launches retain the actual
+Windows PID and creation time so stopping the server closes its own GUI process.
+The Lua input mapping follows mGBA's [single-key API](https://mgba.io/docs/scripting.html).
+
+Run the real bridge/input/checkpoint check before a server session:
+
+```bash
+.venv/bin/python -m tools.runtime.verify_runtime \
+  --config tools/runtime/runtime.local.toml \
+  --output .runtime-logs/verification
+```
+
+Do not run this concurrently with a server using the same configured bridge
+port. It preserves a JSON report and screenshot, checks all ten physical GBA key
+bits and checkpoint round trips, and compares normal save fingerprints before
+and after cleanup. This is a hardware/control check; it does not claim gameplay
+progress.
+
+For a semantic objective, use observed mode, map and coordinates together:
+
+```json
+{
+  "objective": {
+    "description": "Move one tile in the starting bedroom",
+    "max_steps": 3,
+    "save_before": true,
+    "success": {
+      "mode_is": "field",
+      "map_is": "MAP_PALLET_TOWN_PLAYERS_HOUSE_2F",
+      "position_changed": true
+    }
+  }
+}
+```
+
+Post this to `/agent/objective` after the player is in that named map. Use
+`position_is: {"x": 5, "y": 6}` for a specific target; combine it with
+`position_changed: true` to require a transition. Unknown criteria and incomplete
+semantic criteria fail before planning. A failed starting checkpoint stops the
+run. `agent_steps_at_least` and `runtime_frame_at_least` remain explicitly labelled
+smoke checks.
+
+The default web-deck objective uses semantic criteria. Save a checkpoint before
+exploration; press **Stop** to end an objective between decisions. New-game
+navigation uses the screenshot until real field state exists. Naming screens may
+require START followed by A; an empty name can use the game's default.
+
+The reusable [verification skill](../../.agents/skills/verify-pokemon-runtime/SKILL.md)
+covers Launch, Doctor, Drive, Evidence and Cleanup. The [feature map](../../docs/visuals/runtime-feature-map.html)
+shows which paths have current proof. See the [roadmap](../../docs/PLAN.md) for
+acceptance evidence and follow-up limits. No full-story or battle autonomy is
+implied by a first-overworld demonstration.

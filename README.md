@@ -25,4 +25,6 @@ Runtime setup and operating notes live in
 [`tools/runtime/README.md`](tools/runtime/README.md). Keep ROMs, saves,
 `runtime.local.toml`, emulator binaries, and machine-specific paths out of git.
 
+Project status and active work are tracked in [`docs/PLAN.md`](docs/PLAN.md).
+
 For contacts and other pret projects, see [pret.github.io](https://pret.github.io/).
