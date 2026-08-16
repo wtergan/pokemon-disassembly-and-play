@@ -68,9 +68,9 @@
 </head>
 <body>
   <main>
-    <p class="eyebrow">Local runtime · evidence map · 2026-08-16</p>
+    <p class="eyebrow">Local runtime · evidence map</p>
     <h1>Three ways to check the Pokémon runtime</h1>
-    <p class="lede">A dedicated emulator supports a target check, the manual web deck, and bounded model objectives. Each path has a different proof threshold; campaign progress is still in progress.</p>
+    <p class="lede">A dedicated emulator supports a target check, the manual web deck, and bounded model objectives. The house route is verified; battles and broader story progression still need checks.</p>
     <div class="facts" aria-label="Runtime boundaries">
       <span class="fact">FireRed Rev 1 local config</span>
       <span class="fact">Loopback HTTP :8795</span>
@@ -93,31 +93,31 @@
       <h2 id="behaviors-title">Behavior and evidence</h2>
       <div class="branches">
         <article>
-          <span class="status verified">Verified · 2026-08-16</span>
+          <span class="status verified">Verified</span>
           <h3>Check target inputs and save containment</h3>
           <p>FireRed Rev 1 and LeafGreen Rev 1 reports each show all 10 key bits, checkpoint save and reload, a snapshot, and unchanged normal-save fingerprints. Cleanup left no owned Windows mGBA process.</p>
-          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/owned-rom-inputs-save-containment.md">Behavior recipe</a> · <a href="../../.runtime-logs/verification/report.json">FireRed report</a> · <a href="../../.runtime-logs/recovery-2026-08-16/leafgreen/report.json">LeafGreen report</a></p>
+          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/owned-rom-inputs-save-containment.md">Behavior recipe</a></p>
         </article>
         <article>
-          <span class="status verified">House exit verified · 2026-08-16</span>
+          <span class="status verified">House exit verified</span>
           <h3>Ask the model for a checked state change</h3>
           <p>GPT-5.6 Luna at xhigh left the upstairs bedroom, descended through the ground floor and reached MAP_PALLET_TOWN at (6,8). The route used 22 decisions across two bounded runs; all five final semantic checks passed. Normal saves stayed unchanged. Story and battle progression remain unverified.</p>
-          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/semantic-agent-objective.md">Behavior recipe</a> · <a href="../../.runtime-logs/house-exit-verified-2026-08-16.json">house-exit proof</a> · <a href="../plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md">current recovery plan</a></p>
+          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/semantic-agent-objective.md">Behavior recipe</a> · <a href="../PLAN.md">project roadmap</a></p>
         </article>
         <article>
-          <span class="status verified">Selected live checks · 2026-08-16</span>
+          <span class="status verified">Selected live checks</span>
           <h3>Operate the deck by hand</h3>
           <p>At 390px, the live image loaded at 240px wide. Hold A press/release left no input held, and the UI Save/Load round trip passed. A fresh browser Run also reported semantic success in one step with field/high telemetry and no held inputs.</p>
-          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/manual-web-control-deck.md">Behavior recipe</a> · <a href="../../.runtime-logs/recovery-2026-08-16/deck-mobile.png">mobile capture</a></p>
+          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/manual-web-control-deck.md">Behavior recipe</a></p>
         </article>
       </div>
     </section>
 
     <div class="boundary">
       <aside class="note"><p><strong>Evidence boundary.</strong> Inputs and unchanged normal saves prove runtime control and containment. The verified house exit proves this bounded route from the bedroom checkpoint. Battles and full campaign progress remain unverified.</p></aside>
-      <nav class="links" aria-label="Project documents"><p><a href="../PLAN.md">Roadmap</a><br><a href="../plans/007-firered-semantic-progression-2026-07-09.md">Plan 007: semantic progression</a><br><a href="../plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md">Plan 008: current recovery</a><br><a href="../../.agents/skills/verify-pokemon-runtime/SKILL.md">Runtime verification recipe</a></p></nav>
+      <nav class="links" aria-label="Project documents"><p><a href="../PLAN.md">Roadmap</a><br><a href="../../tools/runtime/README.md">Runtime guide</a><br><a href="../../.agents/skills/verify-pokemon-runtime/SKILL.md">Runtime verification recipe</a></p></nav>
     </div>
-    <footer>Local artifact. Reports and screenshots are ignored runtime evidence; they are not committed with the page and are unavailable from a clean clone.</footer>
+    <footer>Local artifact. Detailed plans, reports and screenshots remain local. Follow the committed recipes to generate fresh runtime evidence.</footer>
   </main>
 </body>
 </html>

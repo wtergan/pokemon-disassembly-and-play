@@ -11,15 +11,15 @@ requests on loopback. The local config must select the owned FireRed Rev 1
 target, its matching generated symbols, a dedicated Windows mGBA cache, and
 target-scoped runtime state.
 
-**Recipe status: Verified 2026-08-16** for the one-shot input/checkpoint checks,
+**Recipe status: Verified** for the one-shot input/checkpoint checks,
 the bounded live movement objective, and the selected live web-deck checks.
-**House exit verified 2026-08-16:** GPT-5.6 Luna at xhigh reached Pallet Town
+**House exit verified:** GPT-5.6 Luna at xhigh reached Pallet Town
 in 22 decisions across two bounded runs, with unchanged normal-save hashes.
 This does not verify full story or battle progression. The web deck's
 agent-facing Run button passed a fresh-browser semantic movement check. Runtime reports and captures
 are ignored local evidence; links to them will not work from a clean clone.
 See [the behavior index](references/features/README.md) and the
-[current recovery plan](../../../docs/plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md).
+[project roadmap](../../../docs/PLAN.md).
 
 ## Launch
 
@@ -125,7 +125,7 @@ literal result, and remaining limits in the matching
 [behavior reference](references/features/README.md). Never include local ROM,
 cache, account, or executable paths in shared notes.
 
-The retained 2026-08-16 evidence covers both FireRed and LeafGreen verifier
+The retained local evidence covers both FireRed and LeafGreen verifier
 runs, one FireRed semantic movement, and selected live deck interactions.
 Those logs and screenshots are local-only; a clean checkout cannot reproduce
 the evidence links without rerunning the recipe.

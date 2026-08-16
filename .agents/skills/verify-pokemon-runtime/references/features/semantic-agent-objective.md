@@ -1,8 +1,7 @@
 # Bounded model-driven semantic objective
 
 **Implementation:** present in the bounded objective runner and semantic
-scoring path. **Live verification:** one FireRed movement passed on
-2026-08-16; a GPT-5.6 Luna house exit passed on 2026-08-16. Broader story and battle progression remains unverified.
+scoring path. **Live verification:** a FireRed movement and a GPT-5.6 Luna house exit passed. Broader story and battle progression remains unverified.
 
 For the retained check, a fresh server loaded the model-created
 `first_overworld` checkpoint. Telemetry showed high-confidence field mode
@@ -12,20 +11,12 @@ runtime observed `(6,6) → (5,6)` on the same map and returned
 `semantic_state_verified`; all six checks passed: location, coordinates,
 mode, map, target position, and changed position.
 
-Local ignored proof:
-[movement objective](../../../../../.runtime-logs/recovery-2026-08-16/movement-objective.json) ·
-[one-step result](../../../../../.runtime-logs/recovery-2026-08-16/movement-result.json) ·
-[start checkpoint](../../../../../.runtime-logs/recovery-2026-08-16/first-overworld-checkpoint.json).
+The request, result and starting checkpoint remain local.
 The result proves this bounded transition from the retained checkpoint. It
 does not prove the path from a new game through the story, battles, or later
 maps. The web deck's Run button independently passed the same bounded movement check in a fresh browser context.
 
-Read [plan 007](../../../../../docs/plans/007-firered-semantic-progression-2026-07-09.md)
-for the progression acceptance boundary and
-[plan 008](../../../../../docs/plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md)
-for current recovery context. Run the objective only when model-driven play
-is authorized, the client is available, and telemetry meets the preconditions
-in the [verification recipe](../../SKILL.md).
+Read the [roadmap](../../../../../docs/PLAN.md) for current acceptance and limits. Run objectives only when model-driven play is authorized, the client is available, and telemetry meets the preconditions in the [verification recipe](../../SKILL.md).
 
 Source anchors: `tools/runtime/runtime_app.py`,
 `tools/runtime/objective_runner.py`, `tools/runtime/objective_scoring.py`,
@@ -34,7 +25,7 @@ checks establish implementation, not live gameplay evidence.
 
 ## Repeat the house exit
 
-Verified on 2026-08-16 with GPT-5.6 Luna at xhigh: the planner moved from
+Verified with GPT-5.6 Luna at xhigh: the planner moved from
 `MAP_PALLET_TOWN_PLAYERS_HOUSE_2F` at `(6,6)`, through the ground floor,
 to `MAP_PALLET_TOWN` at `(6,8)`. One 20-step run stopped at the doorway;
 a two-step continuation passed all five semantic checks. The normal save
@@ -70,9 +61,7 @@ only `success`, all semantic checks true, and outdoor field telemetry count
 as completion. On an error, preserve the report and checkpoint; do not
 blindly retry or call the failed segment successful.
 
-Local ignored proof: [verified summary](../../../../../.runtime-logs/house-exit-verified-2026-08-16.json),
-[first segment](../../../../../.runtime-logs/house-exit-2026-08-16-124353/result.json),
-[successful continuation](../../../../../.runtime-logs/house-exit-2026-08-16-124547/result.json),
-and [outside screenshot](../../../../../.runtime-logs/house-exit-2026-08-16-124547/after.png).
+The local evidence retains both segment results, a verified summary,
+before/after snapshots and normal-save fingerprints.
 The retained checkpoint is `outside_luna_5_6`. This verifies the house route,
 not battles or subsequent story progression.

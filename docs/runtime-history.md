@@ -39,9 +39,4 @@ rerun during this documentation migration.
 
 ## Resume context
 
-The July 9 follow-up, [FireRed Semantic Progression](plans/007-firered-semantic-progression-2026-07-09.md),
-reports that toolchain/symbol generation and disposable-save setup were
-complete, but first-overworld telemetry was blocked before the Lua reverse
-client connected. [Runtime recovery plan 008](plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md)
-is the current continuation point. The last baseline game-level evidence is
-three executed inputs, not verified gameplay progress.
+The semantic progression work required matching symbols, isolated saves and a reliable reverse-socket bridge before first-overworld telemetry could be trusted. Current gameplay acceptance and repeatable checks are summarized in the [roadmap](PLAN.md) and [runtime verification recipe](../.agents/skills/verify-pokemon-runtime/SKILL.md). Detailed working notes remain local.

@@ -103,3 +103,6 @@ tools/runtime/.runtime-cache/
 *.runtime.local.toml
 .playwright-cli/
 .playwright/
+
+# Detailed working plans stay local.
+/docs/plans/
