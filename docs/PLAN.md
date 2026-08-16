@@ -4,7 +4,7 @@ The runtime launches a dedicated mGBA instance, exposes a browser control deck a
 
 ## Current state
 
-Verified on 2026-08-16: the configured model completed the FireRed intro into the first controllable overworld, then performed a one-step movement confirmed by named map, coordinates and high-confidence field telemetry. The live browser Run path passed too. FireRed and LeafGreen input/checkpoint checks preserved normal saves. Full story, battles and LeafGreen autonomous progression remain unverified.
+Verified on 2026-08-16: **GPT-5.6 Luna at xhigh** drove from the upstairs bedroom through the ground floor and out into Pallet Town at `(6,8)`. The route used 22 decisions across two bounded runs, with named-map, coordinate and high-confidence field telemetry. Normal saves stayed unchanged. Earlier intro, movement, browser and FireRed/LeafGreen input/checkpoint checks remain recorded in the recovery plan. Full story, battles and LeafGreen autonomous progression remain unverified.
 
 Seven installed emulators have working per-user Desktop/Start Menu shortcuts and verified taskbar pins. The runtime test suite has 123 passing cases in 11 responsibility modules; the 93 original cases were retained while 30 small files became seven grouped modules.
 
@@ -12,8 +12,8 @@ Seven installed emulators have working per-user Desktop/Start Menu shortcuts and
 
 | Plan | Status | Evidence |
 |---|---|---|
-| [Recovery and autonomous play](plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md) | Verified bounded acceptance | Real mGBA, model, browser and Windows launch checks |
-| [Semantic progression](plans/007-firered-semantic-progression-2026-07-09.md) | First-overworld acceptance achieved | Exact map/coordinate movement; broader actions deferred |
+| [Recovery and autonomous play](plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md) | House exit verified | Real mGBA, GPT-5.6 Luna, browser and Windows launch checks |
+| [Semantic progression](plans/007-firered-semantic-progression-2026-07-09.md) | First-overworld acceptance achieved | Exact movement and house exit; broader actions deferred |
 
 Use the [runtime guide](../tools/runtime/README.md), [verification recipe](../.agents/skills/verify-pokemon-runtime/SKILL.md), and [feature map](visuals/runtime-feature-map.html). Earlier milestones are condensed in [runtime history](runtime-history.md).
 

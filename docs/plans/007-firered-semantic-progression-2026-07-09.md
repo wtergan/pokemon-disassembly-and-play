@@ -70,7 +70,7 @@ recovery. Screenshot handling and web-deck polish follow those state contracts.
 Recovery in plan 008 completed the initial acceptance: model-driven intro,
 high-confidence field telemetry on a named bedroom map at `(6,6)`, followed by
 a one-step model-driven movement to `(5,6)` verified by the conjunctive semantic scorer.
-The browser Run path also passed. Full runtime suite: 123 passing cases.
+The browser Run path also passed. A subsequent GPT-5.6 Luna xhigh check left the house and verified Pallet Town at `(6,8)` in 22 decisions across two bounded runs; plan 008 retains that proof. Full runtime suite: 123 passing cases.
 
 Screenshot-assisted planning is implemented. Reusable dialogue/menu/route
 macros, battles and broad story progression remain deferred. Use the committed

@@ -99,10 +99,10 @@
           <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/owned-rom-inputs-save-containment.md">Behavior recipe</a> · <a href="../../.runtime-logs/verification/report.json">FireRed report</a> · <a href="../../.runtime-logs/recovery-2026-08-16/leafgreen/report.json">LeafGreen report</a></p>
         </article>
         <article>
-          <span class="status progress">One movement verified · broader progress in progress</span>
+          <span class="status verified">House exit verified · 2026-08-16</span>
           <h3>Ask the model for a checked state change</h3>
-          <p>From the retained FireRed checkpoint, one model-planned step moved from (6,6) to (5,6) on MAP_PALLET_TOWN_PLAYERS_HOUSE_2F; all six semantic checks passed. Story and battle progression remain unverified.</p>
-          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/semantic-agent-objective.md">Behavior recipe</a> · <a href="../../.runtime-logs/recovery-2026-08-16/movement-result.json">movement result</a> · <a href="../plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md">current recovery plan</a></p>
+          <p>GPT-5.6 Luna at xhigh left the upstairs bedroom, descended through the ground floor and reached MAP_PALLET_TOWN at (6,8). The route used 22 decisions across two bounded runs; all five final semantic checks passed. Normal saves stayed unchanged. Story and battle progression remain unverified.</p>
+          <p class="evidence"><a href="../../.agents/skills/verify-pokemon-runtime/references/features/semantic-agent-objective.md">Behavior recipe</a> · <a href="../../.runtime-logs/house-exit-verified-2026-08-16.json">house-exit proof</a> · <a href="../plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md">current recovery plan</a></p>
         </article>
         <article>
           <span class="status verified">Selected live checks · 2026-08-16</span>
@@ -114,7 +114,7 @@
     </section>
 
     <div class="boundary">
-      <aside class="note"><p><strong>Evidence boundary.</strong> Inputs and unchanged normal saves prove runtime control and containment. One checked movement proves only that bounded transition from a retained checkpoint; it does not prove a new-game route, battles, or full campaign progress.</p></aside>
+      <aside class="note"><p><strong>Evidence boundary.</strong> Inputs and unchanged normal saves prove runtime control and containment. The verified house exit proves this bounded route from the bedroom checkpoint. Battles and full campaign progress remain unverified.</p></aside>
       <nav class="links" aria-label="Project documents"><p><a href="../PLAN.md">Roadmap</a><br><a href="../plans/007-firered-semantic-progression-2026-07-09.md">Plan 007: semantic progression</a><br><a href="../plans/008-runtime-recovery-and-autonomous-play-2026-08-16.md">Plan 008: current recovery</a><br><a href="../../.agents/skills/verify-pokemon-runtime/SKILL.md">Runtime verification recipe</a></p></nav>
     </div>
     <footer>Local artifact. Reports and screenshots are ignored runtime evidence; they are not committed with the page and are unavailable from a clean clone.</footer>

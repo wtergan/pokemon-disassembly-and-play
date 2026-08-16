@@ -13,6 +13,8 @@ target-scoped runtime state.
 
 **Recipe status: Verified 2026-08-16** for the one-shot input/checkpoint checks,
 the bounded live movement objective, and the selected live web-deck checks.
+**House exit verified 2026-08-16:** GPT-5.6 Luna at xhigh reached Pallet Town
+in 22 decisions across two bounded runs, with unchanged normal-save hashes.
 This does not verify full story or battle progression. The web deck's
 agent-facing Run button passed a fresh-browser semantic movement check. Runtime reports and captures
 are ignored local evidence; links to them will not work from a clean clone.
@@ -111,6 +113,8 @@ steps. Save the request and response in the run folder:
 A semantic pass needs `status: success`, `score.success: true`, all reported
 semantic checks true, and the requested before/after map and position. A frame
 advance or action count alone does not prove progress. The web deck's **Run** path has also passed a fresh-browser bounded movement check; broader objectives need their own semantic evidence.
+
+For the multi-map route, follow [Repeat the house exit](references/features/semantic-agent-objective.md#repeat-the-house-exit). It uses exact outdoor map/position criteria and preserves incomplete segments.
 
 ## Evidence
 

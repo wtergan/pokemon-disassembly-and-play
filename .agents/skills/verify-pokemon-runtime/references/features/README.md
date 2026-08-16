@@ -9,7 +9,7 @@ overview, not proof.
 | Behavior | Current status | Evidence |
 | --- | --- | --- |
 | Owned ROM, physical inputs, checkpoint, and save containment | Verified 2026-08-16 on FireRed Rev 1 and LeafGreen Rev 1 | [Reports and limits](owned-rom-inputs-save-containment.md) |
-| Bounded model-driven semantic objective | One live movement verified 2026-08-16; broader progression in progress | [Objective path](semantic-agent-objective.md) |
+| Bounded model-driven semantic objective | Movement verified 2026-08-16; GPT-5.6 Luna house exit verified 2026-08-16 | [Objective path](semantic-agent-objective.md) |
 | Manual web deck | Selected live controls and slot checks verified 2026-08-16; Run-button semantic movement verified | [Deck path](manual-web-control-deck.md) |
 
 Suggested regression order: owned-target preflight and save containment,

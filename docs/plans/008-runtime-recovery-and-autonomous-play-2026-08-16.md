@@ -1,6 +1,6 @@
 # Runtime recovery and autonomous play
 
-Status: Verified bounded acceptance. Observation date: 2026-08-16 (America/New_York).
+Status: House exit verified. Initial checks: 2026-08-16; house-exit check: 2026-08-16 (America/New_York).
 
 ## Outcome and scope
 
@@ -66,6 +66,14 @@ A ROM mismatch, save escape, invalid symbols or non-fast-forward remote stops th
 
 For local continuation, use the ignored runtime config and desktop-backed planner launcher, start `python -m tools.runtime.server --config ...` as documented in the runtime guide, and load the retained `first_overworld` checkpoint before the exact movement recipe. The local control deck listens on `http://127.0.0.1:8795/`. Keep one runtime per bridge port and close its owner before running the doctor.
 
-## House-exit follow-up
+## House-exit verification
 
-Verification in progress on 2026-08-16: use the existing runtime and GPT-5.6 Luna xhigh planner to leave the upstairs bedroom, descend the stairs and exit into Pallet Town. Acceptance requires high-confidence field telemetry on `MAP_PALLET_TOWN` at `(6,8)`, an observed transition through the ground floor, a retained screenshot/trace, and unchanged normal-save fingerprints. Use only advertised actions and runtime-owned checkpoints.
+Verified on 2026-08-16 with **GPT-5.6 Luna at xhigh** through the existing HTTP runtime. Starting state: `MAP_PALLET_TOWN_PLAYERS_HOUSE_2F`, `(6,6)`, high-confidence field mode. The planner descended to `MAP_PALLET_TOWN_PLAYERS_HOUSE_1F`, reached the doorway at `(4,8)`, and exited to `MAP_PALLET_TOWN`, `(6,8)`, high-confidence field mode.
+
+The successful route used 22 decisions across a 20-step run and a two-step continuation. The first stopped at its step limit on the doorway without claiming success. The continuation returned `semantic_state_verified`; all five checks passed. Both runs preserved normal-save fingerprints. The final runtime-owned checkpoint is `outside_luna_5_6`; the live deck is left outside the house with GPT-5.6 Luna configured.
+
+An earlier attempt reached the ground floor but a planner turn timed out and automatic recovery restored its starting checkpoint. The successful retry retained the same initial state and disabled automatic rollback so a later timeout would preserve observed progress. No manual walking, game-memory edits or injected saves completed the route. Source map events and stair behavior supplied navigation context; the model chose and executed the input sequence.
+
+The upstairs warp at `(10,2)` has `MB_DOWN_LEFT_STAIR_WARP` behavior. Once standing on it, a leftward input triggers descent; walking upward onto it and waiting do not. The ground-floor exit tiles are `(4,8)` and `(5,8)`; a downward input and transition wait reach the outdoor target. These facts come from the map JSON, layout attributes and `IsDirectionalStairWarpMetatileBehavior` in `src/field_control_avatar.c`.
+
+Local ignored proof: `.runtime-logs/house-exit-verified-2026-08-16.json`; the two segment directories `.runtime-logs/house-exit-2026-08-16-124353/` and `.runtime-logs/house-exit-2026-08-16-124547/` each retain the objective, client model/effort, result, before/after state, screenshot and save fingerprints. Earlier incomplete attempts are retained separately. The committed behavior recipe describes how to repeat the bounded check.
