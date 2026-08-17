@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Run repository-relative tools from the project root, even from another cwd.
+POKEMON_SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$POKEMON_SCRIPT_DIR/.." || exit 1
 # Compares baserom.gba and pokefirered.gba
 
 # create baserom_compare.dump if necessary

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Run repository-relative tools from the project root, even from another cwd.
+POKEMON_SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$POKEMON_SCRIPT_DIR/.." || exit 1
+
 if [ "$1" == "firered" ] || [ "$1" == "leafgreen" ] || [ "$1" == "firered_rev1" ] || [ "$1" == "leafgreen_rev1" ]; then
   buildname="$1"
   shift

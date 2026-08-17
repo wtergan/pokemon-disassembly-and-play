@@ -1,4 +1,4 @@
-include config.mk
+include make/config.mk
 
 # Default make rule
 all: rom
@@ -105,7 +105,7 @@ endif
 
 # Variable filled out in other make files
 AUTO_GEN_TARGETS :=
-include make_tools.mk
+include make/make_tools.mk
 # Tool executables
 GFX       := $(TOOLS_DIR)/gbagfx/gbagfx$(EXE)
 WAV2AGB   := $(TOOLS_DIR)/wav2agb/wav2agb$(EXE)
@@ -155,7 +155,7 @@ endif
 ifeq ($(SETUP_PREREQS),1)
   # If set on: Default target or a rule requiring a scan
   # Forcibly execute `make tools` since we need them for what we are doing.
-  $(foreach line, $(shell $(MAKE) -f make_tools.mk | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
+  $(foreach line, $(shell $(MAKE) -f make/make_tools.mk | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
   ifneq ($(.SHELLSTATUS),0)
     $(error Errors occurred while building tools. See error messages above for more details)
   endif
@@ -202,7 +202,7 @@ compare: all
 # Other rules
 rom: $(ROM)
 ifeq ($(COMPARE),1)
-	@$(SHA1) $(BUILD_NAME).sha1
+	@$(SHA1) make/checksums/$(BUILD_NAME).sha1
 endif
 
 syms: $(SYM)
@@ -242,12 +242,12 @@ leafgreen_modern:      ; @$(MAKE) GAME_VERSION=LEAFGREEN MODERN=1
 leafgreen_rev1_modern: ; @$(MAKE) GAME_VERSION=LEAFGREEN GAME_REVISION=1 MODERN=1
 
 # Other rules
-include graphics_file_rules.mk
-include tileset_rules.mk
-include map_data_rules.mk
-include spritesheet_rules.mk
-include json_data_rules.mk
-include audio_rules.mk
+include make/graphics_file_rules.mk
+include make/tileset_rules.mk
+include make/map_data_rules.mk
+include make/spritesheet_rules.mk
+include make/json_data_rules.mk
+include make/audio_rules.mk
 
 # NOTE: Tools must have been built prior (FIXME)
 # so you can't really call this rule directly
@@ -349,35 +349,35 @@ ifneq ($(NODEP),1)
 -include $(addprefix $(OBJ_DIR)/,$(REGULAR_DATA_ASM_SRCS:.s=.d))
 endif
 
-$(OBJ_DIR)/sym_bss.ld: sym_bss.txt
+$(OBJ_DIR)/sym_bss.ld: make/linker/sym_bss.txt
 	$(RAMSCRGEN) .bss $< ENGLISH > $@
 
-$(OBJ_DIR)/sym_bss_rev10.ld: sym_bss_rev10.txt
+$(OBJ_DIR)/sym_bss_rev10.ld: make/linker/sym_bss_rev10.txt
 	$(RAMSCRGEN) .bss $< ENGLISH > $@
 
-$(OBJ_DIR)/sym_common.ld: sym_common.txt $(C_OBJS) $(wildcard common_syms/*.txt)
+$(OBJ_DIR)/sym_common.ld: make/linker/sym_common.txt $(C_OBJS) $(wildcard common_syms/*.txt)
 	$(RAMSCRGEN) COMMON $< ENGLISH -c $(C_BUILDDIR),common_syms > $@
 
-$(OBJ_DIR)/sym_common_rev10.ld: sym_common_rev10.txt $(C_OBJS) $(wildcard common_syms/*.txt)
+$(OBJ_DIR)/sym_common_rev10.ld: make/linker/sym_common_rev10.txt $(C_OBJS) $(wildcard common_syms/*.txt)
 	$(RAMSCRGEN) COMMON $< ENGLISH -c $(C_BUILDDIR),common_syms > $@
 
-$(OBJ_DIR)/sym_ewram.ld: sym_ewram.txt
+$(OBJ_DIR)/sym_ewram.ld: make/linker/sym_ewram.txt
 	$(RAMSCRGEN) ewram_data $< ENGLISH > $@
 
-$(OBJ_DIR)/sym_ewram_rev10.ld: sym_ewram_rev10.txt
+$(OBJ_DIR)/sym_ewram_rev10.ld: make/linker/sym_ewram_rev10.txt
 	$(RAMSCRGEN) ewram_data $< ENGLISH > $@
 
 # Linker script
 ifeq ($(MODERN),0)
 ifeq ($(GAME_REVISION),10)
-LD_SCRIPT := ld_script_rev10.ld
+LD_SCRIPT := make/linker/ld_script_rev10.ld
 LD_SCRIPT_DEPS := $(OBJ_DIR)/sym_bss_rev10.ld $(OBJ_DIR)/sym_common_rev10.ld $(OBJ_DIR)/sym_ewram_rev10.ld
 else
-LD_SCRIPT := ld_script.ld
+LD_SCRIPT := make/linker/ld_script.ld
 LD_SCRIPT_DEPS := $(OBJ_DIR)/sym_bss.ld $(OBJ_DIR)/sym_common.ld $(OBJ_DIR)/sym_ewram.ld
 endif
 else
-LD_SCRIPT := ld_script_modern.ld
+LD_SCRIPT := make/linker/ld_script_modern.ld
 LD_SCRIPT_DEPS :=
 endif
 
