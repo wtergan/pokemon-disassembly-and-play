@@ -10,6 +10,8 @@ Seven installed emulators have working per-user Desktop/Start Menu shortcuts and
 
 Use the [runtime guide](../tools/runtime/README.md), [verification recipe](../.agents/skills/verify-pokemon-runtime/SKILL.md), and [feature map](visuals/runtime-feature-map.html). Earlier milestones are condensed in [runtime history](runtime-history.md). Detailed working plans and raw execution evidence are retained locally.
 
+An independent planner compatibility run reproduced the same house-exit route from the same bedroom checkpoint. Both checks completed in 22 decisions across two bounded runs and preserved the normal-save fingerprints.
+
 ## Backlog
 
 - Add bounded dialogue/menu/route skills, each with an observed state transition and checkpoint recovery.
